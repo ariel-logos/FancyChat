@@ -1,0 +1,1514 @@
+Mode: local Channel:1Msg: [Addons] Loaded addon: fancychat version: 0.2 - by: Arielfy
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Peachlyn> Mine (aside from muds) was realm online
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Sabaku> PSO
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Sylardean> ha realm was cool..
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Joliminet> Wait... what mmo was from 95?
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Rhumu> PSO
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Mouldatron> hey astraea thats class love that! started on xbox 360 lol
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Cestus> EQ, AC, FFXI were the biggies for me
+----------
+Mode: local Channel:1Msg: Eleanor : ❮Invite to Join Party❯ ? ^^
+----------
+Mode: system8 Channel:135Msg: Tatai invites you to join a party.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Astraea> same! lol
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Sylardean> Meridian was from 95
+----------
+Mode: combatspell Channel:52Msg: The LightSpirit starts casting Protect IV.
+----------
+Mode: combat Channel:111Msg: Giapper uses Bestial Loyalty.
+----------
+Mode: combatspell Channel:52Msg: Cestus starts casting Protectra V on Cestus.
+----------
+Mode: combat Channel:111Msg: Yuber uses Meditate.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Stratus> yeah, I blame PSO for my FFXI addiction lol
+----------
+Mode: local Channel:1Msg: Eleanor : ❮Thank you.❯
+----------
+Mode: combatspell Channel:64Msg: The LightSpirit casts Protect IV. Nikolce gains the effect of Protect.
+----------
+Mode: combatspell Channel:64Msg: Cestus casts Shellra V. Cestus gains the effect of Shell.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Envii> Phantasy Star Online, Runescape, Everquest came before FFXI
+----------
+Mode: emote2 Channel:15Msg: Eleanor bows courteously to Tatai.
+----------
+Mode: combat Channel:111Msg: Yuber uses Hasso.
+----------
+Mode: combatspell Channel:64Msg: Cestus casts Protectra V. Cestus gains the effect of Protect.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Cestus> PSO was actually legit
+----------
+Mode: combat Channel:106Msg: Hankok uses Meditate.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Punch> ahh PSO with my Dreamcast keyboard, good times
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Sabaku> pso was good till 11 came out
+----------
+Mode: combat Channel:106Msg: Tataii uses Hasso.
+----------
+Mode: combat Channel:106Msg: Tatai uses Hasso.
+----------
+Mode: combat Channel:111Msg: Nikolce uses Release.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Sabaku> since then never was as good as this
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Indi-Acumen on Darkrider.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> oh snap, forgot about pso
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Fenrir on Nikolce.
+----------
+Mode: combatspell Channel:52Msg: Cestus starts casting Haste on Cestus.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Rhumu> how dare you
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Indi-Acumen on Darkrider.
+----------
+Mode: combatspell Channel:52Msg: Cestus starts casting Enlight on Cestus.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Sylardean> meridian59 is classed as the 1st mmo ever.. can still paly it now on STEAM.. lol
+----------
+Mode: combatspell Channel:64Msg: Cestus casts Haste. Cestus gains the effect of Haste.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Stratus> how cool was the dreamcast though
+----------
+Mode: combatspell Channel:64Msg: Cestus casts Enlight. Cestus gains the effect of Enlight.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Rhumu> dreamcast was way ahead of its time
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Peachlyn> I was playing ff11 along side city of heroes since they came out around the same time
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Cestus> i remember they couldnt give dreamcast away
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> lol. started with kunark in EQ till 11 came out then tried to play both. my girlfriend hated me...
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Geo-Frailty on the Hurkan.
+----------
+Mode: combat Channel:111Msg: Nikolce uses Assault.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Joliminet> Oh wow, I had no idea there was an mmo that old. 
+----------
+Mode: combat Channel:122Msg: The Hurkan is out of range.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Hurkan for 166 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Thunder III on the Hurkan.
+----------
+Mode: combat Channel:110Msg: Fenrir readies Lunar Cry.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 414 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 106 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Hurkan for 173 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 46 additional points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Hurkan for 167 points of damage.
+----------
+Mode: combat Channel:106Msg: Giapper uses Fight.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 142 points of damage.
+----------
+Mode: combat Channel:21Msg: Eleanor misses the Hurkan.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 95 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 23 points of damage.
+----------
+Mode: combatspell Channel:50Msg: Eleanor starts casting Flash on the Hurkan.
+----------
+Mode: combat Channel:41Msg: 1 of Chronotrigger's shadows absorbs the damage and disappears.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 45 additional points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 92 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 95 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 30 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Hurkan for 187 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 44 additional points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Hurkan for 101 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Blizzard III on the Hurkan.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Hurkan for 135 points of damage.
+----------
+Mode: combat Channel:41Msg: Cestus misses the Hurkan.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 71 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Hurkan for 224 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Thunder III on the Hurkan.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Dia II on the Hurkan.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 108 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 43 additional points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Hurkan for 104 points of damage.
+----------
+Mode: combat Channel:111Msg: Chronotrigger uses Focus. Chronotrigger's accuracy is enhanced.
+----------
+Mode: combat Channel:40Msg: Yuber scores a critical hit! The Hurkan takes 291 points of damage.
+----------
+Mode: combat Channel:106Msg: Tataii uses Berserk. Attacks are enhanced but defense weakens.
+----------
+Mode: combat Channel:106Msg: Tatai uses Berserk. Attacks are enhanced but defense weakens.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 31 points of damage.
+----------
+Mode: combat Channel:41Msg: 1 of Chronotrigger's shadows absorbs the damage and disappears.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 42 additional points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Hurkan for 215 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Hurkan takes 198 points of damage.
+----------
+Mode: combat Channel:110Msg: Tataii readies Tachi: Rana.
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Rana.
+----------
+Mode: combat Channel:110Msg: The Hurkan readies Static Prison.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 62 points of damage.
+----------
+Mode: combat Channel:41Msg: Cestus misses the Hurkan.
+----------
+Mode: combat Channel:25Msg: Tatai scores a critical hit! The Hurkan takes 299 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Hurkan takes 185 points of damage.
+----------
+Mode: combat Channel:106Msg: Hankok uses Hasso.
+----------
+Mode: combat Channel:41Msg: Cestus misses the Hurkan.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 47 points of damage.
+----------
+Mode: combat Channel:111Msg: Chronotrigger uses Dodge. Chronotrigger's evasion is enhanced.
+----------
+Mode: combatspell Channel:65Msg: Eleanor casts Flash. The Hurkan is afflicted with Flash.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Thunder III. The Hurkan takes 57 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Hurkan takes 189 points of damage.
+----------
+Mode: combat Channel:112Msg: Fenrir uses Lunar Cry. The Hurkan receives the effect of Accuracy Down and Evasion Down.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 29 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Hurkan takes 208 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:191Msg: Fenrir's stun effect wears off.
+----------
+Mode: combat Channel:191Msg: Eleanor's stun effect wears off.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Fire III on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 41 additional points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Blizzard III on the Hurkan.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 29 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 40 additional points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Hurkan for 194 points of damage.
+----------
+Mode: combat Channel:191Msg: The AmigoSabotender's stun effect wears off.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Blizzard III. The Hurkan takes 858 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 149 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 57 points of damage.
+----------
+Mode: combat Channel:110Msg: The AmigoSabotender readies ??? Needles.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Hurkan for 261 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii uses Tachi: Rana. The Hurkan takes 5397 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Thunder III. The Hurkan takes 636 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 135 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Rana. The Hurkan takes 7306 points of damage.
+----------
+Mode: combat Channel:40Msg: Nikolce casts Dia II. The Hurkan takes 3 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Hurkan for 250 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 39 additional points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> you damn kids growing up with your always on internet...
+----------
+Mode: combat Channel:40Msg: The Hurkan uses Static Prison. Chronotrigger takes 156 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir takes 407 points of damage.
+----------
+Mode: combat Channel:40Msg: Nikolce takes 0 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus takes 95 points of damage.
+----------
+Mode: combat Channel:32Msg: Tatai takes 207 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 207 points of damage.
+----------
+Mode: combat Channel:32Msg: Hankok takes 156 points of damage.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 215 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Hurkan for 270 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 26 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 38 additional points of damage.
+----------
+Mode: combat Channel:33Msg: The Hurkan misses Tatai.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Bravemistakes> not so much an MMO but i feel like the old Diablos outclass the newer ones
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Aero III on the Hurkan.
+----------
+Mode: combat Channel:41Msg: Cestus misses the Hurkan.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Fire III. The Hurkan takes 400 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Fire III on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Hurkan takes 1048 points of damage.
+----------
+Mode: combat Channel:41Msg: Cestus misses the Hurkan.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:191Msg: The Hurkan's Flash effect wears off.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Hurkan takes 1396 points of damage.
+----------
+Mode: combat Channel:21Msg: Eleanor misses the Hurkan.
+----------
+Mode: combat Channel:106Msg: Hankok uses Berserk. Attacks are enhanced but defense weakens.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Hurkan for 138 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 25 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 37 additional points of damage.
+----------
+Mode: combat Channel:111Msg: Yuber uses Sekkanoki.
+----------
+Mode: combat Channel:111Msg: Nikolce uses Apogee.
+----------
+Mode: combat Channel:40Msg: Zav casts Blizzard III. The Hurkan takes 1196 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Hurkan for 314 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Hurkan for 118 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 161 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Hurkan for 203 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Hurkan for 220 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus scores a critical hit! The Hurkan takes 177 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 36 additional points of damage.
+----------
+Mode: combat Channel:110Msg: Fenrir readies Eclipse Bite.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Hurkan takes 239 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Hurkan for 223 points of damage.
+----------
+Mode: combat Channel:33Msg: Tatai parries the Hurkan's attack with his weapon.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 37 points of damage.
+----------
+Mode: combat Channel:106Msg: Hankok uses Warcry. Hankok's attacks are enhanced.
+----------
+Mode: combat Channel:105Msg: The Hurkan readies Brownout.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender uses ??? Needles. The Hurkan takes 1577 points of damage.
+----------
+Mode: combatspell Channel:64Msg: Tatai's attacks are enhanced.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 35 additional points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 172 points of damage.
+----------
+Mode: combatspell Channel:64Msg: Tataii's attacks are enhanced.
+----------
+Mode: combat Channel:111Msg: Chronotrigger uses Footwork.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Water III on the Hurkan.
+----------
+Mode: combatspell Channel:64Msg: Giapper's attacks are enhanced.
+----------
+Mode: combatspell Channel:69Msg: Yuber uses Konzen-ittai. No effect on the Hurkan.
+----------
+Mode: combatspell Channel:56Msg: Eleanor's attacks are enhanced.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 35 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Aero III on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Zav casts Fire III. The Hurkan takes 537 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 55 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 34 additional points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 29 points of damage.
+----------
+Mode: combat Channel:111Msg: Yuber uses Berserk. Attacks are enhanced but defense weakens.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 93 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 33 additional points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Hurkan takes 1228 points of damage.
+----------
+Mode: combat Channel:111Msg: Chronotrigger uses Perfect Counter.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 38 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 32 additional points of damage.
+----------
+Mode: combat Channel:106Msg: Hankok uses Sekkanoki.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Hurkan for 301 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Aero III. The Hurkan takes 45 points of damage.
+----------
+Mode: combat Channel:110Msg: Hankok readies Tachi: Kasha.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 103 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Hurkan takes 1118 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 133 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 31 additional points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir uses Eclipse Bite. The Hurkan takes 3118 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Hurkan for 208 points of damage.
+----------
+Mode: combat Channel:110Msg: Fenrir readies Eclipse Bite.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 154 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 56 points of damage.
+----------
+Mode: combat Channel:41Msg: Cestus misses the Hurkan.
+----------
+Mode: combat Channel:111Msg: Yuber uses Warcry. Yuber's attacks are enhanced.
+----------
+Mode: combat Channel:32Msg: The Hurkan uses Brownout. Tatai takes 152 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Stone III on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 35 points of damage.
+----------
+Mode: combat Channel:110Msg: Yuber readies Tachi: Kaiten.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Water III on the Hurkan.
+----------
+Mode: combat Channel:25Msg: Hankok uses Tachi: Kasha. The Hurkan takes 2833 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Hurkan for 120 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 30 additional points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Hurkan for 318 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok scores a critical hit! The Hurkan takes 390 points of damage.
+----------
+Mode: combat Channel:32Msg: The Breeze Vulture hits Tatai for 91 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Hurkan for 132 points of damage.
+----------
+Mode: combat Channel:40Msg: The Hurkan hits Fenrir for 68 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 25 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 44 points of damage.
+----------
+Mode: combat Channel:32Msg: The Stonefaced Roc hits Tatai for 100 points of damage.
+----------
+Mode: combat Channel:33Msg: Tatai parries the Clawed Tulfaire's attack with his weapon.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 160 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 34 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Hurkan takes 244 points of damage.
+----------
+Mode: combat Channel:110Msg: Hankok readies Tachi: Kaiten.
+----------
+Mode: combat Channel:32Msg: The Breeze Vulture hits Tatai for 91 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Aero III. The Hurkan takes 123 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Water III. The Hurkan takes 332 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Hurkan takes 1375 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 14 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 173 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 144 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 88 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:105Msg: The Hurkan readies Crashing Thunder.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 124 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir uses Eclipse Bite. The Hurkan takes 3091 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Hurkan for 303 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Hurkan takes 250 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 29 additional points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Hurkan for 319 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Hurkan for 336 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Hurkan for 230 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Hurkan for 256 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combatspell Channel:69Msg: Lyn's Glutinous Dart has no effect on the Hurkan.
+----------
+Mode: combat Channel:20Msg: Eleanor uses Shield Bash. The Hurkan takes 239 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 27 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Thunder III on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 28 additional points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Stone III on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Yuber uses Tachi: Kaiten. The Hurkan takes 3178 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 169 points of damage.
+----------
+Mode: combat Channel:32Msg: The Breeze Vulture hits Tatai for 82 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 38 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 26 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 27 additional points of damage.
+----------
+Mode: combat Channel:110Msg: Yuber readies Tachi: Rana.
+----------
+Mode: combat Channel:32Msg: The Stonefaced Roc hits Tatai for 84 points of damage.
+----------
+Mode: combat Channel:32Msg: The Clawed Tulfaire hits Tatai for 99 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 17 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 25 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 24 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Stone III. The Hurkan takes 606 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 26 additional points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 39 points of damage.
+----------
+Mode: combat Channel:114Msg: Hankok uses Tachi: Kaiten, but misses the Hurkan.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 25 additional points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Water III. The Hurkan takes 448 points of damage.
+----------
+Mode: combat Channel:191Msg: The AmigoSabotender's stun effect wears off.
+----------
+Mode: combat Channel:191Msg: Fenrir's stun effect wears off.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Hurkan takes 957 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 32 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Cestus> now everyone wishes they had their old dreamcast back
+----------
+Mode: combat Channel:191Msg: Eleanor's stun effect wears off.
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Rana.
+----------
+Mode: combat Channel:110Msg: Tataii readies Tachi: Rana.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 24 additional points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Blizzard III on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Hurkan takes 1017 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Hurkan takes 193 points of damage.
+----------
+Mode: combat Channel:32Msg: The Hurkan uses Crashing Thunder. Tatai takes 153 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Thunder III on the Hurkan.
+----------
+Mode: combat Channel:32Msg: Tataii takes 153 points of damage.
+----------
+Mode: combat Channel:32Msg: Giapper takes 82 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender takes 225 points of damage.
+----------
+Mode: combat Channel:32Msg: Hankok takes 116 points of damage.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 159 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir takes 301 points of damage.
+----------
+Mode: combat Channel:40Msg: Nikolce takes 62 points of damage.
+----------
+Mode: combat Channel:37Msg: Tatai defeats the Stonefaced Roc.
+----------
+Mode: system8 Channel:127Msg: Records of Eminence: Vanquish Multiple Enemies I.
+----------
+Mode: system8 Channel:127Msg: Progress: 4/200.
+----------
+Mode: combat Channel:131Msg: Eleanor gains 583 limit points.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Blink on Nikolce.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 97 points of damage.
+----------
+Mode: combat Channel:32Msg: The Clawed Tulfaire hits Tatai for 76 points of damage.
+----------
+Mode: combat Channel:32Msg: The Breeze Vulture hits Tatai for 82 points of damage.
+----------
+Mode: combat Channel:32Msg: The Hurkan hits Tatai for 74 points of damage.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 5 points of damage to Chronotrigger.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Hurkan for 255 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Hurkan for 71 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 13 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 33 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 26 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 74 points of damage.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 5 points of damage to Chronotrigger.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 13 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 0 additional points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Stone III. The Hurkan takes 820 points of damage.
+----------
+Mode: combat Channel:32Msg: The Hurkan's spikes deal 5 points of damage to Hankok.
+----------
+Mode: combat Channel:32Msg: The Hurkan's spikes deal 4 points of damage to Giapper.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Hurkan for 195 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Hurkan for 56 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 98 points of damage.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 4 points of damage to Cestus.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Thunder III. The Hurkan takes 229 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 0 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok scores a critical hit! The Hurkan takes 395 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 0 additional points of damage.
+----------
+Mode: combat Channel:28Msg: The Hurkan's spikes deal 6 points of damage to Eleanor.
+----------
+Mode: combat Channel:32Msg: The Hurkan's spikes deal 4 points of damage to Giapper.
+----------
+Mode: combat Channel:25Msg: Additional effect: Attack Down.
+----------
+Mode: combat Channel:40Msg: Yuber scores a critical hit! The Hurkan takes 375 points of damage.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 4 points of damage to Cestus.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 8 points of damage to Fenrir.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 7 points of damage to the AmigoSabotender.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 0 points of damage.
+----------
+Mode: combat Channel:32Msg: The Hurkan's spikes deal 5 points of damage to Hankok.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 0 additional points of damage.
+----------
+Mode: combat Channel:191Msg: The AmigoSabotender's Shock effect wears off.
+----------
+Mode: combat Channel:191Msg: Fenrir's Shock effect wears off.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 6 points of damage to Yuber.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 4 points of damage to Cestus.
+----------
+Mode: combat Channel:32Msg: The Breeze Vulture hits Tatai for 91 points of damage.
+----------
+Mode: combat Channel:191Msg: Eleanor's Shock effect wears off.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 0 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Rana. The Stonefaced Roc takes 3577 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Hurkan for 212 points of damage.
+----------
+Mode: combat Channel:122Msg: The Hurkan is paralyzed.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 0 additional points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 36 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Joliminet> Diablo 2 was awesome when it was new ;w;
+----------
+Mode: combat Channel:191Msg: Fenrir's stun effect wears off.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Fire III on the Hurkan.
+----------
+Mode: combat Channel:32Msg: The Clawed Tulfaire hits Tatai for 69 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Blizzard III on the Hurkan.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 4 points of damage to Cestus.
+----------
+Mode: combat Channel:32Msg: The Hurkan's spikes deal 6 points of damage to Tataii.
+----------
+Mode: combat Channel:26Msg: Tatai misses the Hurkan.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Hurkan for 259 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 19 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 90 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 0 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 45 points of damage.
+----------
+Mode: craft Channel:121Msg: You find a Kindred's seal on the Stonefaced Roc.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the Kindred's seal: 755 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the Kindred's seal: 379 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the Kindred's seal: 605 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the Kindred's seal: 148 points.
+----------
+Mode: combat Channel:105Msg: The Hurkan readies Reverse Current.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 132 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 0 additional points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Hurkan for 193 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Hurkan for 267 points of damage.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 4 points of damage to Cestus.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 0 points of damage.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 5 points of damage to Chronotrigger.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 127 points of damage.
+----------
+Mode: combat Channel:28Msg: The Hurkan's spikes deal 6 points of damage to Eleanor.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 7 points of damage to the AmigoSabotender.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 0 additional points of damage.
+----------
+Mode: combat Channel:32Msg: The Hurkan's spikes deal 6 points of damage to Tataii.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Blizzard III. The Hurkan takes 903 points of damage.
+----------
+Mode: combat Channel:32Msg: The Hurkan's spikes deal 5 points of damage to Hankok.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 4 points of damage to Cestus.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Zav casts Thunder III. The Hurkan takes 38 points of damage.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 5 points of damage to Chronotrigger.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Hurkan for 269 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:32Msg: The Hurkan's spikes deal 5 points of damage to Hankok.
+----------
+Mode: combat Channel:110Msg: Chronotrigger readies Shijin Spiral.
+----------
+Mode: combat Channel:32Msg: The Breeze Vulture hits Tatai for 84 points of damage.
+----------
+Mode: combat Channel:32Msg: The Clawed Tulfaire hits Tatai for 84 points of damage.
+----------
+Mode: combat Channel:32Msg: The Hurkan uses Reverse Current. Tatai takes 230 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 230 points of damage.
+----------
+Mode: combat Channel:32Msg: Giapper takes 123 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender takes 338 points of damage.
+----------
+Mode: combat Channel:32Msg: Hankok takes 86 points of damage.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 238 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir takes 453 points of damage.
+----------
+Mode: combat Channel:40Msg: Nikolce takes 54 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 22 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 34 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Fire III. The Hurkan takes 360 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Aero III on the Hurkan.
+----------
+Mode: combat Channel:191Msg: The AmigoSabotender's stun effect wears off.
+----------
+Mode: combat Channel:191Msg: Eleanor's stun effect wears off.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Fire III on the Hurkan.
+----------
+Mode: combatspell Channel:64Msg: Nikolce casts Blink. Nikolce gains the effect of Blink.
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Rana.
+----------
+Mode: combat Channel:110Msg: Tataii readies Tachi: Rana.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 35 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Blizzard III. The Hurkan takes 1276 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Hurkan for 301 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> back when you owned your games..
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Hurkan takes 1140 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 117 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 67 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger uses Shijin Spiral. The Hurkan takes 4297 points of damage.
+----------
+Mode: combat Channel:122Msg: The Hurkan is paralyzed.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 0 additional points of damage.
+----------
+Mode: combat Channel:28Msg: The Hurkan's spikes deal 6 points of damage to Eleanor.
+----------
+Mode: combat Channel:191Msg: Eleanor's Warcry effect wears off.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 22 points of damage.
+----------
+Mode: combat Channel:32Msg: The Breeze Vulture hits Tatai for 89 points of damage.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 4 points of damage to Cestus.
+----------
+Mode: combatspell Channel:69Msg: Linvala's Glutinous Dart has no effect on the Hurkan.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 6 points of damage to Yuber.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 0 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 7 points of damage to the AmigoSabotender.
+----------
+Mode: combat Channel:32Msg: Additional effect: 13 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 0 additional points of damage.
+----------
+Mode: combat Channel:33Msg: Tatai parries the Clawed Tulfaire's attack with his weapon.
+----------
+Mode: combat Channel:28Msg: The Hurkan's spikes deal 6 points of damage to Eleanor.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 4 points of damage to Cestus.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Hurkan for 232 points of damage.
+----------
+Mode: combat Channel:41Msg: Cestus misses the Hurkan.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Water III on the Hurkan.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Stoneskin on Nikolce.
+----------
+Mode: combat Channel:40Msg: Zav casts Fire III. The Hurkan takes 497 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Hurkan for 96 points of damage.
+----------
+Mode: combat Channel:32Msg: The Hurkan's spikes deal 5 points of damage to Hankok.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 1 point of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Aero III on the Hurkan.
+----------
+Mode: combat Channel:110Msg: Hankok readies Tachi: Kaiten.
+----------
+Mode: combat Channel:105Msg: The Hurkan readies Crashing Thunder.
+----------
+Mode: combat Channel:20Msg: Eleanor scores a critical hit! The Hurkan takes 102 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 0 additional points of damage.
+----------
+Mode: combat Channel:32Msg: The Hurkan's spikes deal 4 points of damage to Giapper.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Hurkan for 174 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Rana. The Hurkan takes 7767 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Hurkan for 90 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 93 points of damage.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 4 points of damage to Cestus.
+----------
+Mode: combat Channel:28Msg: The Hurkan's spikes deal 6 points of damage to Eleanor.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 0 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii uses Tachi: Rana. The Hurkan takes 5170 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Hurkan for 289 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 25 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 126 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 0 additional points of damage.
+----------
+Mode: combat Channel:32Msg: The Hurkan's spikes deal 4 points of damage to Giapper.
+----------
+Mode: combat Channel:32Msg: The Breeze Vulture hits Tatai for 65 points of damage.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 4 points of damage to Cestus.
+----------
+Mode: combat Channel:122Msg: Nikolce's casting is interrupted.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Aero III. The Hurkan takes 5 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 36 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 0 points of damage.
+----------
+Mode: combat Channel:28Msg: The Hurkan's spikes deal 6 points of damage to Eleanor.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 7 points of damage to the AmigoSabotender.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 5 points of damage to Chronotrigger.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 0 additional points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 104 points of damage.
+----------
+Mode: combat Channel:32Msg: The Clawed Tulfaire hits Tatai for 82 points of damage.
+----------
+Mode: combat Channel:191Msg: Eleanor's stun effect wears off.
+----------
+Mode: combat Channel:32Msg: Additional effect: 25 points of damage.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 4 points of damage to Cestus.
+----------
+Mode: combatspell Channel:52Msg: Eleanor starts casting Cure IV on Eleanor.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 5 points of damage to Chronotrigger.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Hurkan takes 1111 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Stone III on the Hurkan.
+----------
+Mode: combat Channel:106Msg: Tataii uses Meditate.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Water III on the Hurkan.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:191Msg: The AmigoSabotender's stun effect wears off.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Cestus> Diablo 1 was prob the best game of its time
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Fenrir on Nikolce.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Hurkan takes 1125 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok uses Tachi: Kaiten. The Hurkan takes 4468 points of damage.
+----------
+Mode: combat Channel:106Msg: Tatai uses Meditate.
+----------
+Mode: combat Channel:32Msg: The Hurkan uses Crashing Thunder. Tatai takes 153 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 153 points of damage.
+----------
+Mode: combat Channel:32Msg: Giapper takes 82 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender takes 225 points of damage.
+----------
+Mode: combat Channel:32Msg: Hankok takes 116 points of damage.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 159 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:191Msg: The Hurkan's Phalanx effect wears off.
+----------
+Mode: combat Channel:191Msg: The Hurkan's Shock Spikes effect wears off.
+----------
+Mode: combat Channel:40Msg: Nikolce takes 73 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger takes 116 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 80 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Water III. The Hurkan takes 292 points of damage.
+----------
+Mode: combat Channel:33Msg: The Hurkan misses Tatai.
+----------
+Mode: combat Channel:33Msg: Tatai parries the Breeze Vulture's attack with his weapon.
+----------
+Mode: combat Channel:33Msg: The Clawed Tulfaire misses Tatai.
+----------
+Mode: combat Channel:40Msg: Zav casts Aero III. Magic Burst! The Hurkan takes 39 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 139 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 12 additional points of damage.
+----------
+Mode: combat Channel:41Msg: Yuber misses the Hurkan.
+----------
+Mode: combat Channel:40Msg: The Hurkan's spikes deal 7 points of damage to the AmigoSabotender.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 23 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Hurkan for 732 points of damage.
+----------
+Mode: combat Channel:25Msg: Skillchain: Fragmentation. The Hurkan takes 2774 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Hurkan for 314 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 11 additional points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Thunder III on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 33 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 153 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 10 additional points of damage.
+----------
+Mode: combat Channel:191Msg: The AmigoSabotender's stun effect wears off.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Stone III on the Hurkan.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Hurkan for 332 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Hurkan takes 1195 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 156 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 32 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 9 additional points of damage.
+----------
+Mode: combat Channel:105Msg: The Hurkan readies Brownout.
+----------
+Mode: combat Channel:101Msg: Eleanor uses Majesty.
+----------
+Mode: combat Channel:25Msg: Giapper scores a critical hit! The Hurkan takes 167 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Stone III. The Hurkan takes 566 points of damage.
+----------
+Mode: combat Channel:32Msg: The Breeze Vulture hits Tatai for 93 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Hurkan for 248 points of damage.
+----------
+Mode: combat Channel:32Msg: The Hurkan hits Tatai for 89 points of damage.
+----------
+Mode: combatspell Channel:31Msg: Eleanor casts Cure IV. Eleanor recovers 398 HP.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 32 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 23 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 8 additional points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 28 points of damage.
+----------
+Mode: combat Channel:32Msg: The Clawed Tulfaire hits Tatai for 100 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Clawed Tulfaire for 176 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Hurkan takes 1339 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Hurkan for 105 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Water III. The Hurkan takes 448 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 11 points of damage.
+----------
+Mode: combat Channel:191Msg: The Hurkan's plague effect wears off.
+----------
+Mode: combat Channel:122Msg: Unable to cast spells at this time.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Hurkan for 232 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Chronotrigger starts casting Utsusemi: Ni on Chronotrigger.
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Shoha.
+----------
+Mode: combat Channel:40Msg: Cestus scores a critical hit! The Hurkan takes 176 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 7 additional points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Clawed Tulfaire for 214 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 170 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 52 points of damage.
+----------
+Mode: combat Channel:111Msg: Nikolce uses Assault.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 32 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Blizzard III on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Hurkan for 306 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok scores a critical hit! The Hurkan takes 405 points of damage.
+----------
+Mode: local Channel:1Msg: Eleanor : !signet
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 6 additional points of damage.
+----------
+Mode: combat Channel:37Msg: Tatai defeats the Clawed Tulfaire.
+----------
+Mode: system8 Channel:127Msg: Records of Eminence: Vanquish Multiple Enemies I.
+----------
+Mode: system8 Channel:127Msg: Progress: 5/200.
+----------
+Mode: combat Channel:131Msg: Limit chain #1! Eleanor gains 613 limit points.
+----------
+Mode: combat Channel:32Msg: The Hurkan uses Brownout. Tatai takes 197 points of damage.
+----------
+Mode: combat Channel:32Msg: Giapper takes 62 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus takes 142 points of damage.
+----------
+Mode: servermsg Channel:200Msg: ----== SystemMessage ==----
+----------
+Mode: servermsg Channel:200Msg: Enjoy signet!
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Thunder III on the Hurkan.
+----------
+Mode: combat Channel:41Msg: Cestus misses the Hurkan.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Estellese> the only thing I dont miss about my dreamcast is the disc spinning/grinding noise it made ;_;
+----------
+Mode: combat Channel:32Msg: The Breeze Vulture hits Tatai for 82 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Stoneskin on Nikolce.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Hurkan for 245 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 32 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 23 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Zav casts Stone III. The Hurkan takes 820 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 5 additional points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 139 points of damage.
+----------
+Mode: combat Channel:21Msg: Eleanor misses the Hurkan.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Hurkan for 219 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Thunder III. The Hurkan takes 57 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Hurkan takes 1165 points of damage.
+----------
+Mode: combat Channel:191Msg: Eleanor's Regain effect wears off.
+----------
+Mode: combatspell Channel:52Msg: Eleanor starts casting Cure IV on Eleanor.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Shoha. The Clawed Tulfaire takes 4391 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Hurkan for 70 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Hurkan for 225 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:105Msg: The Hurkan readies Reverse Current.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 420 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 4 additional points of damage.
+----------
+Mode: combat Channel:131Msg: Tatai earns a merit point! (Total: 41)
+----------
+Mode: combat Channel:25Msg: Giapper hits the Hurkan for 133 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 164 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Hurkan for 309 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Fire III on the Hurkan.
+----------
+Mode: combat Channel:122Msg: Eleanor's casting is interrupted.
+----------
+Mode: combat Channel:122Msg: Nikolce's casting is interrupted.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 27 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Hurkan for 90 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Blizzard III on the Hurkan.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 3 additional points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 142 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 23 points of damage.
+----------
+Mode: combat Channel:32Msg: The Breeze Vulture hits Tatai for 72 points of damage.
+----------
+Mode: combatspell Channel:64Msg: Chronotrigger casts Utsusemi: Ni. Chronotrigger gains the effect of Copy Image.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 2 additional points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 15 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai scores a critical hit! The Hurkan takes 428 points of damage.
+----------
+Mode: combat Channel:106Msg: Tatai uses Sekkanoki.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Blizzard III. The Hurkan takes 858 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 37 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: The Hurkan takes 1 additional point of damage.
+----------
+Mode: combat Channel:32Msg: The Hurkan uses Reverse Current. Tatai takes 230 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 230 points of damage.
+----------
+Mode: combat Channel:32Msg: Giapper takes 123 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender takes 338 points of damage.
+----------
+Mode: combat Channel:32Msg: Hankok takes 173 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Thunder III. The Hurkan takes 78 points of damage.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 238 points of damage.
+----------
+Mode: combat Channel:40Msg: Nikolce takes 109 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger takes 173 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Hurkan takes 1041 points of damage.
+----------
+Mode: combat Channel:191Msg: The AmigoSabotender's stun effect wears off.
+----------
+Mode: combat Channel:191Msg: Fenrir's stun effect wears off.
+----------
+Mode: combat Channel:191Msg: Eleanor's stun effect wears off.
+----------
+Mode: combat Channel:122Msg: The Hurkan is paralyzed.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combatspell Channel:52Msg: Eleanor starts casting Cure IV on Eleanor.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Hurkan for 312 points of damage.
+----------
+Mode: combat Channel:110Msg: Fenrir readies Eclipse Bite.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Hurkan takes 1373 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combat Channel:105Msg: The Hurkan readies Sparkstorm.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Hurkan for 252 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 133 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Fire III. The Hurkan takes 400 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Aero III on the Hurkan.
+----------
+Mode: combat Channel:32Msg: The Breeze Vulture hits Tatai for 97 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 36 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Fire III on the Hurkan.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Punch> had the Dreamcast fight stick to play MvC2
+----------
+Mode: combat Channel:106Msg: Tataii uses Sekkanoki.
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Rana.
+----------
+Mode: combat Channel:122Msg: Unable to use weapon skill.
+----------
+Mode: combat Channel:32Msg: The Hurkan uses Sparkstorm. Tatai takes 297 points of damage.
+----------
+Mode: combat Channel:32Msg: Giapper takes 189 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 135 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus takes 136 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Blizzard III. The Hurkan takes 1196 points of damage.
+----------
+Mode: combat Channel:110Msg: Tataii readies Tachi: Rana.
+----------
+Mode: combat Channel:110Msg: Giapper readies Ruinator.
+----------
+Mode: combat Channel:25Msg: Hankok scores a critical hit! The Hurkan takes 381 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 158 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus scores a critical hit! The Hurkan takes 50 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Hurkan for 150 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Stoneskin on Nikolce.
+----------
+Mode: combat Channel:40Msg: Fenrir uses Eclipse Bite. The Hurkan takes 3404 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Hurkan takes 1073 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Hurkan for 149 points of damage.
+----------
+Mode: combat Channel:32Msg: The Breeze Vulture hits Tatai for 75 points of damage.
+----------
+Mode: combat Channel:105Msg: The Hurkan readies Crashing Thunder.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Hurkan for 284 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 26 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 22 points of damage.
+----------
+Mode: combat Channel:25Msg: Additional effect: Attack Down.
+----------
+Mode: combat Channel:32Msg: The Stonefaced Roc hits Tatai for 80 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Hurkan.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Water III on the Hurkan.
+----------
+Mode: combat Channel:110Msg: Eleanor readies Swift Blade.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Hurkan takes 1281 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 23 points of damage.
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Rana.
+----------
+Mode: combat Channel:110Msg: Tataii readies Tachi: Rana.
+----------
+Mode: combat Channel:25Msg: Tatai scores a critical hit! The Hurkan takes 456 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Hurkan for 357 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Fire III. The Hurkan takes 537 points of damage.
+----------
+Mode: combatspell Channel:31Msg: Eleanor casts Cure IV. Eleanor recovers 398 HP.
+----------
+Mode: combat Channel:23Msg: Tatai recovers 398 HP.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Hurkan for 316 points of damage.
+----------
+Mode: combat Channel:23Msg: Tataii recovers 398 HP.
+----------
+Mode: combat Channel:23Msg: Giapper recovers 311 HP.
+----------
+Mode: combat Channel:23Msg: Hankok recovers 285 HP.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Aero III on the Hurkan.
+----------
+Mode: combat Channel:110Msg: Hankok readies Tachi: Kaiten.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 39 points of damage.
+----------
+Mode: combat Channel:33Msg: Tatai parries the Breeze Vulture's attack with his weapon.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Hurkan for 249 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 35 points of damage.
+----------
+Mode: combat Channel:122Msg: Darkrider's casting is interrupted.
+----------
+Mode: combat Channel:37Msg: Hankok defeats the Hurkan.
+----------
+Mode: system8 Channel:127Msg: Records of Eminence: Vanquish Multiple Enemies I.
+----------
+Mode: system8 Channel:127Msg: Progress: 6/200.
+----------
+Mode: combat Channel:131Msg: Limit chain #2! Eleanor gains 600 limit points.
+----------
+Mode: combat Channel:20Msg: Eleanor uses Swift Blade. The Hurkan takes 417 points of damage.
+----------
+Mode: combat Channel:40Msg: Cestus hits the Hurkan for 32 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper uses Ruinator. The Hurkan takes 4770 points of damage.
+----------
+Mode: combat Channel:122Msg: Zav's casting is interrupted.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Aero III. The Hurkan takes 366 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii uses Tachi: Rana. The Hurkan takes 5870 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Rana. The Hurkan takes 8914 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Hurkan takes 1380 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii uses Tachi: Rana. The Hurkan takes 4609 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Rana. The Hurkan takes 7668 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok uses Tachi: Kaiten. The Hurkan takes 3986 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Blink on Nikolce.
+----------
+Mode: combat Channel:131Msg: Hankok earns a merit point! (Total: 41)
+----------
+Mode: craft Channel:121Msg: You find a pinch of high-purity bayld on the Hurkan.
+----------
+Mode: craft Channel:121Msg: You find a pinch of high-purity bayld on the Hurkan.
+----------
+Mode: craft Channel:121Msg: You find a pinch of high-purity bayld on the Hurkan.
+----------
+Mode: craft Channel:121Msg: You find a pinch of high-purity bayld on the Hurkan.
+----------
+Mode: craft Channel:121Msg: You find a pinch of high-purity bayld on the Hurkan.
+----------
+Mode: craft Channel:121Msg: You find a pinch of high-purity bayld on the Hurkan.
+----------
+Mode: craft Channel:121Msg: You find a kaquljaan on the Hurkan.
+----------
+Mode: craft Channel:121Msg: You find a snow geode on the Hurkan.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the pinch of high-purity bayld: 449 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the pinch of high-purity bayld: 43 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the pinch of high-purity bayld: 887 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the pinch of high-purity bayld: 522 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the pinch of high-purity bayld: 891 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the kaquljaan: 720 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the pinch of high-purity bayld: 328 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the pinch of high-purity bayld: 742 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the pinch of high-purity bayld: 630 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the pinch of high-purity bayld: 847 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the pinch of high-purity bayld: 266 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the pinch of high-purity bayld: 135 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the pinch of high-purity bayld: 225 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the pinch of high-purity bayld: 493 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the pinch of high-purity bayld: 956 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the pinch of high-purity bayld: 170 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the pinch of high-purity bayld: 656 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the pinch of high-purity bayld: 3 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the snow geode: 407 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the pinch of high-purity bayld: 948 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the pinch of high-purity bayld: 586 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the pinch of high-purity bayld: 418 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the pinch of high-purity bayld: 421 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the snow geode: 811 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the pinch of high-purity bayld: 188 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the pinch of high-purity bayld: 546 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the pinch of high-purity bayld: 159 points.
+----------
+Mode: combatspell Channel:64Msg: Nikolce casts Stoneskin. Nikolce gains the effect of Stoneskin.
+----------

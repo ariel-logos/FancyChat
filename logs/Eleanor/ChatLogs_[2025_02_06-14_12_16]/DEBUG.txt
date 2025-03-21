@@ -1,0 +1,1572 @@
+Mode: craft Channel:121Msg: Chronotrigger's lot for the pinch of high-purity bayld: 485 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the pinch of high-purity bayld: 453 points.
+----------
+Mode: craft Channel:121Msg: Cestus's lot for the pinch of high-purity bayld: 135 points.
+----------
+Mode: craft Channel:121Msg: Cestus's lot for the pinch of high-purity bayld: 552 points.
+----------
+Mode: craft Channel:121Msg: Chronotrigger's lot for the pinch of high-purity bayld: 851 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the pinch of high-purity bayld: 705 points.
+----------
+Mode: craft Channel:121Msg: Chronotrigger's lot for the pinch of high-purity bayld: 634 points.
+----------
+Mode: craft Channel:121Msg: Cestus's lot for the pinch of high-purity bayld: 405 points.
+----------
+Mode: combatspell Channel:64Msg: Nikolce casts Blink. Nikolce gains the effect of Blink.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the pinch of high-purity bayld: 252 points.
+----------
+Mode: craft Channel:121Msg: Cestus's lot for the pinch of high-purity bayld: 850 points.
+----------
+Mode: combat Channel:191Msg: Eleanor's Regain effect wears off.
+----------
+Mode: craft Channel:121Msg: Chronotrigger's lot for the pinch of high-purity bayld: 5 points.
+----------
+Mode: craft Channel:121Msg: Chronotrigger's lot for the pinch of high-purity bayld: 577 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the pinch of high-purity bayld: 860 points.
+----------
+Mode: craft Channel:121Msg: Eleanor gains 1172 domain shards.
+----------
+Mode: combat Channel:191Msg: Eleanor's Elvorseal effect wears off.
+----------
+Mode: unity Channel:212Msg: {Apururu} Oh dear, one of our members-wembers in Kamihr Drifts says that Kumhau could appear anytime in the next 5 minutes.
+----------
+Mode: unity Channel:212Msg: {Apururu} Would you please go and see if she's alrightaru?
+----------
+Mode: craft Channel:121Msg: Cestus's lot for the kaquljaan: 961 points.
+----------
+Mode: craft Channel:121Msg: Chronotrigger's lot for the pinch of high-purity bayld: 692 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the pinch of high-purity bayld: 330 points.
+----------
+Mode: craft Channel:121Msg: Cestus's lot for the pinch of high-purity bayld: 930 points.
+----------
+Mode: craft Channel:121Msg: Chronotrigger's lot for the Kindred's seal: 770 points.
+----------
+Mode: craft Channel:121Msg: Hankok's lot for the pinch of high-purity bayld: 917 points.
+----------
+Mode: craft Channel:121Msg: Cestus's lot for the Kindred's seal: 888 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the Kindred's seal: 665 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the pinch of high-purity bayld: 430 points.
+----------
+Mode: craft Channel:121Msg: Hankok's lot for the pinch of high-purity bayld: 373 points.
+----------
+Mode: system8 Channel:127Msg: Cestus obtains a Kindred's seal.
+----------
+Mode: craft Channel:121Msg: Cestus's lot for the pinch of high-purity bayld: 898 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the pinch of high-purity bayld: 222 points.
+----------
+Mode: craft Channel:121Msg: Hankok's lot for the pinch of high-purity bayld: 495 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the pinch of high-purity bayld: 560 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the pinch of high-purity bayld: 715 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the pinch of high-purity bayld: 827 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the pinch of high-purity bayld: 991 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the pinch of high-purity bayld: 391 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the pinch of high-purity bayld: 57 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the snow geode: 145 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the pinch of high-purity bayld: 646 points.
+----------
+Mode: craft Channel:121Msg: Hankok's lot for the pinch of high-purity bayld: 217 points.
+----------
+Mode: craft Channel:121Msg: Hankok's lot for the pinch of high-purity bayld: 449 points.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the pinch of high-purity bayld: 327 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the pinch of high-purity bayld: 994 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the snow geode: 246 points.
+----------
+Mode: craft Channel:121Msg: Hankok's lot for the pinch of high-purity bayld: 265 points.
+----------
+Mode: system8 Channel:127Msg: Hankok obtains a pinch of high-purity bayld.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the pinch of high-purity bayld: 468 points.
+----------
+Mode: craft Channel:121Msg: Chronotrigger's lot for the snow geode: 296 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the pinch of high-purity bayld: 409 points.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the pinch of high-purity bayld: 865 points.
+----------
+Mode: system8 Channel:127Msg: Eleanor obtains a pinch of high-purity bayld.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Peachlyn> I didn't have a DC... played my mvc2 on ps2
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the pinch of high-purity bayld: 215 points.
+----------
+Mode: system8 Channel:127Msg: Giapper obtains a pinch of high-purity bayld.
+----------
+Mode: combat Channel:111Msg: Nikolce uses Release.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Bravemistakes> my sega saturn battery died, i replaced it and the system never bothered to
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the pinch of high-purity bayld: 79 points.
+----------
+Mode: system8 Channel:127Msg: Tataii obtains a pinch of high-purity bayld.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the pinch of high-purity bayld: 809 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the pinch of high-purity bayld: 821 points.
+----------
+Mode: system8 Channel:127Msg: Cestus obtains a pinch of high-purity bayld.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the pinch of high-purity bayld: 875 points.
+----------
+Mode: system8 Channel:127Msg: Cestus obtains a pinch of high-purity bayld.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the kaquljaan: 911 points.
+----------
+Mode: system8 Channel:127Msg: Cestus obtains a kaquljaan.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the snow geode: 585 points.
+----------
+Mode: system8 Channel:127Msg: Darkrider obtains a snow geode.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Bravemistakes> work again
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Titus> i personally sought out every game/accessory for dreamcast. i have a nice collection :D
+----------
+Mode: craft Channel:121Msg: Domain Prowess: ☆☆☆☆☆ (0 Daily Quests, 3 Domains Conquered)
+----------
+Mode: system5_NPC Channel:9Msg: You haven't accumulated enough daily Domain Prowess to use the travel service.
+----------
+Mode: item? Channel:90Msg: Eleanor uses a scroll of Instant Warp.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Sukoshi> still got gamecube with PSO
+----------
+Mode: item? Channel:90Msg: Cestus uses a warp ring.
+----------
+Mode: zone Channel:0Msg: === Area: Windurst Woods ===
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Reiyan> the keyboard was so nice
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Stratus> does it still work on GC?
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Reiyan> powerstone?
+----------
+Mode: NPC Channel:151Msg: A home point can be set as a spot for you to return to Vana'diel when you have been knocked out. You can also use a home point to teleport to other home points.
+----------
+Mode: system8 Channel:190Msg: A home point can be set as a spot for you to return to Vana'diel when you have been knocked out. You can also use a home point to teleport to other home points.
+----------
+Mode: system8 Channel:190Msg: A home point can be set as a spot for you to return to Vana'diel when you have been knocked out. You can also use a home point to teleport to other home points.
+----------
+Mode: NPC Channel:151Msg: You may teleport from here to any other home point you have registered.
+----------
+Mode: system8 Channel:190Msg: You may teleport from here to any other home point you have registered.
+----------
+Mode: system8 Channel:190Msg: You may teleport from here to any other home point you have registered.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Reiyan> marvel v capcom
+----------
+Mode: NPC Channel:151Msg: It costs 100 gil to teleport to Home Point #2 in Lower Jeuno.
+----------
+Mode: system8 Channel:190Msg: It costs 100 gil to teleport to Home Point #2 in Lower Jeuno.
+----------
+Mode: system8 Channel:190Msg: It costs 100 gil to teleport to Home Point #2 in Lower Jeuno.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Reiyan> so good
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Bravemistakes> crazy taxi waspretty much Offsrping's Smash Album
+----------
+Mode: zone Channel:0Msg: === Area: Lower Jeuno ===
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> mvc was amazing. same with Street fighter alpha
+----------
+Mode: system5_NPC Channel:9Msg: Domain Invasion is currently happening in Kamihr Drifts. Need a lift? The ride's free if you've accumulated enough Domain Prowess today.
+----------
+Mode: craft Channel:121Msg: Domain Prowess: ☆☆☆☆☆ (0 Daily Quests, 3 Domains Conquered)
+----------
+Mode: system5_NPC Channel:9Msg: Now traveling to Kamihr Drifts (8 Total Travels)
+----------
+Mode: system7NPC Channel:142Msg: Obtained: Scroll of Instant Warp.
+----------
+Mode: zone Channel:0Msg: === Area: Kamihr Drifts ===
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> me and pabst would do the co-op against bison for hours.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Agrapina> kings field ps1
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Punch> man I had a nicedemo disc collection, rememebr playing Raildroad Tycoon alot
+----------
+Mode: combat Channel:111Msg: Yuber uses Meditate.
+----------
+Mode: combat Channel:111Msg: Yuber uses Hasso.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Bravemistakes> dark cloud
+----------
+Mode: combat Channel:191Msg: Eleanor's Majesty effect wears off.
+----------
+Mode: combat Channel:111Msg: Yuber uses Berserk. Attacks are enhanced but defense weakens.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Peachlyn> See this is nice convo.  "We are all old, lets nostalgia bait each other" XD
+----------
+Mode: combat Channel:122Msg: The Kumhau is out of range.
+----------
+Mode: combat Channel:111Msg: Nikolce uses Assault.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Sylardean> loved darkclud
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Kumhau for 128 points of damage.
+----------
+Mode: combat Channel:122Msg: The Kumhau is out of range.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Geo-Frailty on the Kumhau.
+----------
+Mode: combatspell Channel:50Msg: Eleanor starts casting Flash on the Kumhau.
+----------
+Mode: combat Channel:106Msg: Tatai uses Hasso.
+----------
+Mode: combat Channel:41Msg: Yuber misses the Kumhau.
+----------
+Mode: combat Channel:110Msg: Fenrir readies Lunar Cry.
+----------
+Mode: combat Channel:106Msg: Tataii uses Hasso.
+----------
+Mode: combat Channel:40Msg: The Kumhau hits Fenrir for 68 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Kumhau for 201 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 48 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Kumhau for 150 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 91 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 94 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Kumhau for 45 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Kumhau for 108 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Thunder III on the Kumhau.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Kumhau for 92 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Indi-Acumen on Darkrider.
+----------
+Mode: combat Channel:106Msg: Giapper uses Fight.
+----------
+Mode: combatspell Channel:65Msg: Eleanor casts Flash. The Kumhau is afflicted with Flash.
+----------
+Mode: combat Channel:28Msg: The Kumhau hits Eleanor for 24 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Kumhau for 148 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Dia II on the Kumhau.
+----------
+Mode: combat Channel:28Msg: Additional effect: 26 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 113 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Kumhau for 635 points of damage.
+----------
+Mode: combat Channel:106Msg: Hankok uses Hasso.
+----------
+Mode: combat Channel:20Msg: Eleanor scores a critical hit! The Kumhau takes 86 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Kumhau for 181 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender scores a critical hit! The Kumhau takes 201 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Kumhau for 153 points of damage.
+----------
+Mode: combat Channel:111Msg: Chronotrigger uses Footwork.
+----------
+Mode: combat Channel:101Msg: Eleanor uses Sentinel.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Blizzard III on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Thunder III on the Kumhau.
+----------
+Mode: combat Channel:106Msg: Hankok uses Berserk. Attacks are enhanced but defense weakens.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Kumhau for 138 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Kumhau for 161 points of damage.
+----------
+Mode: combat Channel:111Msg: Chronotrigger uses Perfect Counter.
+----------
+Mode: combat Channel:41Msg: Yuber parries the Kumhau's attack with his weapon.
+----------
+Mode: combat Channel:112Msg: Fenrir uses Lunar Cry. The Kumhau receives the effect of Accuracy Down and Evasion Down.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Kumhau for 175 points of damage.
+----------
+Mode: combat Channel:111Msg: Yuber uses Warcry. Yuber's attacks are enhanced.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 155 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Bravemistakes> Alundra!!
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Kumhau for 257 points of damage.
+----------
+Mode: combat Channel:100Msg: The Kumhau readies Polar Roar.
+----------
+Mode: combat Channel:106Msg: Hankok uses Warcry. Hankok's attacks are enhanced.
+----------
+Mode: combat Channel:20Msg: Eleanor scores a critical hit! The Kumhau takes 87 points of damage.
+----------
+Mode: combatspell Channel:64Msg: Giapper's attacks are enhanced.
+----------
+Mode: combat Channel:111Msg: Chronotrigger uses Focus. Chronotrigger's accuracy is enhanced.
+----------
+Mode: combat Channel:26Msg: Tatai misses the Kumhau.
+----------
+Mode: combatspell Channel:64Msg: Tatai's attacks are enhanced.
+----------
+Mode: combat Channel:191Msg: The Kumhau's Flash effect wears off.
+----------
+Mode: combatspell Channel:64Msg: Tataii's attacks are enhanced.
+----------
+Mode: combatspell Channel:56Msg: Eleanor's attacks are enhanced.
+----------
+Mode: combat Channel:40Msg: Zav casts Thunder III. The Kumhau takes 594 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 498 points of damage.
+----------
+Mode: combat Channel:111Msg: Yuber uses Sekkanoki.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Kumhau for 54 points of damage.
+----------
+Mode: combat Channel:106Msg: Tataii uses Berserk. Attacks are enhanced but defense weakens.
+----------
+Mode: combat Channel:106Msg: Tatai uses Berserk. Attacks are enhanced but defense weakens.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 144 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Fire III on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Blizzard III on the Kumhau.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Kumhau for 198 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Kumhau takes 220 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Kumhau for 128 points of damage.
+----------
+Mode: combat Channel:106Msg: Hankok uses Sekkanoki.
+----------
+Mode: combat Channel:111Msg: Nikolce uses Release.
+----------
+Mode: combat Channel:28Msg: The Kumhau uses Polar Roar. Eleanor takes 174 points of damage.
+----------
+Mode: combat Channel:32Msg: Giapper takes 45 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender takes 225 points of damage.
+----------
+Mode: combat Channel:32Msg: Hankok takes 127 points of damage.
+----------
+Mode: combat Channel:32Msg: Tatai takes 168 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 168 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir takes 331 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber takes 174 points of damage.
+----------
+Mode: combat Channel:110Msg: Yuber readies Tachi: Kaiten.
+----------
+Mode: combat Channel:40Msg: Nikolce casts Dia II. The Kumhau takes 1 point of damage.
+----------
+Mode: combat Channel:122Msg: The Kumhau is out of range.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Ifrit on Nikolce.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Kumhau for 113 points of damage.
+----------
+Mode: combat Channel:191Msg: The Kumhau's Ice Spikes effect wears off.
+----------
+Mode: combat Channel:111Msg: Chronotrigger uses Dodge. Chronotrigger's evasion is enhanced.
+----------
+Mode: combat Channel:40Msg: The Kumhau hits Yuber for 133 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Blizzard III. The Kumhau takes 78 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Thunder III. The Kumhau takes 444 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 141 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Aero III on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Fire III on the Kumhau.
+----------
+Mode: combat Channel:40Msg: Zav casts Fire III. The Kumhau takes 1076 points of damage.
+----------
+Mode: combat Channel:122Msg: The Kumhau is out of range.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Kumhau for 281 points of damage.
+----------
+Mode: combat Channel:191Msg: Eleanor's bind effect wears off.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Kumhau for 231 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 169 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 163 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber uses Tachi: Kaiten. The Kumhau takes 3387 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 143 points of damage.
+----------
+Mode: combat Channel:191Msg: The AmigoSabotender's bind effect wears off.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 148 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Blizzard III. The Kumhau takes 55 points of damage.
+----------
+Mode: combat Channel:41Msg: Yuber parries the Kumhau's attack with his weapon.
+----------
+Mode: combat Channel:122Msg: The Kumhau is out of range.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Kumhau for 249 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 195 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok scores a critical hit! The Kumhau takes 437 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Water III on the Kumhau.
+----------
+Mode: combat Channel:122Msg: The Kumhau is too far away.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Kumhau for 71 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Aero III on the Kumhau.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Fire III. The Kumhau takes 780 points of damage.
+----------
+Mode: combat Channel:111Msg: Nikolce uses Assault.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 155 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Kumhau takes 1324 points of damage.
+----------
+Mode: combat Channel:40Msg: Ifrit hits the Kumhau for 200 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 501 points of damage.
+----------
+Mode: combat Channel:41Msg: Yuber parries the Kumhau's attack with his weapon.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Kumhau for 299 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Kumhau takes 1133 points of damage.
+----------
+Mode: combat Channel:110Msg: Yuber readies Tachi: Rana.
+----------
+Mode: combat Channel:106Msg: Tataii uses Sekkanoki.
+----------
+Mode: combat Channel:106Msg: Tatai uses Sekkanoki.
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Rana.
+----------
+Mode: combat Channel:110Msg: Tataii readies Tachi: Rana.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 126 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Aero III. The Kumhau takes 60 points of damage.
+----------
+Mode: combat Channel:110Msg: The Kumhau readies Glacial Tomb.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Mouldatron> how have i not seen elder scrolls v yet 0.0
+----------
+Mode: combat Channel:111Msg: Nikolce uses Apogee.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Kumhau for 297 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 172 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Stone III on the Kumhau.
+----------
+Mode: combat Channel:110Msg: Ifrit readies Flaming Crush.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Water III on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:21Msg: Eleanor misses the Kumhau.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Kumhau for 277 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Kumhau for 252 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Kumhau for 58 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:40Msg: The Kumhau uses Glacial Tomb. Yuber takes 281 points of damage.
+----------
+Mode: combat Channel:32Msg: Hankok takes 187 points of damage.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 282 points of damage.
+----------
+Mode: combat Channel:40Msg: Nikolce takes 0 points of damage.
+----------
+Mode: combat Channel:32Msg: Tatai takes 247 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger takes 187 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 247 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender takes 364 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Claw hits Yuber for 110 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk hits Yuber for 102 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Hoof hits Yuber for 93 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Water III. The Kumhau takes 448 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Kumhau for 326 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Kumhau for 320 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 29 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 39 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 26 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 143 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Aero III. The Kumhau takes 44 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 160 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber uses Tachi: Rana. The Kumhau takes 5702 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 172 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii uses Tachi: Rana. The Kumhau takes 4693 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Rana. The Kumhau takes 6998 points of damage.
+----------
+Mode: combat Channel:110Msg: Hankok readies Tachi: Gekko.
+----------
+Mode: combat Channel:25Msg: Hankok scores a critical hit! The Kumhau takes 377 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Kumhau for 68 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Hoof hits Yuber for 113 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk hits Yuber for 90 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 13 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Thunder III on the Kumhau.
+----------
+Mode: combat Channel:40Msg: Additional effect: 35 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Kumhau for 290 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok uses Tachi: Gekko. The Kumhau takes 1244 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Cestus> was just going to say brave
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Stone III on the Kumhau.
+----------
+Mode: combat Channel:110Msg: The AmigoSabotender readies ??? Needles.
+----------
+Mode: combat Channel:110Msg: Ifrit readies Flaming Crush.
+----------
+Mode: combat Channel:41Msg: The Kumhau misses Yuber.
+----------
+Mode: combat Channel:40Msg: Yuber scores a critical hit! The Kumhau takes 376 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Kumhau takes 1304 points of damage.
+----------
+Mode: combat Channel:40Msg: Ifrit hits the Kumhau for 197 points of damage.
+----------
+Mode: combat Channel:40Msg: Ifrit uses Flaming Crush. The Kumhau takes 4338 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Claw hits Yuber for 95 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 21 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk hits Yuber for 107 points of damage.
+----------
+Mode: combat Channel:41Msg: The Kumhau's Hoof misses Yuber.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender uses ??? Needles. The Kumhau takes 1478 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Claw takes 1094 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk takes 1749 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Hoof takes 271 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Kumhau takes 1386 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 36 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Stone III. The Kumhau takes 408 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Water III. The Kumhau takes 323 points of damage.
+----------
+Mode: combat Channel:191Msg: Eleanor's Sentinel effect wears off.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Kumhau for 54 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:110Msg: The Kumhau readies Permafrost Requiem.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 137 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Kumhau for 285 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 130 points of damage.
+----------
+Mode: combat Channel:40Msg: Ifrit uses Flaming Crush. The Kumhau takes 5601 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Kumhau for 246 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Kumhau takes 203 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Blizzard III on the Kumhau.
+----------
+Mode: combat Channel:191Msg: Eleanor's encumbrance effect wears off.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Thunder III on the Kumhau.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 164 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Claw hits the AmigoSabotender for 50 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 24 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk hits the AmigoSabotender for 60 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Hoof hits the AmigoSabotender for 36 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 19 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 24 points of damage.
+----------
+Mode: combat Channel:191Msg: Eleanor's Warcry effect wears off.
+----------
+Mode: combat Channel:40Msg: Zav casts Thunder III. The Kumhau takes 636 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Stone III. The Kumhau takes 294 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau uses Permafrost Requiem. Ifrit takes 377 points of damage.
+----------
+Mode: combat Channel:32Msg: Hankok takes 79 points of damage.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 99 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber takes 240 points of damage.
+----------
+Mode: combat Channel:32Msg: Tatai takes 191 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger takes 144 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 191 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender takes 282 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Kumhau takes 915 points of damage.
+----------
+Mode: combat Channel:191Msg: The AmigoSabotender's terror effect wears off.
+----------
+Mode: combat Channel:40Msg: The Kumhau hits Yuber for 92 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Punch> I can talk your head off with video agmes, from the times I spent in aracdes in the late 80s
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Kumhau takes 971 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Ifrit on Nikolce.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Kumhau for 292 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 18 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 185 points of damage.
+----------
+Mode: combat Channel:191Msg: The AmigoSabotender's encumbrance effect wears off.
+----------
+Mode: combat Channel:191Msg: Eleanor's terror effect wears off.
+----------
+Mode: combat Channel:110Msg: Hankok readies Tachi: Kasha.
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Rana.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Claw hits the AmigoSabotender for 41 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Fire III on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Blizzard III on the Kumhau.
+----------
+Mode: combat Channel:110Msg: Tataii readies Tachi: Rana.
+----------
+Mode: combat Channel:40Msg: Additional effect: 41 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Hoof hits the AmigoSabotender for 45 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Kumhau for 254 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 33 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk's attack is countered by the AmigoSabotender. The Kumhau's Tusk takes 119 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Kumhau for 54 points of damage.
+----------
+Mode: combat Channel:110Msg: Chronotrigger readies Shijin Spiral.
+----------
+Mode: combat Channel:25Msg: Hankok uses Tachi: Kasha. The Kumhau takes 3046 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok scores a critical hit! The Kumhau takes 892 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Kumhau for 319 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Blizzard III. The Kumhau takes 73 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Kumhau for 67 points of damage.
+----------
+Mode: combat Channel:32Msg: The Kumhau hits Tatai for 106 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Thunder III. The Kumhau takes 446 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 168 points of damage.
+----------
+Mode: combat Channel:105Msg: The Kumhau readies Biting Abrogation.
+----------
+Mode: combat Channel:32Msg: Additional effect: 11 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Cestus> tes3 was the best
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Kumhau takes 1284 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Fire III. The Kumhau takes 1076 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Claw hits the AmigoSabotender for 47 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Rana. The Kumhau takes 7715 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Aero III on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Fire III on the Kumhau.
+----------
+Mode: combat Channel:40Msg: Additional effect: 13 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk hits the AmigoSabotender for 46 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger uses Shijin Spiral. The Kumhau takes 4717 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Hoof's attack is countered by the AmigoSabotender. The Kumhau's Hoof takes 124 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Kumhau takes 1039 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 37 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii uses Tachi: Rana. The Kumhau takes 5455 points of damage.
+----------
+Mode: combat Channel:122Msg: Eleanor is paralyzed.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Kumhau for 228 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Eleanor starts casting Cure IV on Eleanor.
+----------
+Mode: combat Channel:32Msg: The Kumhau uses Biting Abrogation. Tatai takes 191 points of damage.
+----------
+Mode: combat Channel:32Msg: Giapper takes 112 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender takes 282 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: Attack Down.
+----------
+Mode: combat Channel:32Msg: Hankok takes 159 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 191 points of damage.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 198 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber takes 119 points of damage.
+----------
+Mode: combat Channel:191Msg: The Kumhau's paralysis effect wears off.
+----------
+Mode: combat Channel:40Msg: Chronotrigger takes 144 points of damage.
+----------
+Mode: combat Channel:122Msg: Eleanor is paralyzed.
+----------
+Mode: combat Channel:122Msg: The AmigoSabotender is paralyzed.
+----------
+Mode: combat Channel:111Msg: Nikolce uses Assault.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Blizzard III. The Kumhau takes 55 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:122Msg: Tatai is paralyzed.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Kumhau for 165 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Claw hits the AmigoSabotender for 71 points of damage.
+----------
+Mode: combat Channel:40Msg: Ifrit scores a critical hit! The Kumhau takes 310 points of damage.
+----------
+Mode: combat Channel:122Msg: Eleanor's casting is interrupted.
+----------
+Mode: combat Channel:40Msg: Additional effect: 19 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk hits the AmigoSabotender for 71 points of damage.
+----------
+Mode: combat Channel:41Msg: The Kumhau's Hoof misses the AmigoSabotender.
+----------
+Mode: combat Channel:122Msg: Chronotrigger is paralyzed.
+----------
+Mode: combat Channel:122Msg: Hankok is paralyzed.
+----------
+Mode: combat Channel:40Msg: Additional effect: 38 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Water III on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Aero III on the Kumhau.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Fire III. The Kumhau takes 777 points of damage.
+----------
+Mode: combat Channel:122Msg: The AmigoSabotender is paralyzed.
+----------
+Mode: combat Channel:33Msg: Tatai parries the Kumhau's attack with his weapon.
+----------
+Mode: combatspell Channel:52Msg: Eleanor starts casting Cure IV on Eleanor.
+----------
+Mode: combatspell Channel:52Msg: Chronotrigger starts casting Utsusemi: Ni on Chronotrigger.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Kumhau takes 922 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Aero III. The Kumhau takes 60 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Kumhau takes 1116 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Claw's attack is countered by the AmigoSabotender. The Kumhau's Claw takes 93 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Hoof hits the AmigoSabotender for 39 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 179 points of damage.
+----------
+Mode: combat Channel:122Msg: Yuber is paralyzed.
+----------
+Mode: combat Channel:122Msg: Tatai is paralyzed.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk's attack is countered by the AmigoSabotender. The Kumhau's Tusk takes 99 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 17 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Claw's attack is countered by the AmigoSabotender. The Kumhau's Claw takes 135 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 146 points of damage.
+----------
+Mode: combat Channel:122Msg: Eleanor is paralyzed.
+----------
+Mode: combat Channel:106Msg: Tataii uses Meditate.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:40Msg: Ifrit hits the Kumhau for 209 points of damage.
+----------
+Mode: combat Channel:32Msg: The Kumhau hits Tatai for 72 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Kumhau for 126 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Stone III on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Water III on the Kumhau.
+----------
+Mode: combat Channel:122Msg: Hankok is paralyzed.
+----------
+Mode: combat Channel:32Msg: Additional effect: 39 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Kumhau for 119 points of damage.
+----------
+Mode: combat Channel:106Msg: Tatai uses Meditate.
+----------
+Mode: combat Channel:40Msg: Zav casts Water III. The Kumhau takes 448 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Dia II on the Kumhau.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Aero III. The Kumhau takes 44 points of damage.
+----------
+Mode: combat Channel:122Msg: Tataii is paralyzed.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 130 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Claw hits the AmigoSabotender for 56 points of damage.
+----------
+Mode: combat Channel:122Msg: Tatai is paralyzed.
+----------
+Mode: combat Channel:40Msg: Additional effect: 14 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk hits the AmigoSabotender for 54 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Hoof hits the AmigoSabotender for 41 points of damage.
+----------
+Mode: combat Channel:122Msg: Eleanor is paralyzed.
+----------
+Mode: combatspell Channel:64Msg: Chronotrigger casts Utsusemi: Ni. Chronotrigger gains the effect of Copy Image.
+----------
+Mode: combat Channel:40Msg: Additional effect: 17 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 34 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 166 points of damage.
+----------
+Mode: combat Channel:105Msg: The Kumhau readies Brain Freeze.
+----------
+Mode: combat Channel:32Msg: The Kumhau hits Tatai for 66 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 139 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Thunder III on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Stone III on the Kumhau.
+----------
+Mode: combat Channel:32Msg: Additional effect: 26 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Kumhau takes 1077 points of damage.
+----------
+Mode: combat Channel:41Msg: Ifrit misses the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:122Msg: Yuber is paralyzed.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Kumhau takes 226 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Kumhau takes 1313 points of damage.
+----------
+Mode: combat Channel:122Msg: Hankok is paralyzed.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 160 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Stone III. The Kumhau takes 408 points of damage.
+----------
+Mode: combat Channel:122Msg: Eleanor is paralyzed.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Claw hits the AmigoSabotender for 82 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 14 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk's attack is countered by the AmigoSabotender. The Kumhau's Tusk takes 131 points of damage.
+----------
+Mode: combat Channel:32Msg: The Kumhau uses Brain Freeze. Tatai takes 107 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 143 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber takes 168 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Water III. The Kumhau takes 321 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Hoof's attack is countered by the AmigoSabotender. The Kumhau's Hoof takes 113 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Kumhau for 129 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Kumhau for 249 points of damage.
+----------
+Mode: combat Channel:191Msg: Eleanor's paralysis effect wears off.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Kumhau for 96 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 156 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Kumhau for 169 points of damage.
+----------
+Mode: combat Channel:40Msg: Nikolce casts Dia II. The Kumhau takes 1 point of damage.
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Rana.
+----------
+Mode: combat Channel:110Msg: Tataii readies Tachi: Rana.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Kumhau for 237 points of damage.
+----------
+Mode: combat Channel:101Msg: Eleanor uses Warcry. Eleanor's attacks are enhanced.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 148 points of damage.
+----------
+Mode: combatspell Channel:64Msg: Giapper's attacks are enhanced.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Blizzard III on the Kumhau.
+----------
+Mode: combat Channel:105Msg: The Kumhau readies Glacial Tomb.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Thunder III on the Kumhau.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk's attack is countered by the AmigoSabotender. The Kumhau's Tusk takes 99 points of damage.
+----------
+Mode: combatspell Channel:64Msg: Hankok's attacks are enhanced.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Kumhau takes 213 points of damage.
+----------
+Mode: combatspell Channel:64Msg: Tatai's attacks are enhanced.
+----------
+Mode: combatspell Channel:64Msg: Tataii's attacks are enhanced.
+----------
+Mode: combatspell Channel:52Msg: Eleanor starts casting Cure IV on Eleanor.
+----------
+Mode: combat Channel:40Msg: Ifrit hits the Kumhau for 194 points of damage.
+----------
+Mode: combat Channel:110Msg: The Kumhau's Tusk readies Sweeping Gouge.
+----------
+Mode: combat Channel:191Msg: The AmigoSabotender's paralysis effect wears off.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Claw hits the AmigoSabotender for 43 points of damage.
+----------
+Mode: combatspell Channel:69Msg: Lyn's Glutinous Dart has no effect on the Kumhau.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Stone III. The Kumhau takes 293 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 43 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk hits the AmigoSabotender for 71 points of damage.
+----------
+Mode: combat Channel:41Msg: The Kumhau's Hoof misses the AmigoSabotender.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:122Msg: Hankok is paralyzed.
+----------
+Mode: combat Channel:40Msg: Additional effect: 29 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Thunder III. The Kumhau takes 636 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Kumhau takes 1094 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Kumhau for 542 points of damage.
+----------
+Mode: combat Channel:32Msg: The Kumhau uses Glacial Tomb. Tatai takes 247 points of damage.
+----------
+Mode: combat Channel:32Msg: Giapper takes 132 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender takes 364 points of damage.
+----------
+Mode: combat Channel:32Msg: Hankok takes 187 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 247 points of damage.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 257 points of damage.
+----------
+Mode: combat Channel:40Msg: Nikolce takes 2 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber takes 310 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 146 points of damage.
+----------
+Mode: combat Channel:111Msg: Chronotrigger uses Perfect Counter.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Tusk uses Sweeping Gouge. The AmigoSabotender takes 151 points of damage.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 47 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii uses Tachi: Rana. The Kumhau takes 4577 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Rana. The Kumhau takes 6985 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Fire III on the Kumhau.
+----------
+Mode: combat Channel:110Msg: Yuber readies Tachi: Shoha.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Blizzard III on the Kumhau.
+----------
+Mode: combat Channel:32Msg: The Kumhau hits Tatai for 52 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Claw's attack is countered by the AmigoSabotender. The Kumhau's Claw takes 108 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 15 points of damage.
+----------
+Mode: combat Channel:105Msg: The Kumhau readies Glassy Nova.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Kumhau for 61 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Blizzard III. The Kumhau takes 73 points of damage.
+----------
+Mode: combat Channel:40Msg: The Kumhau's Hoof's attack is countered by the AmigoSabotender. The Kumhau's Hoof takes 122 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Kumhau for 145 points of damage.
+----------
+Mode: combat Channel:40Msg: Ifrit hits the Kumhau for 162 points of damage.
+----------
+Mode: combat Channel:122Msg: Tatai is paralyzed.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Kumhau takes 1324 points of damage.
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender hits the Kumhau for 167 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Thunder III. The Kumhau takes 444 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii scores a critical hit! The Kumhau takes 288 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Kumhau for 58 points of damage.
+----------
+Mode: combat Channel:122Msg: Hankok is paralyzed.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Kumhau for 97 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Kumhau takes 1070 points of damage.
+----------
+Mode: combatspell Channel:31Msg: Eleanor casts Cure IV. Eleanor recovers 398 HP.
+----------
+Mode: combat Channel:111Msg: Chronotrigger uses Mantra. Chronotrigger receives the effect of Mantra.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 110 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Fire III. The Kumhau takes 1076 points of damage.
+----------
+Mode: combat Channel:101Msg: Eleanor uses Majesty.
+----------
+Mode: combat Channel:191Msg: Eleanor's encumbrance effect wears off.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Aero III on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:32Msg: The Kumhau uses Glassy Nova. Tatai takes 105 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Kumhau takes 187 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber uses Tachi: Shoha. The Kumhau takes 3696 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Fire III on the Kumhau.
+----------
+Mode: combat Channel:32Msg: Giapper takes 102 points of damage.
+----------
+Mode: combat Channel:122Msg: Unable to cast spells at this time.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Joliminet> Quest for Glory for my old pc gamer pals ;) Remember when every game was like 5 floppies?
+----------
+Mode: combat Channel:40Msg: The AmigoSabotender takes 282 points of damage.
+----------
+Mode: combat Channel:32Msg: The Kumhau's Claw hits Tatai for 69 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 30 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Kumhau for 214 points of damage.
+----------
+Mode: combat Channel:32Msg: Hankok takes 144 points of damage.
+----------
+Mode: combat Channel:32Msg: The Kumhau's Tusk hits Tatai for 85 points of damage.
+----------
+Mode: combat Channel:32Msg: The Kumhau's Hoof scores a critical hit! Tatai takes 141 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 23 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 15 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 210 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Blizzard III. The Kumhau takes 55 points of damage.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 198 points of damage.
+----------
+Mode: combat Channel:21Msg: Eleanor misses the Kumhau.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Mouldatron> never played that just v and the mmo online and that was well.....
+----------
+Mode: combat Channel:105Msg: The Kumhau readies Glassy Nova.
+----------
+Mode: combat Channel:40Msg: Yuber takes 218 points of damage.
+----------
+Mode: combat Channel:40Msg: Skillchain: Fragmentation. The Kumhau takes 2217 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger takes 144 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Kumhau for 198 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Fire III. The Kumhau takes 777 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Water III on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Aero III on the Kumhau.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 137 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Kumhau takes 1406 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Kumhau for 228 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Kumhau for 121 points of damage.
+----------
+Mode: combat Channel:33Msg: The Kumhau's Claw misses Tatai.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Kumhau for 181 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 139 points of damage.
+----------
+Mode: combat Channel:32Msg: The Kumhau's Tusk hits Tatai for 63 points of damage.
+----------
+Mode: combat Channel:32Msg: The Kumhau's Hoof scores a critical hit! Tatai takes 145 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Kumhau for 41 points of damage.
+----------
+Mode: combat Channel:32Msg: The Kumhau uses Glassy Nova. Tatai takes 191 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 30 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Bravemistakes> my favorite arcade machines were neo geo
+----------
+Mode: combat Channel:32Msg: Additional effect: 18 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Kumhau for 103 points of damage.
+----------
+Mode: combat Channel:32Msg: Giapper takes 102 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Kumhau for 232 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Ifrit on Nikolce.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 133 points of damage.
+----------
+Mode: combat Channel:105Msg: The Kumhau readies Brain Freeze.
+----------
+Mode: combatspell Channel:52Msg: Eleanor starts casting Cure IV on Eleanor.
+----------
+Mode: combat Channel:32Msg: The Kumhau hits Tatai for 76 points of damage.
+----------
+Mode: combat Channel:32Msg: Hankok takes 144 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Kumhau takes 1311 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Aero III. Magic Burst! The Kumhau takes 750 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:32Msg: Additional effect: 12 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 191 points of damage.
+----------
+Mode: combat Channel:44Msg: Yuber was defeated by the Kumhau.
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Shoha.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 198 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber takes 240 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Stone III on the Kumhau.
+----------
+Mode: combat Channel:32Msg: The Kumhau's Claw hits Tatai for 84 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger takes 159 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 23 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Water III on the Kumhau.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Kumhau for 482 points of damage.
+----------
+Mode: combat Channel:33Msg: Tatai parries the Kumhau's Tusk's attack with his weapon.
+----------
+Mode: combat Channel:32Msg: The Kumhau's Hoof hits Tatai for 67 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger scores a critical hit! The Kumhau takes 182 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 19 points of damage.
+----------
+Mode: combat Channel:105Msg: The Kumhau's Claw readies Claw Cyclone.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 137 points of damage.
+----------
+Mode: combat Channel:32Msg: The Kumhau uses Brain Freeze. Tatai takes 105 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 138 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber takes 169 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Kumhau for 204 points of damage.
+----------
+Mode: combat Channel:25Msg: Additional effect: Attack Down.
+----------
+Mode: combat Channel:40Msg: Chronotrigger hits the Kumhau for 147 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Water III. The Kumhau takes 448 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Kumhau for 131 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Aero III. The Kumhau takes 44 points of damage.
+----------
+Mode: combat Channel:105Msg: The Kumhau readies Permafrost Requiem.
+----------
+Mode: combat Channel:110Msg: Hankok readies Tachi: Kasha.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Kumhau takes 1199 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Kumhau for 100 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Shoha. The Kumhau takes 5042 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Kumhau.
+----------
+Mode: combat Channel:25Msg: Tataii scores a critical hit! The Kumhau takes 253 points of damage.
+----------
+Mode: combat Channel:122Msg: Unable to use weapon skill.
+----------
+Mode: combatspell Channel:31Msg: Eleanor casts Cure IV. Eleanor recovers 379 HP.
+----------
+Mode: combat Channel:23Msg: Giapper recovers 270 HP.
+----------
+Mode: combat Channel:23Msg: Hankok recovers 379 HP.
+----------
+Mode: combat Channel:23Msg: Tatai recovers 379 HP.
+----------
+Mode: combat Channel:23Msg: Tataii recovers 379 HP.
+----------
+Mode: combat Channel:33Msg: Tatai parries the Kumhau's Tusk's attack with his weapon.
+----------
+Mode: combat Channel:32Msg: The Kumhau's Hoof hits Tatai for 70 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Thunder III on the Kumhau.
+----------
+Mode: combat Channel:32Msg: Additional effect: 13 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Stone III on the Kumhau.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Kumhau takes 1307 points of damage.
+----------
+Mode: combat Channel:32Msg: The Kumhau's Claw uses Claw Cyclone. Tatai takes 118 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 96 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok uses Tachi: Kasha. The Kumhau takes 2715 points of damage.
+----------
+Mode: combat Channel:32Msg: The Kumhau uses Permafrost Requiem. Tatai takes 191 points of damage.
+----------
+Mode: combat Channel:32Msg: Giapper takes 121 points of damage.
+----------
+Mode: combat Channel:32Msg: Hankok takes 144 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 191 points of damage.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 198 points of damage.
+----------
+Mode: combat Channel:40Msg: Chronotrigger takes 144 points of damage.
+----------
+Mode: combat Channel:111Msg: Nikolce uses Assault.
+----------
+Mode: combat Channel:110Msg: Giapper readies Ruinator.
+----------
+Mode: combat Channel:122Msg: Unable to use weapon skill.
+----------
+Mode: combat Channel:40Msg: Zav casts Stone III. The Kumhau takes 408 points of damage.
+----------
+Mode: combat Channel:122Msg: Zav's casting is interrupted.
+----------
+Mode: combat Channel:122Msg: Unable to use weapon skill.
+----------
+Mode: combat Channel:122Msg: Darkrider's casting is interrupted.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Water III. The Kumhau takes 321 points of damage.
+----------
+Mode: combat Channel:37Msg: Giapper defeats the Kumhau.
+----------
+Mode: system8 Channel:127Msg: Records of Eminence: Vanquish Multiple Enemies I.
+----------
+Mode: system8 Channel:127Msg: Progress: 7/200.
+----------
+Mode: combat Channel:131Msg: Eleanor gains 544 limit points.
+----------
+Mode: combat Channel:131Msg: Eleanor obtains 23 gil.
+----------
+Mode: combat Channel:122Msg: Unable to use weapon skill.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Peachlyn> floppy floppy or we talking 3.5
+----------
+Mode: combat Channel:191Msg: Eleanor's terror effect wears off.
+----------
+Mode: combat Channel:25Msg: Skillchain: Light. The Kumhau takes 2850 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Kumhau takes 1299 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper uses Ruinator. The Kumhau takes 2844 points of damage.
+----------
+Mode: combat Channel:111Msg: Nikolce uses Release.
+----------
+Mode: craft Channel:121Msg: You find a pinch of high-purity bayld on the Kumhau.
+----------
+Mode: craft Channel:121Msg: You find a hunk of behemoth meat on the Kumhau.
+----------
+Mode: craft Channel:121Msg: You find a wolfram steel ingot on the Kumhau.
+----------
+Mode: craft Channel:121Msg: You find a chunk of cobalt ore on the Kumhau.
+----------
+Mode: craft Channel:121Msg: You find a nepote bell on the Kumhau.
+----------
+Mode: craft Channel:121Msg: You find a cehuetzi claw on the Kumhau.
+----------
+Mode: craft Channel:121Msg: You find a baqil staff on the Kumhau.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the cehuetzi claw: 270 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the hunk of behemoth meat: 630 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the hunk of behemoth meat: 565 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the chunk of cobalt ore: 688 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the wolfram steel ingot: 543 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the pinch of high-purity bayld: 373 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the chunk of cobalt ore: 321 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the pinch of high-purity bayld: 539 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the wolfram steel ingot: 688 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the pinch of high-purity bayld: 461 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the pinch of high-purity bayld: 320 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the cehuetzi claw: 712 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the cehuetzi claw: 194 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the pinch of high-purity bayld: 217 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the hunk of behemoth meat: 839 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the wolfram steel ingot: 896 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the pinch of high-purity bayld: 696 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the hunk of behemoth meat: 679 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the wolfram steel ingot: 324 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the chunk of cobalt ore: 771 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the nepote bell: 560 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the cehuetzi claw: 327 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the chunk of cobalt ore: 343 points.
+----------
+Mode: craft Channel:121Msg: Chronotrigger's lot for the pinch of high-purity bayld: 650 points.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Joliminet> The less floppy floppies.
+----------
+Mode: craft Channel:121Msg: Chronotrigger's lot for the hunk of behemoth meat: 124 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the cehuetzi claw: 115 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the pinch of high-purity bayld: 445 points.
+----------
+Mode: craft Channel:121Msg: Chronotrigger's lot for the wolfram steel ingot: 126 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the hunk of behemoth meat: 121 points.
+----------
+Mode: craft Channel:121Msg: Chronotrigger's lot for the chunk of cobalt ore: 940 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the wolfram steel ingot: 137 points.
+----------
+Mode: craft Channel:121Msg: Eleanor gains 1165 domain shards.
+----------
+Mode: system5_NPC Channel:9Msg: You have completed a domain invasion objective. (Progress: 3/6)
+----------
+Mode: combat Channel:191Msg: Eleanor's Elvorseal effect wears off.
+----------
+Mode: combat Channel:191Msg: Eleanor's Regain effect wears off.
+----------
+Mode: unity Channel:212Msg: {Apururu} Oh dear, one of our members-wembers in Ceizak Battlegrounds says that Colkhab could appear anytime in the next 5 minutes.
+----------
+Mode: unity Channel:212Msg: {Apururu} Would you please go and see if she's alrightaru?
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the pinch of high-purity bayld: 679 points.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the hunk of behemoth meat: 933 points.
+----------
+Mode: craft Channel:121Msg: Chronotrigger's lot for the cehuetzi claw: 354 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the chunk of cobalt ore: 372 points.
+----------
+Mode: error Channel:123Msg: You can only hold one item of this type.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the wolfram steel ingot: 761 points.
+----------
+Mode: craft Channel:121Msg: Chronotrigger's lot for the baqil staff: 73 points.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the chunk of cobalt ore: 746 points.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the cehuetzi claw: 800 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the cehuetzi claw: 259 points.
+----------
+Mode: error Channel:123Msg: You can only hold one item of this type.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Peachlyn> XD stiffies, got it
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Bravemistakes> 3.5 hard floppy? sad..
+----------
+Mode: system8 Channel:127Msg: Yuber obtains a pinch of high-purity bayld.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Peachlyn> name wont stick
+----------
+Mode: system8 Channel:127Msg: Yuber obtains a hunk of behemoth meat.
+----------
+Mode: system8 Channel:127Msg: Nikolce obtains a wolfram steel ingot.
+----------
+Mode: system8 Channel:127Msg: Chronotrigger obtains a chunk of cobalt ore.
+----------
+Mode: system8 Channel:127Msg: Yuber obtains a cehuetzi claw.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Cestus> we are so old we are all floppy now
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Bravemistakes> :P
+----------
+Mode: combat Channel:191Msg: Eleanor's STR Down effect wears off.
+----------
+Mode: combat Channel:191Msg: Eleanor's DEX Down effect wears off.
+----------
+Mode: combat Channel:191Msg: Eleanor's VIT Down effect wears off.
+----------
+Mode: combat Channel:191Msg: Eleanor's AGI Down effect wears off.
+----------
+Mode: combat Channel:191Msg: Eleanor's INT Down effect wears off.
+----------
+Mode: combat Channel:191Msg: Eleanor's MND Down effect wears off.
+----------
+Mode: combat Channel:191Msg: Eleanor's CHR Down effect wears off.
+----------
+Mode: craft Channel:121Msg: You do not meet the requirements to obtain the nepote bell. Nepote bell lost.
+----------
+Mode: system8 Channel:127Msg: Chronotrigger obtains a baqil staff.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Agrapina> chatting up girls from 14-married,...best game EVER
+----------
+Mode: item? Channel:90Msg: Nikolce uses a domain coffer.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Kayest> the coffer moves? or it must ne opened to respawn?
+----------

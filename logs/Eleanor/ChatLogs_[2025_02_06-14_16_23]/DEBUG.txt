@@ -1,0 +1,1182 @@
+Mode: craft Channel:121Msg: Domain Prowess: ☆☆☆☆☆ (0 Daily Quests, 4 Domains Conquered)
+----------
+Mode: system5_NPC Channel:9Msg: You haven't accumulated enough daily Domain Prowess to use the travel service.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Sabaku> open to reswpn
+----------
+Mode: item? Channel:90Msg: Eleanor uses a scroll of Instant Warp.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Kayest> ooh snap
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Bravemistakes> i used to enjoy installing games on DoS
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> haha, floppy disks are a core memory
+----------
+Mode: zone Channel:0Msg: === Area: Windurst Woods ===
+----------
+Mode: combat Channel:191Msg: Eleanor's Defense Down effect wears off.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> loading up that organ trail game
+----------
+Mode: NPC Channel:151Msg: A home point can be set as a spot for you to return to Vana'diel when you have been knocked out. You can also use a home point to teleport to other home points.
+----------
+Mode: system8 Channel:190Msg: A home point can be set as a spot for you to return to Vana'diel when you have been knocked out. You can also use a home point to teleport to other home points.
+----------
+Mode: system8 Channel:190Msg: A home point can be set as a spot for you to return to Vana'diel when you have been knocked out. You can also use a home point to teleport to other home points.
+----------
+Mode: NPC Channel:151Msg: You may teleport from here to any other home point you have registered.
+----------
+Mode: system8 Channel:190Msg: You may teleport from here to any other home point you have registered.
+----------
+Mode: system8 Channel:190Msg: You may teleport from here to any other home point you have registered.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Cestus> programming the school computer with punch cards
+----------
+Mode: combat Channel:191Msg: Eleanor's Frost effect wears off.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Sabaku> run redalert.exe :P 
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> heh, pre os days
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Bravemistakes> dir
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Joliminet> Only to die of dysentry 5 minutes later.
+----------
+Mode: NPC Channel:151Msg: It costs 100 gil to teleport to Home Point #2 in Lower Jeuno.
+----------
+Mode: system8 Channel:190Msg: It costs 100 gil to teleport to Home Point #2 in Lower Jeuno.
+----------
+Mode: system8 Channel:190Msg: It costs 100 gil to teleport to Home Point #2 in Lower Jeuno.
+----------
+Mode: zone Channel:0Msg: === Area: Lower Jeuno ===
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> i think i used something called x-tree gold as the first gui
+----------
+Mode: system5_NPC Channel:9Msg: Domain Invasion is currently happening in Ceizak Battlegrounds. Need a lift? The ride's free if you've accumulated enough Domain Prowess today.
+----------
+Mode: craft Channel:121Msg: Domain Prowess: ☆☆☆☆☆ (0 Daily Quests, 4 Domains Conquered)
+----------
+Mode: system5_NPC Channel:9Msg: Now traveling to Ceizak Battlegrounds (9 Total Travels)
+----------
+Mode: system7NPC Channel:142Msg: Obtained: Scroll of Instant Warp.
+----------
+Mode: zone Channel:0Msg: === Area: Ceizak Battlegrounds ===
+----------
+Mode: combat Channel:191Msg: Eleanor's Majesty effect wears off.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> and finding that leasurie suit larry game on the computer in cooking class during HS. 
+----------
+Mode: combat Channel:111Msg: Nikolce uses Assault.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> made you answer historical questions to verify you're an adult
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Envii> Congratulations! You completed Oregon Trail. Do you think you are special? YES or NO
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Colkhab for 150 points of damage.
+----------
+Mode: combat Channel:122Msg: The Colkhab is out of range.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Colkhab for 176 points of damage.
+----------
+Mode: combat Channel:110Msg: Fenrir readies Lunar Cry.
+----------
+Mode: combat Channel:106Msg: Giapper uses Fight.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Colkhab for 118 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Geo-Frailty on the Colkhab.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 30 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Colkhab for 164 points of damage.
+----------
+Mode: combat Channel:40Msg: The Colkhab hits Fenrir for 63 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez scores a critical hit! The Colkhab takes 208 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii scores a critical hit! The Colkhab takes 186 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 30 points of damage.
+----------
+Mode: combat Channel:106Msg: Hankok uses Hasso.
+----------
+Mode: combatspell Channel:50Msg: Eleanor starts casting Flash on the Colkhab.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Dia II on the Colkhab.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Colkhab for 149 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Colkhab for 93 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper scores a critical hit! The Colkhab takes 117 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 103 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Thunder III on the Colkhab.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Colkhab for 65 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Colkhab for 164 points of damage.
+----------
+Mode: combat Channel:33Msg: The Colkhab misses Tatai.
+----------
+Mode: combat Channel:40Msg: Yuber scores a critical hit! The Colkhab takes 301 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 98 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Colkhab for 187 points of damage.
+----------
+Mode: combat Channel:106Msg: Hankok uses Sekkanoki.
+----------
+Mode: combat Channel:40Msg: Additional effect: Attack Down.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Indi-Acumen on Darkrider.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Colkhab for 169 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 72 points of damage.
+----------
+Mode: combat Channel:112Msg: Fenrir uses Lunar Cry. The Colkhab receives the effect of Accuracy Down and Evasion Down.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 80 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii scores a critical hit! The Colkhab takes 244 points of damage.
+----------
+Mode: combat Channel:110Msg: Hankok readies Tachi: Kasha.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 182 points of damage.
+----------
+Mode: combat Channel:112Msg: Hankok uses Konzen-ittai. The Colkhab is chainbound.
+----------
+Mode: combatspell Channel:65Msg: Eleanor casts Flash. The Colkhab is afflicted with Flash.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Blizzard III on the Colkhab.
+----------
+Mode: combat Channel:33Msg: The Colkhab misses Tataii.
+----------
+Mode: combat Channel:105Msg: The Colkhab readies Stinger Volley.
+----------
+Mode: combat Channel:111Msg: Nikolce uses Apogee.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Colkhab for 207 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Thunder III on the Colkhab.
+----------
+Mode: combat Channel:25Msg: Hankok uses Tachi: Kasha. The Colkhab takes 3137 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 58 points of damage.
+----------
+Mode: combat Channel:40Msg: Nikolce casts Dia II. The Colkhab takes 1 point of damage.
+----------
+Mode: combat Channel:106Msg: Tataii uses Berserk. Attacks are enhanced but defense weakens.
+----------
+Mode: combat Channel:106Msg: Tatai uses Berserk. Attacks are enhanced but defense weakens.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combat Channel:110Msg: Fenrir readies Eclipse Bite.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 162 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Thunder III. The Colkhab takes 594 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Colkhab for 107 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Colkhab for 147 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Colkhab for 268 points of damage.
+----------
+Mode: combat Channel:110Msg: Hankok readies Tachi: Kaiten.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 186 points of damage.
+----------
+Mode: combat Channel:32Msg: The Colkhab uses Stinger Volley. Hankok takes 91 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 140 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Colkhab for 87 points of damage.
+----------
+Mode: combat Channel:25Msg: Skillchain: Light. The Colkhab takes 3293 points of damage.
+----------
+Mode: combat Channel:101Msg: Eleanor uses Defender. Defense is enhanced but attacks weaken.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Fire III on the Colkhab.
+----------
+Mode: combat Channel:106Msg: Tataii uses Sekkanoki.
+----------
+Mode: combat Channel:106Msg: Tatai uses Sekkanoki.
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Rana.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Blizzard III on the Colkhab.
+----------
+Mode: combat Channel:110Msg: Tataii readies Tachi: Rana.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 138 points of damage.
+----------
+Mode: combat Channel:191Msg: The Colkhab's Flash effect wears off.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Colkhab takes 1278 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Colkhab for 292 points of damage.
+----------
+Mode: combat Channel:110Msg: Fenrir readies Eclipse Bite.
+----------
+Mode: combat Channel:40Msg: Fenrir uses Eclipse Bite. The Colkhab takes 3408 points of damage.
+----------
+Mode: combat Channel:122Msg: The Colkhab is paralyzed.
+----------
+Mode: combat Channel:40Msg: Zav casts Blizzard III. The Colkhab takes 1196 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 57 points of damage.
+----------
+Mode: combat Channel:111Msg: Yuber uses Berserk. Attacks are enhanced but defense weakens.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Colkhab takes 1199 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combat Channel:25Msg: Hankok uses Tachi: Kaiten. The Colkhab takes 4992 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Thunder III. The Colkhab takes 440 points of damage.
+----------
+Mode: combat Channel:101Msg: Eleanor uses Majesty.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Colkhab for 238 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Fire III. The Colkhab takes 1076 points of damage.
+----------
+Mode: combat Channel:32Msg: The Waggling Wasp hits Hankok for 45 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Aero III on the Colkhab.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 147 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 20 points of damage.
+----------
+Mode: combat Channel:32Msg: The Rapier Hornet hits Hankok for 49 points of damage.
+----------
+Mode: combat Channel:33Msg: The Leaping Chapuli misses Hankok.
+----------
+Mode: combat Channel:32Msg: Additional effect: 24 points of damage.
+----------
+Mode: combat Channel:111Msg: Yuber uses Warcry. Yuber's attacks are enhanced.
+----------
+Mode: combat Channel:122Msg: Hankok is paralyzed.
+----------
+Mode: combat Channel:32Msg: The Waggling Wasp hits Hankok for 65 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Fire III on the Colkhab.
+----------
+Mode: combat Channel:32Msg: Additional effect: 26 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 133 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Colkhab for 100 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Rana. The Colkhab takes 5935 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii uses Tachi: Rana. The Colkhab takes 4826 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir uses Eclipse Bite. The Colkhab takes 3411 points of damage.
+----------
+Mode: combat Channel:32Msg: The Colkhab hits Hankok for 66 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Punch> Carmen San Diego,
+----------
+Mode: combat Channel:25Msg: Giapper hits the Colkhab for 89 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Colkhab takes 1059 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Colkhab for 202 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 7 points of damage.
+----------
+Mode: combat Channel:111Msg: Yuber uses Hasso.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 45 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: item? Channel:90Msg: Yuber uses a meat mithkabob.
+----------
+Mode: combat Channel:105Msg: The Colkhab readies Stinger Volley.
+----------
+Mode: combat Channel:110Msg: The Dirty Sanchez readies Tegmina Buffet.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Colkhab takes 1103 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 128 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Colkhab for 281 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Blizzard III. The Colkhab takes 825 points of damage.
+----------
+Mode: combat Channel:32Msg: The Leaping Chapuli hits Hankok for 52 points of damage.
+----------
+Mode: combat Channel:32Msg: The Rapier Hornet hits Hankok for 64 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combat Channel:33Msg: The Waggling Wasp misses Hankok.
+----------
+Mode: combat Channel:32Msg: Additional effect: 22 points of damage.
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Rana.
+----------
+Mode: combat Channel:110Msg: Tataii readies Tachi: Rana.
+----------
+Mode: combat Channel:32Msg: Additional effect: 29 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Water III on the Colkhab.
+----------
+Mode: combat Channel:32Msg: The Colkhab scores a critical hit! Hankok takes 133 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 30 points of damage.
+----------
+Mode: combat Channel:32Msg: The Leaping Chapuli hits Hankok for 52 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 13 points of damage.
+----------
+Mode: combat Channel:122Msg: Hankok is paralyzed.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Fire III. The Colkhab takes 770 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Aero III on the Colkhab.
+----------
+Mode: combat Channel:32Msg: The Colkhab uses Stinger Volley. Hankok takes 95 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 141 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez uses Tegmina Buffet. The Colkhab takes 1919 points of damage.
+----------
+Mode: combat Channel:40Msg: The Waggling Wasp takes 1914 points of damage.
+----------
+Mode: combat Channel:40Msg: The Leaping Chapuli takes 2514 points of damage.
+----------
+Mode: combat Channel:40Msg: The Rapier Hornet takes 2035 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir scores a critical hit! The Colkhab takes 344 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Colkhab for 316 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combat Channel:40Msg: Zav casts Aero III. The Colkhab takes 60 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Colkhab for 269 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Colkhab takes 988 points of damage.
+----------
+Mode: combat Channel:40Msg: The Waggling Wasp hits the Dirty Sanchez for 39 points of damage.
+----------
+Mode: combat Channel:40Msg: The Rapier Hornet hits the Dirty Sanchez for 47 points of damage.
+----------
+Mode: combat Channel:40Msg: The Leaping Chapuli hits the Dirty Sanchez for 53 points of damage.
+----------
+Mode: combat Channel:122Msg: Tataii is paralyzed.
+----------
+Mode: combat Channel:21Msg: Eleanor misses the Colkhab.
+----------
+Mode: combat Channel:40Msg: Additional effect: 14 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 14 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 44 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Colkhab takes 1184 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Rana. The Colkhab takes 5720 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> i mean yeah if i escaped dysentery
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Stone III on the Colkhab.
+----------
+Mode: combat Channel:25Msg: Tataii uses Tachi: Rana. The Colkhab takes 5413 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combat Channel:32Msg: The Colkhab hits Tatai for 66 points of damage.
+----------
+Mode: combat Channel:40Msg: Skillchain: Darkness. The Colkhab takes 2360 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 10 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 148 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Water III on the Colkhab.
+----------
+Mode: combat Channel:110Msg: Yuber readies Tachi: Rana.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Envii> Pong
+----------
+Mode: combatspell Channel:52Msg: Eleanor starts casting Protect III on Eleanor.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Colkhab for 271 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Colkhab for 260 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Rapier Hornet for 143 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Colkhab for 131 points of damage.
+----------
+Mode: combat Channel:105Msg: The Colkhab readies Incisive Apotheosis.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 159 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Colkhab for 216 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Water III. The Colkhab takes 222 points of damage.
+----------
+Mode: combat Channel:40Msg: The Waggling Wasp hits the Dirty Sanchez for 74 points of damage.
+----------
+Mode: combat Channel:40Msg: The Rapier Hornet hits the Dirty Sanchez for 48 points of damage.
+----------
+Mode: combat Channel:40Msg: The Leaping Chapuli hits the Dirty Sanchez for 66 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Colkhab for 91 points of damage.
+----------
+Mode: combat Channel:129Msg: Eleanor's enhancing magic skill rises 0.9 points.
+----------
+Mode: combat Channel:129Msg: Eleanor's enhancing magic skill reaches level 119.
+----------
+Mode: combat Channel:40Msg: Additional effect: 24 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 29 points of damage.
+----------
+Mode: combat Channel:32Msg: The Colkhab hits Tatai for 94 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 44 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 26 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Colkhab takes 1326 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Aero III. The Colkhab takes 39 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 183 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combat Channel:122Msg: Tataii is paralyzed.
+----------
+Mode: combatspell Channel:107Msg: The Colkhab uses Incisive Apotheosis. Tatai is weakened.
+----------
+Mode: combat Channel:112Msg: Fenrir is weakened.
+----------
+Mode: combat Channel:112Msg: Nikolce is weakened.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Thunder III on the Colkhab.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Colkhab for 306 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 51 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Colkhab takes 1260 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Stone III on the Colkhab.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Rapier Hornet for 143 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber uses Tachi: Rana. The Colkhab takes 5508 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Stone III. The Colkhab takes 49 points of damage.
+----------
+Mode: combat Channel:26Msg: Tatai misses the Colkhab.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 43 points of damage.
+----------
+Mode: combat Channel:40Msg: Fenrir hits the Colkhab for 202 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Peachlyn> Where in the World, USA, or Time?
+----------
+Mode: combatspell Channel:56Msg: Eleanor casts Protect III. Eleanor gains the effect of Protect.
+----------
+Mode: combat Channel:40Msg: The Waggling Wasp hits the Dirty Sanchez for 82 points of damage.
+----------
+Mode: combat Channel:40Msg: The Rapier Hornet hits the Dirty Sanchez for 73 points of damage.
+----------
+Mode: combat Channel:40Msg: The Leaping Chapuli hits the Dirty Sanchez for 43 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 19 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 14 points of damage.
+----------
+Mode: combatspell Channel:64Msg: Hankok gains the effect of Protect.
+----------
+Mode: combat Channel:40Msg: Additional effect: 15 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 179 points of damage.
+----------
+Mode: combat Channel:191Msg: Fenrir's weakness effect wears off.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Colkhab for 308 points of damage.
+----------
+Mode: combatspell Channel:64Msg: Giapper gains the effect of Protect.
+----------
+Mode: combat Channel:32Msg: The Colkhab hits Hankok for 51 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Water III. The Colkhab takes 319 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 16 points of damage.
+----------
+Mode: combatspell Channel:64Msg: Tatai gains the effect of Protect.
+----------
+Mode: combatspell Channel:64Msg: Tataii gains the effect of Protect.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Colkhab takes 946 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 48 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Bravemistakes> i have new oregon trail on nintendo. it's not awful
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Blizzard III on the Colkhab.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Colkhab for 116 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Colkhab for 216 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Thunder III on the Colkhab.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Colkhab takes 1112 points of damage.
+----------
+Mode: combat Channel:40Msg: The Waggling Wasp hits the Dirty Sanchez for 65 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Colkhab for 625 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Sylardean> lol
+----------
+Mode: combat Channel:26Msg: Giapper misses the Colkhab.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 146 points of damage.
+----------
+Mode: combat Channel:105Msg: The Colkhab readies Incisive Denouement.
+----------
+Mode: combat Channel:44Msg: The Leaping Chapuli falls to the ground.
+----------
+Mode: combatspell Channel:50Msg: Eleanor starts casting Protect III on Tatai.
+----------
+Mode: combat Channel:40Msg: The Rapier Hornet hits the Dirty Sanchez for 65 points of damage.
+----------
+Mode: combat Channel:122Msg: The Colkhab is paralyzed.
+----------
+Mode: combat Channel:122Msg: Hankok is paralyzed.
+----------
+Mode: combat Channel:40Msg: Additional effect: 30 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Dia II on the Colkhab.
+----------
+Mode: combat Channel:40Msg: Additional effect: 26 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Colkhab for 300 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Thunder III. The Colkhab takes 636 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Stone III. The Colkhab takes 35 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combat Channel:122Msg: Nikolce's casting is interrupted.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Fire III on the Colkhab.
+----------
+Mode: combat Channel:32Msg: The Colkhab uses Incisive Denouement. Tataii takes 439 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez scores a critical hit! The Colkhab takes 257 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Blizzard III on the Colkhab.
+----------
+Mode: combat Channel:122Msg: The Colkhab is out of range.
+----------
+Mode: combat Channel:40Msg: The Waggling Wasp hits the Dirty Sanchez for 62 points of damage.
+----------
+Mode: combat Channel:40Msg: The Rapier Hornet hits the Dirty Sanchez for 67 points of damage.
+----------
+Mode: combat Channel:32Msg: Hankok takes 317 points of damage.
+----------
+Mode: combat Channel:109Msg: Giapper evades.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez takes 352 points of damage.
+----------
+Mode: combat Channel:32Msg: Tatai takes 408 points of damage.
+----------
+Mode: combat Channel:104Msg: Eleanor evades.
+----------
+Mode: combat Channel:40Msg: Fenrir takes 380 points of damage.
+----------
+Mode: combat Channel:40Msg: Nikolce takes 0 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 27 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 34 points of damage.
+----------
+Mode: combat Channel:122Msg: Hankok is paralyzed.
+----------
+Mode: combat Channel:40Msg: Zav casts Blizzard III. The Colkhab takes 1316 points of damage.
+----------
+Mode: combatspell Channel:64Msg: Eleanor casts Protect III. Tatai gains the effect of Protect.
+----------
+Mode: combatspell Channel:69Msg: Lyn's Glutinous Dart has no effect on the Colkhab.
+----------
+Mode: combatspell Channel:64Msg: Hankok gains the effect of Protect.
+----------
+Mode: combatspell Channel:50Msg: Eleanor starts casting Cure IV on Tatai.
+----------
+Mode: combatspell Channel:64Msg: Giapper gains the effect of Protect.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Thunder III. The Colkhab takes 440 points of damage.
+----------
+Mode: combatspell Channel:64Msg: Tataii gains the effect of Protect.
+----------
+Mode: combat Channel:40Msg: Linvala hits the Colkhab for 84 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Colkhab takes 1050 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 187 points of damage.
+----------
+Mode: combatspell Channel:56Msg: Eleanor gains the effect of Protect.
+----------
+Mode: combat Channel:40Msg: Linvala hits the Colkhab for 84 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Aero III on the Colkhab.
+----------
+Mode: combat Channel:40Msg: Zav casts Fire III. The Colkhab takes 1076 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Colkhab for 260 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala hits the Colkhab for 55 points of damage.
+----------
+Mode: combat Channel:40Msg: The Waggling Wasp hits the Dirty Sanchez for 48 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 40 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 34 points of damage.
+----------
+Mode: combat Channel:40Msg: The Rapier Hornet scores a critical hit! The Dirty Sanchez takes 117 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Waggling Wasp for 251 points of damage.
+----------
+Mode: combat Channel:40Msg: The Colkhab hits Linvala for 60 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 14 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Fire III on the Colkhab.
+----------
+Mode: combat Channel:40Msg: Additional effect: 21 points of damage.
+----------
+Mode: combat Channel:40Msg: The Waggling Wasp hits the Dirty Sanchez for 81 points of damage.
+----------
+Mode: combat Channel:40Msg: Additional effect: 34 points of damage.
+----------
+Mode: combat Channel:122Msg: Tataii is paralyzed.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Rapier Hornet for 155 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn hits the Colkhab for 78 points of damage.
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Rana.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 118 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Quad. Continuum on the Colkhab.
+----------
+Mode: combat Channel:110Msg: The Colkhab readies Incisive Apotheosis.
+----------
+Mode: combat Channel:37Msg: Hankok defeats the Rapier Hornet.
+----------
+Mode: system8 Channel:127Msg: Records of Eminence: Vanquish Multiple Enemies I.
+----------
+Mode: system8 Channel:127Msg: Progress: 8/200.
+----------
+Mode: combat Channel:131Msg: Eleanor gains 583 limit points.
+----------
+Mode: combat Channel:122Msg: The Colkhab is out of range.
+----------
+Mode: combat Channel:40Msg: Lyn hits the Colkhab for 64 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Blizzard III. The Colkhab takes 825 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper scores a critical hit! The Colkhab takes 163 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Quad. Continuum on the Colkhab.
+----------
+Mode: craft Channel:121Msg: You find a snow geode on the Rapier Hornet.
+----------
+Mode: combat Channel:40Msg: Lyn casts Glutinous Dart. The Colkhab takes 1090 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Colkhab for 68 points of damage.
+----------
+Mode: combat Channel:37Msg: Tatai defeats the Waggling Wasp.
+----------
+Mode: system8 Channel:127Msg: Records of Eminence: Vanquish Multiple Enemies I.
+----------
+Mode: system8 Channel:127Msg: Progress: 9/200.
+----------
+Mode: combat Channel:131Msg: Limit chain #1! Eleanor gains 613 limit points.
+----------
+Mode: combatspell Channel:52Msg: Nikolce starts casting Light Spirit on Nikolce.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the snow geode: 429 points.
+----------
+Mode: combat Channel:23Msg: Eleanor casts Cure IV. Tatai recovers 398 HP.
+----------
+Mode: combat Channel:23Msg: Hankok recovers 398 HP.
+----------
+Mode: combat Channel:23Msg: Giapper recovers 0 HP.
+----------
+Mode: combat Channel:23Msg: Tataii recovers 398 HP.
+----------
+Mode: combatspell Channel:31Msg: Eleanor recovers 0 HP.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Water III on the Colkhab.
+----------
+Mode: combat Channel:110Msg: The Dirty Sanchez readies Tegmina Buffet.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Fire III. The Colkhab takes 770 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber scores a critical hit! The Colkhab takes 319 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Aero III on the Colkhab.
+----------
+Mode: combatspell Channel:52Msg: The LightSpirit starts casting Cure V.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 45 points of damage.
+----------
+Mode: combat Channel:112Msg: The Colkhab uses Incisive Apotheosis. Lyn is weakened.
+----------
+Mode: combat Channel:112Msg: Linvala is weakened.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the snow geode: 773 points.
+----------
+Mode: combat Channel:40Msg: Linvala hits the Colkhab for 82 points of damage.
+----------
+Mode: combat Channel:25Msg: Tataii scores a critical hit! The Colkhab takes 320 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 23 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Frenetic Rip on the Colkhab.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Rana. The Waggling Wasp takes 2479 points of damage.
+----------
+Mode: combat Channel:122Msg: Hankok is paralyzed.
+----------
+Mode: combat Channel:40Msg: Zav casts Aero III. The Colkhab takes 52 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala hits the Colkhab for 84 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn casts Quad. Continuum. The Colkhab takes 2108 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Iadas> that book that came with where in the world is carmen san diago 
+----------
+Mode: combat Channel:40Msg: Linvala casts Quad. Continuum. The Colkhab takes 2047 points of damage.
+----------
+Mode: combat Channel:41Msg: Linvala misses the Colkhab.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Frenetic Rip on the Colkhab.
+----------
+Mode: system7NPC Channel:142Msg: You obtain 1 bottle of body boost!
+----------
+Mode: combat Channel:40Msg: The Colkhab hits Zav for 67 points of damage.
+----------
+Mode: craft Channel:121Msg: You find a Kindred's seal on the Waggling Wasp.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the Kindred's seal: 650 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the Kindred's seal: 987 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the Kindred's seal: 22 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the Kindred's seal: 494 points.
+----------
+Mode: combat Channel:40Msg: Additional effect: 33 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai scores a critical hit! The Colkhab takes 317 points of damage.
+----------
+Mode: combat Channel:110Msg: Yuber readies Tachi: Kaiten.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez uses Tegmina Buffet. The Colkhab takes 1870 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 155 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Stone III on the Colkhab.
+----------
+Mode: combat Channel:110Msg: The Colkhab readies Incisive Apotheosis.
+----------
+Mode: combat Channel:21Msg: Eleanor misses the Colkhab.
+----------
+Mode: combat Channel:110Msg: Hankok readies Tachi: Shoha.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Water III on the Colkhab.
+----------
+Mode: combat Channel:21Msg: Eleanor misses the Colkhab.
+----------
+Mode: combat Channel:40Msg: Zav casts Water III. The Colkhab takes 448 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Heavy Strike on the Colkhab.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 186 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Heavy Strike on the Colkhab.
+----------
+Mode: combat Channel:20Msg: Eleanor uses Shield Bash. The Colkhab takes 232 points of damage.
+----------
+Mode: combat Channel:112Msg: The Colkhab uses Incisive Apotheosis. Zav is weakened.
+----------
+Mode: combat Channel:112Msg: Darkrider is weakened.
+----------
+Mode: combatspell Channel:107Msg: Hankok is weakened.
+----------
+Mode: combat Channel:112Msg: Yuber is weakened.
+----------
+Mode: combat Channel:25Msg: Tataii hits the Colkhab for 187 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Colkhab for 120 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber hits the Colkhab for 273 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Aero III. The Colkhab takes 39 points of damage.
+----------
+Mode: combat Channel:32Msg: The Leaping Chapuli hits Hankok for 43 points of damage.
+----------
+Mode: combat Channel:110Msg: The Colkhab readies Incisive Apotheosis.
+----------
+Mode: combat Channel:32Msg: Additional effect: 29 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber uses Tachi: Kaiten. The Colkhab takes 4018 points of damage.
+----------
+Mode: combatspell Channel:43Msg: The LightSpirit casts Cure V. Nikolce recovers 647 HP.
+----------
+Mode: combat Channel:25Msg: Giapper hits the Colkhab for 101 points of damage.
+----------
+Mode: combat Channel:25Msg: Tatai hits the Colkhab for 283 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Frenetic Rip. The Colkhab takes 1504 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Stone III on the Colkhab.
+----------
+Mode: combat Channel:40Msg: Lyn hits the Colkhab for 103 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok uses Tachi: Shoha. The Colkhab takes 5591 points of damage.
+----------
+Mode: combat Channel:106Msg: Hankok uses Meditate.
+----------
+Mode: combat Channel:40Msg: Lyn casts Frenetic Rip. The Colkhab takes 1665 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 51 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Disseverment on the Colkhab.
+----------
+Mode: combat Channel:40Msg: Lyn casts Heavy Strike. The Colkhab takes 1924 points of damage.
+----------
+Mode: combat Channel:111Msg: Zav uses Enmity Douse.
+----------
+Mode: combat Channel:25Msg: Hankok hits the Colkhab for 154 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Stone III. The Colkhab takes 49 points of damage.
+----------
+Mode: combat Channel:40Msg: Lyn hits the Colkhab for 66 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez hits the Colkhab for 135 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Envii> I remember reading gamer pro about people playing Megaman with 1 life and setting time records
+----------
+Mode: combat Channel:110Msg: Tatai readies Tachi: Rana.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Disseverment on the Colkhab.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 33 points of damage.
+----------
+Mode: combat Channel:40Msg: Linvala casts Heavy Strike. The Colkhab takes 1975 points of damage.
+----------
+Mode: combat Channel:110Msg: Giapper readies Ruinator.
+----------
+Mode: combat Channel:112Msg: The Colkhab uses Incisive Apotheosis. Linvala is weakened.
+----------
+Mode: combat Channel:112Msg: Lyn is weakened.
+----------
+Mode: combat Channel:112Msg: Yuber is weakened.
+----------
+Mode: combat Channel:112Msg: Darkrider is weakened.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Water III. The Colkhab takes 39 points of damage.
+----------
+Mode: combat Channel:191Msg: The Colkhab's paralysis effect wears off.
+----------
+Mode: combat Channel:122Msg: Tataii is paralyzed.
+----------
+Mode: combat Channel:32Msg: The Leaping Chapuli hits Hankok for 44 points of damage.
+----------
+Mode: combat Channel:105Msg: The Colkhab readies Droning Whirlwind.
+----------
+Mode: combat Channel:32Msg: Additional effect: 11 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Blizzard III on the Colkhab.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 41 points of damage.
+----------
+Mode: combat Channel:32Msg: The Colkhab hits Tatai for 60 points of damage.
+----------
+Mode: combat Channel:32Msg: Additional effect: 12 points of damage.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez scores a critical hit! The Colkhab takes 262 points of damage.
+----------
+Mode: combat Channel:20Msg: Eleanor hits the Colkhab for 60 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Thunder III on the Colkhab.
+----------
+Mode: combatspell Channel:52Msg: Lyn starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combat Channel:40Msg: Linvala casts Disseverment. The Colkhab takes 1829 points of damage.
+----------
+Mode: combat Channel:110Msg: Hankok readies Tachi: Shoha.
+----------
+Mode: combat Channel:40Msg: Lyn casts Disseverment. The Colkhab takes 2113 points of damage.
+----------
+Mode: combat Channel:25Msg: Giapper uses Ruinator. The Colkhab takes 3677 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Linvala starts casting Glutinous Dart on the Colkhab.
+----------
+Mode: combatspell Channel:50Msg: Eleanor starts casting Cure IV on Hankok.
+----------
+Mode: combat Channel:25Msg: Tatai uses Tachi: Rana. The Colkhab takes 5646 points of damage.
+----------
+Mode: combat Channel:32Msg: The Colkhab hits Tatai for 76 points of damage.
+----------
+Mode: combat Channel:37Msg: Hankok defeats the Leaping Chapuli.
+----------
+Mode: system8 Channel:127Msg: Records of Eminence: Vanquish Multiple Enemies I.
+----------
+Mode: system8 Channel:127Msg: Progress: 10/200.
+----------
+Mode: combat Channel:131Msg: Limit chain #2! Eleanor gains 642 limit points.
+----------
+Mode: combat Channel:32Msg: Additional effect: 13 points of damage.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Stone III. The Colkhab takes 35 points of damage.
+----------
+Mode: combat Channel:191Msg: Eleanor's Regain effect wears off.
+----------
+Mode: combat Channel:32Msg: The Colkhab uses Droning Whirlwind. Tatai takes 172 points of damage.
+----------
+Mode: combat Channel:32Msg: Giapper takes 109 points of damage.
+----------
+Mode: combat Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat Channel:40Msg: The Dirty Sanchez takes 299 points of damage.
+----------
+Mode: combat Channel:32Msg: Tataii takes 155 points of damage.
+----------
+Mode: combat Channel:28Msg: Eleanor takes 161 points of damage.
+----------
+Mode: combat Channel:40Msg: Yuber takes 176 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Zav starts casting Fire III on the Colkhab.
+----------
+Mode: combat Channel:110Msg: Tataii readies Tachi: Shoha.
+----------
+Mode: combat Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat Channel:122Msg: Eleanor's casting is interrupted.
+----------
+Mode: combat Channel:25Msg: Hankok uses Tachi: Shoha. The Leaping Chapuli takes 4200 points of damage.
+----------
+Mode: combatspell Channel:52Msg: Darkrider starts casting Blizzard III on the Colkhab.
+----------
+Mode: combat Channel:25Msg: Skillchain: Distortion. The Colkhab takes 2206 points of damage.
+----------
+Mode: combatspell Channel:69Msg: Lyn's Glutinous Dart has no effect on the Colkhab.
+----------
+Mode: combat Channel:40Msg: Zav casts Blizzard III. The Colkhab takes 920 points of damage.
+----------
+Mode: combat Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat Channel:40Msg: Linvala casts Glutinous Dart. The Colkhab takes 1132 points of damage.
+----------
+Mode: combat Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat Channel:191Msg: The Colkhab's Perfect Dodge effect wears off.
+----------
+Mode: combat Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Thunder III. The Colkhab takes 338 points of damage.
+----------
+Mode: combat Channel:110Msg: Hankok readies Apex Arrow.
+----------
+Mode: combat Channel:32Msg: The Colkhab hits Tatai for 57 points of damage.
+----------
+Mode: combat Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat Channel:32Msg: Additional effect: 34 points of damage.
+----------
+Mode: combat Channel:40Msg: Zav casts Fire III. The Colkhab takes 828 points of damage.
+----------
+Mode: combat Channel:114Msg: Tataii uses Tachi: Shoha, but misses the Colkhab.
+----------
+Mode: combat Channel:37Msg: Hankok defeats the Colkhab.
+----------
+Mode: system8 Channel:127Msg: Records of Eminence: Vanquish Multiple Enemies I.
+----------
+Mode: system8 Channel:127Msg: Progress: 11/200.
+----------
+Mode: combat Channel:131Msg: Limit chain #3! Eleanor gains 627 limit points.
+----------
+Mode: combat Channel:111Msg: Nikolce uses Release.
+----------
+Mode: combat Channel:40Msg: Darkrider casts Blizzard III. The Colkhab takes 728 points of damage.
+----------
+Mode: combat Channel:25Msg: Hankok uses Apex Arrow. The Colkhab takes 4730 points of damage.
+----------
+Mode: craft Channel:121Msg: You find a pinch of high-purity bayld on the Colkhab.
+----------
+Mode: craft Channel:121Msg: You find a pinch of high-purity bayld on the Colkhab.
+----------
+Mode: craft Channel:121Msg: You find a pinch of high-purity bayld on the Colkhab.
+----------
+Mode: craft Channel:121Msg: You find a pinch of high-purity bayld on the Colkhab.
+----------
+Mode: craft Channel:121Msg: You find a pinch of high-purity bayld on the Colkhab.
+----------
+Mode: craft Channel:121Msg: You find a pinch of high-purity bayld on the Colkhab.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the pinch of high-purity bayld: 819 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the pinch of high-purity bayld: 547 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the pinch of high-purity bayld: 345 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the pinch of high-purity bayld: 340 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the pinch of high-purity bayld: 44 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the pinch of high-purity bayld: 487 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the pinch of high-purity bayld: 246 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the pinch of high-purity bayld: 582 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the pinch of high-purity bayld: 545 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the pinch of high-purity bayld: 403 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the pinch of high-purity bayld: 73 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the pinch of high-purity bayld: 684 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the pinch of high-purity bayld: 954 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the pinch of high-purity bayld: 642 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the pinch of high-purity bayld: 744 points.
+----------
+Mode: craft Channel:121Msg: Zav's lot for the pinch of high-purity bayld: 949 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the pinch of high-purity bayld: 180 points.
+----------
+Mode: craft Channel:121Msg: Tataii's lot for the pinch of high-purity bayld: 508 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the pinch of high-purity bayld: 731 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the pinch of high-purity bayld: 411 points.
+----------
+Mode: craft Channel:121Msg: Darkrider's lot for the pinch of high-purity bayld: 587 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the pinch of high-purity bayld: 186 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the pinch of high-purity bayld: 532 points.
+----------
+Mode: craft Channel:121Msg: Tatai's lot for the pinch of high-purity bayld: 77 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the snow geode: 91 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the Kindred's seal: 534 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the pinch of high-purity bayld: 165 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the pinch of high-purity bayld: 136 points.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the snow geode: 786 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the pinch of high-purity bayld: 137 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the pinch of high-purity bayld: 958 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the Kindred's seal: 119 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the pinch of high-purity bayld: 383 points.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the Kindred's seal: 625 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the pinch of high-purity bayld: 381 points.
+----------
+Mode: craft Channel:121Msg: Nikolce's lot for the pinch of high-purity bayld: 244 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the pinch of high-purity bayld: 129 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the pinch of high-purity bayld: 907 points.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the pinch of high-purity bayld: 820 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the pinch of high-purity bayld: 800 points.
+----------
+Mode: craft Channel:121Msg: Eleanor gains 1170 domain shards.
+----------
+Mode: combat Channel:191Msg: Eleanor's Elvorseal effect wears off.
+----------
+Mode: unity Channel:212Msg: {Apururu} Oh dear, one of our members-wembers in Foret de Hennetiel says that Tchakka could appear anytime in the next 5 minutes.
+----------
+Mode: unity Channel:212Msg: {Apururu} Would you please go and see if she's alrightaru?
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the pinch of high-purity bayld: 479 points.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the pinch of high-purity bayld: 456 points.
+----------
+Mode: craft Channel:121Msg: Eleanor's lot for the pinch of high-purity bayld: 814 points.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the pinch of high-purity bayld: 404 points.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the pinch of high-purity bayld: 678 points.
+----------
+Mode: combat Channel:191Msg: Eleanor's Regain effect wears off.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the pinch of high-purity bayld: 888 points.
+----------
+Mode: craft Channel:121Msg: Yuber's lot for the pinch of high-purity bayld: 230 points.
+----------
+Mode: system8 Channel:127Msg: Yuber obtains a snow geode.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the Kindred's seal: 674 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the pinch of high-purity bayld: 160 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the pinch of high-purity bayld: 29 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the pinch of high-purity bayld: 887 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the pinch of high-purity bayld: 280 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the pinch of high-purity bayld: 38 points.
+----------
+Mode: craft Channel:121Msg: Giapper's lot for the pinch of high-purity bayld: 460 points.
+----------
+Mode: system8 Channel:127Msg: Tataii obtains a Kindred's seal.
+----------

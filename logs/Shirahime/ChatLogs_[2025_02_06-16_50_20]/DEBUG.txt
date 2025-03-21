@@ -1,0 +1,58 @@
+Mode: local Channel:1Msg: [Addons] Loaded addon: fancychat version: 0.2 - by: Arielfy
+----------
+Mode: combatspell_? Channel:57Msg: The Dark Elemental casts Sleepga. Shirahime is asleep. (chn: 57)
+----------
+Mode: combat_y Channel:29Msg: The Dark Elemental misses Shirahime.
+----------
+Mode: combat_y Channel:29Msg: The Dark Elemental misses Shirahime.
+----------
+Mode: combat_y Channel:29Msg: The Dark Elemental misses Shirahime.
+----------
+Mode: combat_y Channel:29Msg: The Dark Elemental misses Shirahime.
+----------
+Mode: combat_y Channel:29Msg: The Dark Elemental misses Shirahime.
+----------
+Mode: combat_y Channel:29Msg: The Dark Elemental misses Shirahime.
+----------
+Mode: combat_x Channel:191Msg: Shirahime's sleep effect wears off.
+----------
+Mode: combatspell_n Channel:52Msg: The Dark Elemental starts casting Sleepga.
+----------
+Mode: combat_y Channel:20Msg: Shirahime hits the Dark Elemental for 30 points of damage.
+----------
+Mode: combat_y Channel:20Msg: Shirahime scores a critical hit! The Dark Elemental takes 35 points of damage.
+----------
+Mode: combat_y Channel:29Msg: The Dark Elemental misses Shirahime.
+----------
+Mode: combatspell_? Channel:59Msg: The Dark Elemental casts Sleepga. Shirahime resists the spell. (chn: 59)
+----------
+Mode: combat_y Channel:20Msg: Shirahime scores a critical hit! The Dark Elemental takes 39 points of damage.
+----------
+Mode: combat_y Channel:20Msg: Shirahime hits the Dark Elemental for 27 points of damage.
+----------
+Mode: combatspell_n Channel:52Msg: The Ice Elemental starts casting Enblizzard.
+----------
+Mode: combat_y Channel:29Msg: The Dark Elemental misses Shirahime.
+----------
+Mode: combat_y Channel:20Msg: Shirahime hits the Dark Elemental for 29 points of damage.
+----------
+Mode: combat_y Channel:36Msg: Shirahime defeats the Dark Elemental.
+----------
+Mode: system8 Channel:127Msg: Records of Eminence: Conflict: Castle Zvahl Baileys.
+----------
+Mode: system8 Channel:127Msg: Progress: 6/10.
+----------
+Mode: craft Channel:121Msg: You find a dark cluster on the Dark Elemental.
+----------
+Mode: system8 Channel:127Msg: Shirahime obtains a dark cluster.
+----------
+Mode: craft Channel:121Msg: You find a dark cluster on the Dark Elemental.
+----------
+Mode: system8 Channel:127Msg: Shirahime obtains a dark cluster.
+----------
+Mode: combatspell_x Channel:64Msg: The Ice Elemental casts Enblizzard. The Ice Elemental gains the effect of Enblizzard.
+----------
+Mode: shout Channel:11Msg: Morpheos[RuLudeGard]: Venture or ❮Experience points❯ ❮Can I have it?❯ WHM, BLM, BST or RNG ❮Do you need it?❯ ❮Invite to Join Party❯
+----------
+Mode: combatspell_n Channel:52Msg: The Evil Eye starts casting Blaze Spikes.
+----------

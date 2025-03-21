@@ -1,0 +1,166 @@
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 4 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 2 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 3 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 1 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 12 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 6 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_x Channel:191Msg: Eleanor's terror effect wears off.
+----------
+Mode: combat_n Channel:41Msg: The Kumhau misses Margritli.
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 36 points of damage.
+----------
+Mode: combat_y Channel:21Msg: Eleanor misses the Kumhau.
+----------
+Mode: combat_x Channel:110Msg: Margritli readies Requiescat.
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 42 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Kumhau hits Margritli for 48 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 1 point of damage.
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 42 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli's spikes deal 9 points of damage to the Kumhau.
+----------
+Mode: combat_n Channel:40Msg: Margritli uses Requiescat. The Kumhau takes 1172 points of damage.
+----------
+Mode: combatspell_x Channel:52Msg: Margritli starts casting Fire III on the Kumhau.
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 35 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Kumhau hits Margritli for 101 points of damage.
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 45 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 3 points of damage.
+----------
+Mode: combat_x Channel:122Msg: Margritli's casting is interrupted.
+----------
+Mode: combat_n Channel:40Msg: Margritli's spikes deal 9 points of damage to the Kumhau.
+----------
+Mode: combat_y Channel:20Msg: Eleanor scores a critical hit! The Kumhau takes 56 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 41 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 20 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 42 points of damage.
+----------
+Mode: combatspell_x Channel:52Msg: Margritli starts casting Fire III on the Kumhau.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 13 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 6 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_n Channel:40Msg: The Kumhau hits Margritli for 70 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 4 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 7 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli's spikes deal 9 points of damage to the Kumhau.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 3 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 13 points of damage.
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 35 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 6 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 46 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 12 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 6 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_n Channel:40Msg: The Kumhau hits Margritli for 111 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 12 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli casts Fire III. The Kumhau takes 458 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli scores a critical hit! The Kumhau takes 20 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 10 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_n Channel:40Msg: Margritli's spikes deal 9 points of damage to the Kumhau.
+----------
+Mode: linkshell1 Channel:14Msg: [1]<Rutoto> get your free goblin keys before maint
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 25 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Kumhau hits Margritli for 76 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 21 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli's spikes deal 9 points of damage to the Kumhau.
+----------
+Mode: combat_n Channel:40Msg: The Kumhau hits Margritli for 66 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 6 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli's spikes deal 9 points of damage to the Kumhau.
+----------
+Mode: combat_y Channel:21Msg: Eleanor misses the Kumhau.
+----------
+Mode: combat_x Channel:110Msg: The Kumhau readies Permafrost Requiem.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 23 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 11 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 10 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 5 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 11 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 5 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_n Channel:40Msg: The Kumhau uses Permafrost Requiem. Margritli takes 219 points of damage.
+----------
+Mode: combat_y Channel:28Msg: Eleanor takes 198 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 6 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 1 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_x Channel:191Msg: Eleanor's terror effect wears off.
+----------
+Mode: combat_n Channel:41Msg: Margritli misses the Kumhau.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 13 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 6 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 31 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Kumhau scores a critical hit! Margritli takes 166 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 9 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 2 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 2 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 25 points of damage.
+----------
+Mode: combatspell_x Channel:52Msg: Margritli starts casting Cure IV on Margritli.
+----------
+Mode: combat_n Channel:40Msg: Margritli's spikes deal 9 points of damage to the Kumhau.
+----------
+Mode: combat_y Channel:21Msg: Eleanor misses the Kumhau.
+----------
+Mode: combat_n Channel:41Msg: The Kumhau misses Margritli.
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 45 points of damage.
+----------

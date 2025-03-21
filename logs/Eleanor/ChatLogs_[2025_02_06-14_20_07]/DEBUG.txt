@@ -1,0 +1,698 @@
+Mode: local Channel:1   Msg: [Addons] Loaded addon: fancychat version: 0.2 - by: Arielfy
+----------
+Mode: linkshell2 Channel:214   Msg: [2]<Skeletonhater> curfews
+----------
+Mode: system5_NPC Channel:9   Msg: Domain Invasion is currently happening in Foret de Hennetiel. Need a lift? The ride's free if you've accumulated enough Domain Prowess today.
+----------
+Mode: linkshell2 Channel:214   Msg: [2]<Joliminet> On that note, please remember to hydrate.
+----------
+Mode: craft Channel:121   Msg: Domain Prowess: ★☆☆☆☆ (0 Daily Quests, 5 Domains Conquered)
+----------
+Mode: system5_NPC Channel:9   Msg: Now traveling to Foret de Hennetiel (10 Total Travels)
+----------
+Mode: system7NPC Channel:142   Msg: Obtained: Scroll of Instant Warp.
+----------
+Mode: zone Channel:0   Msg: === Area: Foret de Hennetiel ===
+----------
+Mode: unity Channel:212   Msg: {Apururu} Looks like our forces-warses are gathering for domain invasion! Hurry-worry and join them!
+----------
+Mode: linkshell2 Channel:214   Msg: [2]<Epictaco> Drink water~
+----------
+Mode: linkshell2 Channel:214   Msg: [2]<Epictaco> Forceful hydration
+----------
+Mode: linkshell2 Channel:214   Msg: [2]<Envii> 
+----------
+Mode: linkshell2 Channel:214   Msg:  ❮Energy❯ ❮Drinks❯
+----------
+Mode: combat Channel:40   Msg: Linvala casts Glutinous Dart. The Tchakka takes 1147 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Lyn starts casting Glutinous Dart on the Tchakka.
+----------
+Mode: combatspell Channel:52   Msg: Darkrider starts casting Water III on the Tchakka.
+----------
+Mode: combatspell Channel:52   Msg: Zav starts casting Stone III on the Tchakka.
+----------
+Mode: combat Channel:110   Msg: Hankok readies Tachi: Kasha.
+----------
+Mode: combat Channel:40   Msg: Fenrir hits the Tchakka for 206 points of damage.
+----------
+Mode: combat Channel:40   Msg: Veil hits the Tchakka for 112 points of damage.
+----------
+Mode: linkshell2 Channel:214   Msg: [2]<Peachlyn> ❮True Strike❯
+----------
+Mode: combat Channel:40   Msg: The Cracklaw hits the Dirty Sanchez for 70 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Veil starts casting Hysteric Barrage on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: The Dirty Sanchez hits the Tchakka for 114 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 36 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Wetlands Orobon hits the Dirty Sanchez for 44 points of damage.
+----------
+Mode: combat Channel:40   Msg: Mouldatron casts Blizzard III. The Tchakka takes 34 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 25 points of damage.
+----------
+Mode: combat Channel:110   Msg: The Tchakka readies Carcharian Verve.
+----------
+Mode: combatspell Channel:52   Msg: Lyn starts casting Glutinous Dart on the Tchakka.
+----------
+Mode: combat Channel:25   Msg: Tatai hits the Tchakka for 200 points of damage.
+----------
+Mode: combat Channel:122   Msg: The Tchakka is paralyzed.
+----------
+Mode: combat Channel:40   Msg: Veil hits the Tchakka for 65 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Dirty Sanchez hits the Tchakka for 109 points of damage.
+----------
+Mode: combat Channel:25   Msg: Tataii hits the Tchakka for 172 points of damage.
+----------
+Mode: combat Channel:25   Msg: Giapper hits the Tchakka for 126 points of damage.
+----------
+Mode: combat Channel:41   Msg: Veil misses the Tchakka.
+----------
+Mode: combat Channel:40   Msg: Yuber hits the Tchakka for 244 points of damage.
+----------
+Mode: combat Channel:40   Msg: Lyn casts Glutinous Dart. The Tchakka takes 1182 points of damage.
+----------
+Mode: combat Channel:40   Msg: Darkrider casts Aero III. The Tchakka takes 280 points of damage.
+----------
+Mode: combat Channel:40   Msg: Zav casts Water III. The Tchakka takes 803 points of damage.
+----------
+Mode: combat Channel:25   Msg: Giapper hits the Tchakka for 67 points of damage.
+----------
+Mode: combat Channel:25   Msg: Tataii scores a critical hit! The Tchakka takes 269 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Zav starts casting Thunder III on the Tchakka.
+----------
+Mode: combatspell Channel:52   Msg: Darkrider starts casting Stone III on the Tchakka.
+----------
+Mode: combatspell Channel:52   Msg: Linvala starts casting Glutinous Dart on the Tchakka.
+----------
+Mode: combat Channel:110   Msg: Veil readies Requiescat.
+----------
+Mode: combatspell Channel:52   Msg: Nikolce starts casting Blink on Nikolce.
+----------
+Mode: combatspell Channel:52   Msg: Mouldatron starts casting Blizzard IV on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: The Primrose Jagil hits the Dirty Sanchez for 63 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Dirty Sanchez hits the Tchakka for 97 points of damage.
+----------
+Mode: combat Channel:25   Msg: Hankok uses Tachi: Kasha. The Tchakka takes 3305 points of damage.
+----------
+Mode: combat Channel:25   Msg: Hankok hits the Tchakka for 702 points of damage.
+----------
+Mode: combat Channel:40   Msg: Fenrir hits the Tchakka for 197 points of damage.
+----------
+Mode: combat Channel:40   Msg: Yuber hits the Tchakka for 258 points of damage.
+----------
+Mode: combatspell Channel:64   Msg: Nikolce casts Stoneskin. Nikolce gains the effect of Stoneskin.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 29 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Cracklaw hits the Dirty Sanchez for 47 points of damage.
+----------
+Mode: combat Channel:40   Msg: Zav casts Stone III. The Tchakka takes 368 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 12 points of damage.
+----------
+Mode: combat Channel:191   Msg: The Tchakka's Regen effect wears off.
+----------
+Mode: combat Channel:191   Msg: The Tchakka's paralysis effect wears off.
+----------
+Mode: combat Channel:40   Msg: Veil casts Hysteric Barrage. The Tchakka takes 2699 points of damage.
+----------
+Mode: combat Channel:40   Msg: Darkrider casts Water III. The Tchakka takes 286 points of damage.
+----------
+Mode: combat Channel:25   Msg: Tatai hits the Tchakka for 85 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Wetlands Orobon scores a critical hit! The Dirty Sanchez takes 182 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 16 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Lyn starts casting Glutinous Dart on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: Lyn casts Glutinous Dart. The Tchakka takes 1099 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Dirty Sanchez hits the Tchakka for 84 points of damage.
+----------
+Mode: combat Channel:26   Msg: Tataii misses the Tchakka.
+----------
+Mode: combat Channel:40   Msg: Veil uses Requiescat. The Tchakka takes 4408 points of damage.
+----------
+Mode: combat Channel:191   Msg: The Tchakka's Attack Boost effect wears off.
+----------
+Mode: combatspell Channel:52   Msg: Darkrider starts casting Thunder III on the Tchakka.
+----------
+Mode: combatspell Channel:52   Msg: Zav starts casting Blizzard III on the Tchakka.
+----------
+Mode: combatspell Channel:52   Msg: Veil starts casting Heavy Strike on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: The Primrose Jagil hits the Dirty Sanchez for 48 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Linvala starts casting Glutinous Dart on the Tchakka.
+----------
+Mode: combat Channel:110   Msg: The Tchakka readies Tidal Guillotine.
+----------
+Mode: combat Channel:40   Msg: Linvala casts Glutinous Dart. The Tchakka takes 343 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 45 points of damage.
+----------
+Mode: combat Channel:40   Msg: Fenrir hits the Tchakka for 162 points of damage.
+----------
+Mode: combat Channel:40   Msg: Yuber hits the Tchakka for 370 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Cracklaw scores a critical hit! The Dirty Sanchez takes 140 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: Attack Down.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 32 points of damage.
+----------
+Mode: combat Channel:25   Msg: Hankok hits the Tchakka for 284 points of damage.
+----------
+Mode: combat Channel:111   Msg: The Tchakka uses Carcharian Verve. The Tchakka gains the effect of Magic Atk. Boost.
+----------
+Mode: combat Channel:40   Msg: Darkrider casts Stone III. Magic Burst! The Tchakka takes 833 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Tchakka hits Veil for 105 points of damage.
+----------
+Mode: combat Channel:40   Msg: Zav casts Thunder III. The Tchakka takes 1117 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 42 points of damage.
+----------
+Mode: combat Channel:25   Msg: Giapper hits the Tchakka for 121 points of damage.
+----------
+Mode: combat Channel:191   Msg: Fenrir's Drown effect wears off.
+----------
+Mode: combat Channel:191   Msg: Fenrir's Attack Down effect wears off.
+----------
+Mode: combat Channel:40   Msg: The Dirty Sanchez hits the Tchakka for 150 points of damage.
+----------
+Mode: combat Channel:40   Msg: Skillchain: Gravitation. The Tchakka takes 2644 points of damage.
+----------
+Mode: combat Channel:25   Msg: Tatai hits the Tchakka for 198 points of damage.
+----------
+Mode: combat Channel:25   Msg: Giapper hits the Tchakka for 68 points of damage.
+----------
+Mode: combat Channel:40   Msg: Veil scores a critical hit! The Tchakka takes 184 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Veil starts casting Uppercut on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: Veil casts Heavy Strike. The Tchakka takes 1540 points of damage.
+----------
+Mode: combat Channel:40   Msg: Lyn casts Glutinous Dart. The Tchakka takes 1235 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Dirty Sanchez hits the Tchakka for 141 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Primrose Jagil hits the Dirty Sanchez for 46 points of damage.
+----------
+Mode: combat Channel:40   Msg: Veil scores a critical hit! The Tchakka takes 156 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Tchakka uses Tidal Guillotine. Veil takes 0 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Wetlands Orobon hits the Dirty Sanchez for 48 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 27 points of damage.
+----------
+Mode: combat Channel:40   Msg: Mouldatron casts Blizzard IV. The Tchakka takes 57 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 24 points of damage.
+----------
+Mode: combatspell Channel:64   Msg: Nikolce casts Blink. Nikolce gains the effect of Blink.
+----------
+Mode: combatspell Channel:52   Msg: Zav starts casting Fire III on the Tchakka.
+----------
+Mode: combatspell Channel:52   Msg: Darkrider starts casting Blizzard III on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: The Cracklaw hits the Dirty Sanchez for 63 points of damage.
+----------
+Mode: combat Channel:40   Msg: Veil hits the Tchakka for 108 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 14 points of damage.
+----------
+Mode: combat Channel:25   Msg: Tataii hits the Tchakka for 235 points of damage.
+----------
+Mode: combat Channel:40   Msg: Linvala casts Glutinous Dart. The Tchakka takes 1072 points of damage.
+----------
+Mode: combat Channel:191   Msg: The Dirty Sanchez's Drown effect wears off.
+----------
+Mode: combat Channel:191   Msg: The Dirty Sanchez's Attack Down effect wears off.
+----------
+Mode: combatspell Channel:52   Msg: Linvala starts casting Glutinous Dart on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: Fenrir hits the Tchakka for 228 points of damage.
+----------
+Mode: combat Channel:40   Msg: Yuber hits the Tchakka for 322 points of damage.
+----------
+Mode: combat Channel:40   Msg: Zav casts Blizzard III. The Tchakka takes 262 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Dirty Sanchez hits the Tchakka for 159 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Wetlands Orobon hits the Dirty Sanchez for 50 points of damage.
+----------
+Mode: combat Channel:25   Msg: Hankok hits the Tchakka for 289 points of damage.
+----------
+Mode: combat Channel:40   Msg: Darkrider casts Thunder III. The Tchakka takes 771 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 41 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Lyn starts casting Glutinous Dart on the Tchakka.
+----------
+Mode: combatspell Channel:52   Msg: Mouldatron starts casting Aero IV on the Tchakka.
+----------
+Mode: combatspell Channel:52   Msg: Veil starts casting Sickle Slash on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: Veil casts Uppercut. The Tchakka takes 685 points of damage.
+----------
+Mode: combat Channel:110   Msg: The Tchakka readies Carcharian Verve.
+----------
+Mode: combat Channel:40   Msg: The Primrose Jagil hits the Dirty Sanchez for 51 points of damage.
+----------
+Mode: combat Channel:25   Msg: Tatai hits the Tchakka for 191 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 38 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Wetlands Orobon hits the Dirty Sanchez for 66 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Cracklaw hits the Dirty Sanchez for 69 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Darkrider starts casting Fire III on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: Zav casts Fire III. The Tchakka takes 473 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 19 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 41 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Zav starts casting Aero III on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: The Primrose Jagil hits the Dirty Sanchez for 48 points of damage.
+----------
+Mode: combat Channel:25   Msg: Giapper hits the Tchakka for 126 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 23 points of damage.
+----------
+Mode: combat Channel:122   Msg: The Dirty Sanchez is intimidated by the Tchakka's presence.
+----------
+Mode: combat Channel:40   Msg: Fenrir hits the Tchakka for 255 points of damage.
+----------
+Mode: combat Channel:40   Msg: Veil casts Sickle Slash. The Tchakka takes 1478 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Veil starts casting Spinal Cleave on the Tchakka.
+----------
+Mode: combat Channel:25   Msg: Tataii hits the Tchakka for 257 points of damage.
+----------
+Mode: combat Channel:40   Msg: Linvala casts Glutinous Dart. The Tchakka takes 1379 points of damage.
+----------
+Mode: combat Channel:25   Msg: Giapper hits the Tchakka for 152 points of damage.
+----------
+Mode: combat Channel:25   Msg: Hankok hits the Tchakka for 323 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Linvala starts casting Glutinous Dart on the Tchakka.
+----------
+Mode: combat Channel:122   Msg: Veil's casting is interrupted.
+----------
+Mode: combat Channel:40   Msg: Yuber hits the Tchakka for 143 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Tchakka hits Veil for 181 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 38 points of damage.
+----------
+Mode: combat Channel:40   Msg: Darkrider casts Blizzard III. The Tchakka takes 44 points of damage.
+----------
+Mode: combat Channel:25   Msg: Hankok scores a critical hit! The Tchakka takes 449 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Primrose Jagil scores a critical hit! The Dirty Sanchez takes 149 points of damage.
+----------
+Mode: combat Channel:40   Msg: Yuber hits the Tchakka for 144 points of damage.
+----------
+Mode: combat Channel:40   Msg: Lyn casts Glutinous Dart. The Tchakka takes 1342 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 36 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Wetlands Orobon hits the Dirty Sanchez for 63 points of damage.
+----------
+Mode: combat Channel:25   Msg: Tatai hits the Tchakka for 86 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Lyn starts casting Glutinous Dart on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 41 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Dirty Sanchez hits the Tchakka for 45 points of damage.
+----------
+Mode: combat Channel:106   Msg: Tatai uses Meditate.
+----------
+Mode: combatspell Channel:52   Msg: Mouldatron starts casting Thunder IV on the Tchakka.
+----------
+Mode: combatspell Channel:50   Msg: Eleanor starts casting Flash on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: Darkrider casts Fire III. The Tchakka takes 42 points of damage.
+----------
+Mode: combat Channel:191   Msg: The Tchakka's Choke effect wears off.
+----------
+Mode: combat Channel:110   Msg: The Dirty Sanchez readies Tegmina Buffet.
+----------
+Mode: combatspell Channel:52   Msg: Darkrider starts casting Aero III on the Tchakka.
+----------
+Mode: combatspell Channel:52   Msg: Zav starts casting Water III on the Tchakka.
+----------
+Mode: combatspell Channel:52   Msg: Veil starts casting Spinal Cleave on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: Veil hits the Tchakka for 26 points of damage.
+----------
+Mode: combat Channel:110   Msg: The Tchakka readies Carcharian Verve.
+----------
+Mode: combat Channel:111   Msg: The Tchakka uses Carcharian Verve. The Tchakka gains the effect of Magic Atk. Boost.
+----------
+Mode: combat Channel:40   Msg: Fenrir hits the Tchakka for 100 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Tchakka hits Veil for 158 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 20 points of damage.
+----------
+Mode: combat Channel:191   Msg: The Tchakka's Attack Boost effect wears off.
+----------
+Mode: combatspell Channel:52   Msg: Nikolce starts casting Dia II on the Tchakka.
+----------
+Mode: combat Channel:25   Msg: Tataii hits the Tchakka for 96 points of damage.
+----------
+Mode: combat Channel:40   Msg: Veil hits the Tchakka for 40 points of damage.
+----------
+Mode: combat Channel:122   Msg: Unable to use job ability.
+----------
+Mode: combat Channel:25   Msg: Hankok hits the Tchakka for 146 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 40 points of damage.
+----------
+Mode: combat Channel:40   Msg: Mouldatron casts Aero IV. The Tchakka takes 336 points of damage.
+----------
+Mode: combat Channel:40   Msg: Zav casts Aero III. The Tchakka takes 392 points of damage.
+----------
+Mode: combat Channel:25   Msg: Additional effect: Attack Down.
+----------
+Mode: combat Channel:40   Msg: Linvala casts Glutinous Dart. The Tchakka takes 290 points of damage.
+----------
+Mode: combat Channel:44   Msg: The Dirty Sanchez defeats the Primrose Jagil.
+----------
+Mode: system8 Channel:127   Msg: Records of Eminence: Vanquish Multiple Enemies I.
+----------
+Mode: system8 Channel:127   Msg: Progress: 12/200.
+----------
+Mode: combat Channel:131   Msg: Eleanor gains 583 limit points.
+----------
+Mode: combat Channel:44   Msg: The Dirty Sanchez defeats the Cracklaw.
+----------
+Mode: system8 Channel:127   Msg: Records of Eminence: Vanquish Multiple Enemies I.
+----------
+Mode: system8 Channel:127   Msg: Progress: 13/200.
+----------
+Mode: combat Channel:131   Msg: Limit chain #1! Eleanor gains 613 limit points.
+----------
+Mode: combat Channel:131   Msg: Eleanor obtains 23 gil.
+----------
+Mode: combat Channel:44   Msg: The Dirty Sanchez defeats the Wetlands Orobon.
+----------
+Mode: system8 Channel:127   Msg: Records of Eminence: Vanquish Multiple Enemies I.
+----------
+Mode: system8 Channel:127   Msg: Progress: 14/200.
+----------
+Mode: combat Channel:25   Msg: Hankok hits the Tchakka for 118 points of damage.
+----------
+Mode: combat Channel:131   Msg: Limit chain #2! Eleanor gains 642 limit points.
+----------
+Mode: combat Channel:131   Msg: Eleanor obtains 20 gil.
+----------
+Mode: combatspell Channel:52   Msg: Linvala starts casting Glutinous Dart on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: The Dirty Sanchez uses Tegmina Buffet. The Tchakka takes 1386 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Primrose Jagil takes 3927 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Cracklaw takes 2128 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Wetlands Orobon takes 2875 points of damage.
+----------
+Mode: combat Channel:20   Msg: Eleanor hits the Tchakka for 11 points of damage.
+----------
+Mode: combat Channel:40   Msg: Veil casts Spinal Cleave. The Tchakka takes 871 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Lyn starts casting Glutinous Dart on the Tchakka.
+----------
+Mode: combat Channel:191   Msg: The Tchakka's Regen effect wears off.
+----------
+Mode: combat Channel:40   Msg: Yuber hits the Tchakka for 118 points of damage.
+----------
+Mode: combat Channel:40   Msg: Lyn casts Glutinous Dart. The Tchakka takes 418 points of damage.
+----------
+Mode: linkshell2 Channel:214   Msg: [2]<Epictaco> Spent many a time in a line-boxy thing being forced to drink a canteen of water even if I wasnt thirsty or just drank lo
+----------
+Mode: combatspell Channel:52   Msg: Darkrider starts casting Water III on the Tchakka.
+----------
+Mode: craft Channel:121   Msg: You find a snow geode on the Primrose Jagil.
+----------
+Mode: combat Channel:131   Msg: Tataii earns a merit point! (Total: 12)
+----------
+Mode: combatspell Channel:65   Msg: Eleanor casts Flash. The Tchakka is afflicted with Flash.
+----------
+Mode: combat Channel:20   Msg: Eleanor scores a critical hit! The Tchakka takes 77 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Zav starts casting Stone III on the Tchakka.
+----------
+Mode: combat Channel:110   Msg: Tatai readies Tachi: Rana.
+----------
+Mode: combat Channel:110   Msg: Tataii readies Tachi: Rana.
+----------
+Mode: combat Channel:110   Msg: The Tchakka readies Pelagic Cleaver.
+----------
+Mode: combat Channel:40   Msg: Fenrir hits the Tchakka for 253 points of damage.
+----------
+Mode: combat Channel:25   Msg: Giapper hits the Tchakka for 157 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Dirty Sanchez hits the Tchakka for 138 points of damage.
+----------
+Mode: combat Channel:110   Msg: Hankok readies Tachi: Rana.
+----------
+Mode: craft Channel:121   Msg: Darkrider's lot for the snow geode: 59 points.
+----------
+Mode: combat Channel:20   Msg: Eleanor uses Shield Bash. The Tchakka takes 232 points of damage.
+----------
+Mode: combat Channel:110   Msg: Giapper readies Ruinator.
+----------
+Mode: combatspell Channel:52   Msg: Mouldatron starts casting Ionohelix on the Tchakka.
+----------
+Mode: combat Channel:41   Msg: The Tchakka misses Veil.
+----------
+Mode: craft Channel:121   Msg: Zav's lot for the snow geode: 822 points.
+----------
+Mode: combatspell Channel:52   Msg: Veil starts casting Plenilune Embrace on Veil.
+----------
+Mode: combat Channel:25   Msg: Giapper scores a critical hit! The Tchakka takes 184 points of damage.
+----------
+Mode: combat Channel:122   Msg: Unable to use job ability.
+----------
+Mode: system8 Channel:209   Msg: Time left: (0:00:57)
+----------
+Mode: combat Channel:25   Msg: Tatai hits the Tchakka for 256 points of damage.
+----------
+Mode: combat Channel:40   Msg: Zav casts Water III. The Tchakka takes 401 points of damage.
+----------
+Mode: combat Channel:40   Msg: Darkrider casts Aero III. The Tchakka takes 311 points of damage.
+----------
+Mode: combat Channel:40   Msg: Linvala casts Glutinous Dart. The Tchakka takes 1252 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Tchakka uses Pelagic Cleaver. Veil takes 354 points of damage.
+----------
+Mode: combat Channel:109   Msg: Tataii evades.
+----------
+Mode: combat Channel:32   Msg: Tatai takes 172 points of damage.
+----------
+Mode: combat Channel:104   Msg: Eleanor evades.
+----------
+Mode: combat Channel:109   Msg: Hankok evades.
+----------
+Mode: combat Channel:114   Msg: The Dirty Sanchez evades.
+----------
+Mode: combat Channel:109   Msg: Giapper evades.
+----------
+Mode: combat Channel:40   Msg: Fenrir takes 195 points of damage.
+----------
+Mode: combat Channel:111   Msg: The Tchakka uses Carcharian Verve. The Tchakka gains the effect of Magic Atk. Boost.
+----------
+Mode: combat Channel:20   Msg: Eleanor hits the Tchakka for 75 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Linvala starts casting Glutinous Dart on the Tchakka.
+----------
+Mode: combat Channel:26   Msg: Hankok misses the Tchakka.
+----------
+Mode: combat Channel:25   Msg: Hankok hits the Tchakka for 315 points of damage.
+----------
+Mode: combat Channel:40   Msg: Yuber hits the Tchakka for 317 points of damage.
+----------
+Mode: combat Channel:110   Msg: Fenrir readies Eclipse Bite.
+----------
+Mode: combat Channel:40   Msg: Lyn casts Glutinous Dart. The Tchakka takes 1259 points of damage.
+----------
+Mode: combat Channel:40   Msg: Nikolce casts Dia II. The Tchakka takes 1 point of damage.
+----------
+Mode: combatspell Channel:52   Msg: Naja starts casting Fenrir on Naja.
+----------
+Mode: combatspell Channel:52   Msg: Darkrider starts casting Stone III on the Tchakka.
+----------
+Mode: combat Channel:40   Msg: Mouldatron casts Thunder IV. The Tchakka takes 893 points of damage.
+----------
+Mode: combat Channel:20   Msg: Eleanor hits the Tchakka for 77 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Zav starts casting Thunder III on the Tchakka.
+----------
+Mode: combat Channel:110   Msg: The Tchakka readies Aquatic Lance.
+----------
+Mode: combat Channel:40   Msg: Yuber hits the Tchakka for 286 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Dirty Sanchez hits the Tchakka for 189 points of damage.
+----------
+Mode: combat Channel:25   Msg: Tataii uses Tachi: Rana. The Tchakka takes 1076 points of damage.
+----------
+Mode: combat Channel:25   Msg: Tatai uses Tachi: Rana. The Tchakka takes 4766 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Lyn starts casting Glutinous Dart on the Tchakka.
+----------
+Mode: combat Channel:106   Msg: Tataii uses Meditate.
+----------
+Mode: combat Channel:25   Msg: Giapper uses Ruinator. The Tchakka takes 4970 points of damage.
+----------
+Mode: combatspell Channel:52   Msg: Mouldatron starts casting Fire IV on the Tchakka.
+----------
+Mode: combat Channel:25   Msg: Tataii hits the Tchakka for 259 points of damage.
+----------
+Mode: combat Channel:25   Msg: Hankok uses Tachi: Rana. The Tchakka takes 5273 points of damage.
+----------
+Mode: combat Channel:40   Msg: Zav casts Stone III. The Tchakka takes 368 points of damage.
+----------
+Mode: combat Channel:40   Msg: Veil scores a critical hit! The Tchakka takes 191 points of damage.
+----------
+Mode: combat Channel:20   Msg: Eleanor hits the Tchakka for 49 points of damage.
+----------
+Mode: combat Channel:40   Msg: Darkrider casts Water III. The Tchakka takes 34 points of damage.
+----------
+Mode: combat Channel:191   Msg: The Tchakka's Flash effect wears off.
+----------
+Mode: combat Channel:40   Msg: Veil hits the Tchakka for 95 points of damage.
+----------
+Mode: combat Channel:40   Msg: Additional effect: 40 points of damage.
+----------
+Mode: combat Channel:25   Msg: Tatai scores a critical hit! The Tchakka takes 425 points of damage.
+----------
+Mode: combat Channel:40   Msg: The Tchakka uses Aquatic Lance. Veil takes 276 points of damage.
+----------
+Mode: combat Channel:40   Msg: Fenrir uses Eclipse Bite. The Tchakka takes 3521 points of damage.
+----------
+Mode: combat Channel:25   Msg: Skillchain: Darkness. The Tchakka takes 4956 points of damage.
+----------
+Mode: combat Channel:40   Msg: Linvala casts Glutinous Dart. The Tchakka takes 1193 points of damage.
+----------
+Mode: combat Channel:40   Msg: Fenrir hits the Tchakka for 270 points of damage.
+----------
+Mode: combatspell Channel:43   Msg: Veil casts Plenilune Embrace. Veil recovers 539 HP.
+----------
+Mode: combat Channel:40   Msg: Mouldatron casts Ionohelix. The Tchakka takes 168 points of damage.
+----------
+Mode: combat Channel:44   Msg: Fenrir defeats the Tchakka.
+----------
+Mode: combatspell Channel:50   Msg: Eleanor starts casting Cure IV on Hankok.
+----------
+Mode: combat Channel:40   Msg: Lyn casts Glutinous Dart. The Tchakka takes 1321 points of damage.
+----------
+Mode: combat Channel:122   Msg: Mouldatron's casting is interrupted.
+----------
+Mode: combat Channel:40   Msg: Darkrider casts Stone III. Magic Burst! The Tchakka takes 833 points of damage.
+----------
+Mode: combat Channel:40   Msg: Zav casts Thunder III. The Tchakka takes 1117 points of damage.
+----------
+Mode: combat Channel:40   Msg: Skillchain: Darkness. The Tchakka takes 3521 points of damage.
+----------
+Mode: combat Channel:111   Msg: Nikolce uses Release.
+----------
+Mode: craft Channel:121   Msg: You find a pinch of high-purity bayld on the Tchakka.
+----------
+Mode: craft Channel:121   Msg: You find a pinch of high-purity bayld on the Tchakka.
+----------
+Mode: craft Channel:121   Msg: You find a pinch of high-purity bayld on the Tchakka.
+----------
+Mode: craft Channel:121   Msg: You find a chunk of cobalt ore on the Tchakka.
+----------
+Mode: craft Channel:121   Msg: You find a pinch of high-purity bayld on the Tchakka.
+----------
+Mode: craft Channel:121   Msg: You find a pinch of high-purity bayld on the Tchakka.
+----------
+Mode: craft Channel:121   Msg: You find an atetepeyorg on the Tchakka.
+----------
+Mode: craft Channel:121   Msg: You find a snow geode on the Tchakka.
+----------
+Mode: craft Channel:121   Msg: Darkrider's lot for the pinch of high-purity bayld: 32 points.
+----------
+Mode: craft Channel:121   Msg: Darkrider's lot for the pinch of high-purity bayld: 517 points.
+----------
+Mode: craft Channel:121   Msg: Darkrider's lot for the snow geode: 339 points.
+----------
+Mode: craft Channel:121   Msg: Darkrider's lot for the pinch of high-purity bayld: 968 points.
+----------
+Mode: craft Channel:121   Msg: Tataii's lot for the pinch of high-purity bayld: 900 points.
+----------
+Mode: craft Channel:121   Msg: Zav's lot for the pinch of high-purity bayld: 828 points.
+----------
+Mode: craft Channel:121   Msg: Zav's lot for the chunk of cobalt ore: 701 points.
+----------
+Mode: craft Channel:121   Msg: Tataii's lot for the pinch of high-purity bayld: 676 points.
+----------
+Mode: craft Channel:121   Msg: Tataii's lot for the pinch of high-purity bayld: 339 points.
+----------
+Mode: craft Channel:121   Msg: Zav's lot for the pinch of high-purity bayld: 217 points.
+----------
+Mode: craft Channel:121   Msg: Zav's lot for the pinch of high-purity bayld: 669 points.
+----------
+Mode: craft Channel:121   Msg: Zav's lot for the atetepeyorg: 937 points.
+----------
+Mode: craft Channel:121   Msg: Zav's lot for the pinch of high-purity bayld: 344 points.
+----------
+Mode: craft Channel:121   Msg: Darkrider's lot for the chunk of cobalt ore: 223 points.
+----------
+Mode: craft Channel:121   Msg: Tatai's lot for the pinch of high-purity bayld: 478 points.
+----------
+Mode: craft Channel:121   Msg: Tatai's lot for the pinch of high-purity bayld: 872 points.
+----------
+Mode: craft Channel:121   Msg: Tatai's lot for the pinch of high-purity bayld: 997 points.
+----------
+Mode: craft Channel:121   Msg: Tatai's lot for the pinch of high-purity bayld: 122 points.
+----------
+Mode: craft Channel:121   Msg: Zav's lot for the snow geode: 664 points.
+----------
+Mode: craft Channel:121   Msg: Darkrider's lot for the pinch of high-purity bayld: 884 points.
+----------
+Mode: craft Channel:121   Msg: Darkrider's lot for the pinch of high-purity bayld: 83 points.
+----------
+Mode: craft Channel:121   Msg: Tataii's lot for the pinch of high-purity bayld: 639 points.
+----------
+Mode: craft Channel:121   Msg: Tatai's lot for the pinch of high-purity bayld: 102 points.
+----------
+Mode: craft Channel:121   Msg: Zav's lot for the pinch of high-purity bayld: 698 points.
+----------
+Mode: craft Channel:121   Msg: Tataii's lot for the pinch of high-purity bayld: 674 points.
+----------
+Mode: combat Channel:111   Msg: Naja uses Release.
+----------
+Mode: craft Channel:121   Msg: Nikolce's lot for the snow geode: 772 points.
+----------
+Mode: craft Channel:121   Msg: Nikolce's lot for the pinch of high-purity bayld: 881 points.
+----------
+Mode: craft Channel:121   Msg: Nikolce's lot for the pinch of high-purity bayld: 89 points.
+----------
+Mode: linkshell2 Channel:214   Msg: [2]<Skeletonhater> wuts a line boxy thing
+----------
+Mode: combat Channel:23   Msg: Eleanor casts Cure IV. Hankok recovers 413 HP.
+----------
+Mode: craft Channel:121   Msg: Nikolce's lot for the pinch of high-purity bayld: 103 points.
+----------
+Mode: craft Channel:121   Msg: Nikolce's lot for the chunk of cobalt ore: 363 points.
+----------

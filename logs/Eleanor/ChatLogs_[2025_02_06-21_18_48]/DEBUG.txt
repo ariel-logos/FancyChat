@@ -1,0 +1,106 @@
+Char-Int match: 30,|81,Q|91,[|30,|6,|65,A|100,d|100,d|111,o|110,n|115,s|30,|81,Q|93,]|30,|1,|32, |30,|106,j|76,L|111,o|97,a|100,d|101,e|100,d|32, |97,a|100,d|100,d|111,o|110,n|58,:|30,|1,|30,|2,|32, |102,f|97,a|110,n|99,c|121,y|99,c|104,h|97,a|116,t|32, |30,|1,|30,|106,j|118,v|101,e|114,r|115,s|105,i|111,o|110,n|58,:|30,|1,|30,|2,|32, |48,0|46,.|50,2|32, |30,|1,|30,|106,j|45,-|32, |98,b|121,y|58,:|30,|1,|30,|2,|32, |65,A|114,r|105,i|101,e|108,l|102,f|121,y|30,|1,|
+Mode: local Channel:1Msg: [Addons] Loaded addon: fancychat version: 0.2 - by: Arielfy
+----------
+Char-Int match: 73,I|99,c|101,e|115,s|112,p|105,i|99,c|101,e|32, |117,u|115,s|101,e|115,s|32, |97,a|32, |30,|2,|112,p|111,o|114,r|107,k|32, |99,c|117,u|116,t|108,l|101,e|116,t|32, |114,r|105,i|99,c|101,e|32, |98,b|111,o|119,w|108,l|32, |43,+|49,1|30,|1,|46,.|127,|49,1|
+Mode: item Channel:90Msg: Icespice uses a pork cutlet rice bowl +1.
+----------
+Char-Int match: 73,I|99,c|101,e|115,s|112,p|105,i|99,c|101,e|32, |117,u|115,s|101,e|115,s|32, |97,a|32, |30,|2,|112,p|111,o|117,u|99,c|104,h|32, |111,o|102,f|32, |102,f|111,o|114,r|103,g|111,o|116,t|116,t|101,e|110,n|32, |106,j|111,o|117,u|114,r|110,n|101,e|121,y|115,s|30,|1,|46,.|127,|49,1|
+Mode: item Channel:90Msg: Icespice uses a pouch of forgotten journeys.
+----------
+Char-Int match: 91,[|50,2|93,]|60,<|127,|252,ü|84,T|115,s|117,u|122,z|122,z|101,e|127,|251,û|62,>|32, |102,f|111,o|108,l|108,l|111,o|119,w|32, |116,t|104,h|101,e|32, |110,n|101,e|119,w|32, |112,p|108,l|97,a|121,y|101,e|114,r|32, |103,g|117,u|105,i|100,d|101,e|32, |111,o|110,n|32, |116,t|104,h|101,e|99,c|32, |118,v|99,c|97,a|116,t|115,s|101,e|121,y|101,e|32, |119,w|105,i|107,k|105,i|10,
+|
+Mode: linkshell2 Channel:214Msg: [2]<Tsuzze> follow the new player guide on thec vcatseye wiki
+----------
+Char-Int match: 30,|5,|78,N|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |118,v|48,0|46,.|53,5|49,1|
+Mode: zone Channel:0Msg: Nameplate v0.51
+----------
+Char-Int match: 30,|5,|104,h|116,t|116,t|112,p|115,s|58,:|47,/|47,/|119,w|119,w|119,w|46,.|103,g|105,i|116,t|104,h|117,u|98,b|46,.|99,c|111,o|109,m|47,/|83,S|104,h|105,i|114,r|107,k|47,/|78,N|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|
+Mode: zone Channel:0Msg: https://www.github.com/Shirk/Nameplate
+----------
+Char-Int match: 30,|106,j|85,U|115,s|97,a|103,g|101,e|58,:|
+Mode: zone Channel:0Msg: Usage:
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |104,h|101,e|108,l|112,p|
+Mode: zone Channel:0Msg: j/nameplate help
+----------
+Char-Int match: 89,Y|111,o|117,u|39,'|114,r|101,e|32, |114,r|101,e|97,a|100,d|105,i|110,n|103,g|32, |105,i|116,t|33,!|
+Mode: zone Channel:0Msg: You're reading it!
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |108,l|111,o|97,a|100,d|
+Mode: zone Channel:0Msg: j/nameplate load
+----------
+Char-Int match: 76,L|111,o|97,a|100,d|32, |99,c|111,o|110,n|102,f|105,i|103,g|117,u|114,r|97,a|116,t|105,i|111,o|110,n|32, |102,f|114,r|111,o|109,m|30,|106,j|32, |99,c|111,o|110,n|102,f|105,i|103,g|92,\|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|92,\|100,d|101,e|102,f|97,a|117,u|108,l|116,t|115,s|46,.|105,i|110,n|105,i|
+Mode: zone Channel:0Msg: Load configuration fromj config\nameplate\defaults.ini
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |115,s|97,a|118,v|101,e|
+Mode: zone Channel:0Msg: j/nameplate save
+----------
+Char-Int match: 83,S|97,a|118,v|101,e|32, |99,c|117,u|114,r|114,r|101,e|110,n|116,t|32, |99,c|111,o|110,n|102,f|105,i|103,g|117,u|114,r|97,a|116,t|105,i|111,o|110,n|32, |116,t|111,o|30,|106,j|32, |99,c|111,o|110,n|102,f|105,i|103,g|92,\|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|92,\|100,d|101,e|102,f|97,a|117,u|108,l|116,t|115,s|46,.|105,i|110,n|105,i|
+Mode: zone Channel:0Msg: Save current configuration toj config\nameplate\defaults.ini
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |102,f|111,o|110,n|116,t|115,s|105,i|122,z|101,e|30,|106,j|32, |60,<|110,n|117,u|109,m|98,b|101,e|114,r|62,>|
+Mode: zone Channel:0Msg: j/nameplate fontsizej <number>
+----------
+Char-Int match: 83,S|101,e|116,t|32, |116,t|104,h|101,e|32, |110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |102,f|111,o|110,n|116,t|32, |115,s|105,i|122,z|101,e|32, |116,t|111,o|32, |60,<|110,n|117,u|109,m|98,b|101,e|114,r|62,>|32, |112,p|105,i|120,x|101,e|108,l|115,s|
+Mode: zone Channel:0Msg: Set the nameplate font size to <number> pixels
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |100,d|97,a|109,m|97,a|103,g|101,e|102,f|111,o|110,n|116,t|115,s|105,i|122,z|101,e|30,|106,j|32, |60,<|110,n|117,u|109,m|98,b|101,e|114,r|62,>|
+Mode: zone Channel:0Msg: j/nameplate damagefontsizej <number>
+----------
+Char-Int match: 83,S|101,e|116,t|32, |116,t|104,h|101,e|32, |100,d|97,a|109,m|97,a|103,g|101,e|32, |102,f|111,o|110,n|116,t|32, |115,s|105,i|122,z|101,e|32, |116,t|111,o|32, |60,<|110,n|117,u|109,m|98,b|101,e|114,r|62,>|32, |112,p|105,i|120,x|101,e|108,l|115,s|
+Mode: zone Channel:0Msg: Set the damage font size to <number> pixels
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |104,h|105,i|100,d|101,e|115,s|116,t|97,a|114,r|115,s|
+Mode: zone Channel:0Msg: j/nameplate hidestars
+----------
+Char-Int match: 72,H|105,i|100,d|101,e|32, |97,a|108,l|108,l|32, |74,J|111,o|98,b|32, |77,M|97,a|115,s|116,t|101,e|114,r|121,y|32, |115,s|116,t|97,a|114,r|115,s|
+Mode: zone Channel:0Msg: Hide all Job Mastery stars
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |115,s|104,h|111,o|119,w|115,s|116,t|97,a|114,r|115,s|
+Mode: zone Channel:0Msg: j/nameplate showstars
+----------
+Char-Int match: 82,R|101,e|45,-|101,e|110,n|97,a|98,b|108,l|101,e|32, |100,d|105,i|115,s|112,p|108,l|97,a|121,y|105,i|110,n|103,g|32, |74,J|111,o|98,b|32, |77,M|97,a|115,s|116,t|101,e|114,r|121,y|32, |115,s|116,t|97,a|114,r|115,s|
+Mode: zone Channel:0Msg: Re-enable displaying Job Mastery stars
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |109,m|111,o|100,d|101,e|32, |97,a|108,l|108,l|
+Mode: zone Channel:0Msg: j/nameplate mode all
+----------
+Char-Int match: 83,S|104,h|111,o|119,w|32, |97,a|108,l|108,l|32, |110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|115,s|
+Mode: zone Channel:0Msg: Show all nameplates
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |109,m|111,o|100,d|101,e|32, |110,n|111,o|110,n|101,e|
+Mode: zone Channel:0Msg: j/nameplate mode none
+----------
+Char-Int match: 72,H|105,i|100,d|101,e|32, |97,a|108,l|108,l|32, |110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|115,s|
+Mode: zone Channel:0Msg: Hide all nameplates
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |109,m|111,o|100,d|101,e|32, |104,h|105,i|100,d|101,e|115,s|101,e|108,l|102,f|
+Mode: zone Channel:0Msg: j/nameplate mode hideself
+----------
+Char-Int match: 72,H|105,i|100,d|101,e|32, |121,y|111,o|117,u|114,r|32, |111,o|119,w|110,n|32, |110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|
+Mode: zone Channel:0Msg: Hide your own nameplate
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |109,m|111,o|100,d|101,e|32, |104,h|105,i|100,d|101,e|112,p|99,c|
+Mode: zone Channel:0Msg: j/nameplate mode hidepc
+----------
+Char-Int match: 72,H|105,i|100,d|101,e|32, |97,a|108,l|108,l|32, |112,p|108,l|97,a|121,y|101,e|114,r|32, |110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|115,s|44,,|32, |101,e|120,x|99,c|101,e|112,p|116,t|32, |119,w|104,h|101,e|110,n|32, |99,c|104,h|97,a|114,r|109,m|101,e|100,d|
+Mode: zone Channel:0Msg: Hide all player nameplates, except when charmed
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |109,m|111,o|100,d|101,e|32, |104,h|105,i|100,d|101,e|112,p|99,c|115,s|101,e|108,l|102,f|
+Mode: zone Channel:0Msg: j/nameplate mode hidepcself
+----------
+Char-Int match: 72,H|105,i|100,d|101,e|32, |97,a|108,l|108,l|32, |112,p|108,l|97,a|121,y|101,e|114,r|32, |110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|115,s|44,,|32, |101,e|120,x|99,c|101,e|112,p|116,t|32, |119,w|104,h|101,e|110,n|32, |99,c|104,h|97,a|114,r|109,m|101,e|100,d|44,,|32, |98,b|117,u|116,t|32, |97,a|108,l|115,s|111,o|32, |107,k|101,e|101,e|112,p|32, |121,y|111,o|117,u|114,r|115,s|32, |97,a|108,l|119,w|97,a|121,y|115,s|32, |104,h|105,i|100,d|100,d|101,e|110,n|
+Mode: zone Channel:0Msg: Hide all player nameplates, except when charmed, but also keep yours always hidden
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |109,m|111,o|100,d|101,e|32, |104,h|105,i|100,d|101,e|110,n|112,p|99,c|
+Mode: zone Channel:0Msg: j/nameplate mode hidenpc
+----------
+Char-Int match: 72,H|105,i|100,d|101,e|32, |97,a|108,l|108,l|32, |110,n|111,o|110,n|45,-|112,p|108,l|97,a|121,y|101,e|114,r|32, |110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|115,s|
+Mode: zone Channel:0Msg: Hide all non-player nameplates
+----------
+Char-Int match: 30,|106,j|47,/|110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|32, |109,m|111,o|100,d|101,e|32, |104,h|105,i|100,d|101,e|110,n|112,p|99,c|115,s|101,e|108,l|102,f|
+Mode: zone Channel:0Msg: j/nameplate mode hidenpcself
+----------
+Char-Int match: 72,H|105,i|100,d|101,e|32, |97,a|108,l|108,l|32, |110,n|111,o|110,n|45,-|112,p|108,l|97,a|121,y|101,e|114,r|32, |110,n|97,a|109,m|101,e|112,p|108,l|97,a|116,t|101,e|115,s|44,,|32, |98,b|117,u|116,t|32, |97,a|108,l|115,s|111,o|32, |107,k|101,e|101,e|112,p|32, |121,y|111,o|117,u|114,r|115,s|32, |97,a|108,l|119,w|97,a|121,y|115,s|32, |104,h|105,i|100,d|100,d|101,e|110,n|
+Mode: zone Channel:0Msg: Hide all non-player nameplates, but also keep yours always hidden
+----------

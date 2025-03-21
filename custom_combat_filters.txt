@@ -1,0 +1,34 @@
+## You can filter combat messages by adding, in the list below, words that would appear in unwanted messages.
+## (e.g. effect wears off)
+##
+## Words must be present in the original message, not the one processed by FancyChat's Compact Log function!
+## Words matching is non case sensitive
+##
+## You can use a double # to comment lines
+## Empty lines are allowed
+##
+## Experimental: you can add _y or _p to let through messages that refer to you (_y) or you and party membembers (_p)
+## (e.g. effect wears off _y , only shows the "effect wears off messages" for you) 
+##
+## !!! Very long lists could cause performance issues !!!
+
+
+## Effects wearing off
+##
+## Examples:
+## effect wears off
+## gains the effect of _y
+ 
+effect wears off _y
+gains the effect of _y
+is afflicted _y
+
+
+## Spells
+
+## Spikes
+##
+## Examples:
+## spikes deal
+
+spikes deal

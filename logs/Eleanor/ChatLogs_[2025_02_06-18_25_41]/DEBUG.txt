@@ -1,0 +1,152 @@
+Mode: local Channel:1Msg: [Addons] Loaded addon: fancychat version: 0.2 - by: Arielfy
+----------
+Mode: system5_NPC Channel:9Msg: Domain Invasion is currently happening in Kamihr Drifts. Need a lift? The ride's free if you've accumulated enough Domain Prowess today.
+----------
+Mode: craft Channel:121Msg: Domain Prowess: ☆☆☆☆☆ (0 Daily Quests, 0 Domains Conquered)
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Eferial> I'm going to be farming Ungir for dailys, does anyone want it's boomerange?
+----------
+Mode: system5_NPC Channel:9Msg: Now traveling to Kamihr Drifts (11 Total Travels)
+----------
+Mode: system7NPC Channel:142Msg: Obtained: Scroll of Instant Warp.
+----------
+Mode: zone Channel:0Msg: === Area: Kamihr Drifts ===
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Envii> yeah Efe
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Vyre> yea
+----------
+Mode: linkshell1 Channel:14Msg: [1]<Saphir> yah. very glitchy atm. mobs doing silly damage 
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Envii> I will help, I need the skillups
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Eferial> I will say in ls chat when it pops then
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Skeletonhater> i would like one
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Eferial> cause it is lottery
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Skeletonhater> im in dynamis rn
+----------
+Mode: combatspell_x Channel:52Msg: Margritli starts casting Phalanx on Margritli.
+----------
+Mode: combatspell_x Channel:64Msg: Margritli casts Stoneskin. Margritli gains the effect of Stoneskin.
+----------
+Mode: combatspell_x Channel:64Msg: Margritli casts Phalanx. Margritli gains the effect of Phalanx.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Envii> I am in ❮Dynamis - San d'Oria❯ waiting for invite, or should I solo
+----------
+Mode: linkshell1 Channel:14Msg: [1]<Saphir> as are magic bursts on geomancer. 5K+ magic burst with a T2 spell in the 40s. absolutely bonkers
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Dokholiday> dont voke it
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Dokholiday> mtish
+----------
+Mode: linkshell1 Channel:14Msg: [1]<Rezkn> Unlimited power
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Oppie> im inside
+----------
+Mode: local Channel:1Msg: Eleanor : ❮Invite to Join Party❯ ? ^^
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Eferial> again I'll say in ls chat. I MIGHT just leave if it takes too long. hate loto nms lol
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Oppie> so is vyre
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Vyre> im inside too
+----------
+Mode: combat_n Channel:40Msg: Margritli scores a critical hit! The Kumhau takes 65 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli scores a critical hit! The Kumhau takes 19 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 8 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Kumhau hits Margritli for 0 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli's spikes deal 9 points of damage to the Kumhau.
+----------
+Mode: combat_x Channel:122Msg: The Kumhau is out of range.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 49 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Kumhau hits Margritli for 0 points of damage.
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 23 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 4 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli's spikes deal 9 points of damage to the Kumhau.
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 29 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 6 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 12 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 10 points of damage.
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 34 points of damage.
+----------
+Mode: combat_y Channel:20Msg: Eleanor scores a critical hit! The Kumhau takes 75 points of damage.
+----------
+Mode: combat_n Channel:41Msg: Margritli parries the Kumhau's attack with her weapon.
+----------
+Mode: combat_x Channel:111Msg: Margritli uses Drain Samba II.
+----------
+Mode: combatspell_x Channel:52Msg: Margritli starts casting Fire III on the Kumhau.
+----------
+Mode: combatspell_y Channel:50Msg: Eleanor starts casting Flash on the Kumhau.
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 41 points of damage.
+----------
+Mode: combat_n Channel:41Msg: Margritli parries the Kumhau's attack with her weapon.
+----------
+Mode: combat_n Channel:40Msg: Margritli casts Fire III. The Kumhau takes 458 points of damage.
+----------
+Mode: combatspell_y Channel:65Msg: Eleanor casts Flash. The Kumhau is afflicted with Flash.
+----------
+Mode: combat_n Channel:41Msg: The Kumhau misses Margritli.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 45 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 22 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 6 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 3 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 45 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Kumhau hits Margritli for 0 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 7 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli's spikes deal 9 points of damage to the Kumhau.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 3 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_n Channel:40Msg: Margritli scores a critical hit! The Kumhau takes 22 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 11 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_y Channel:20Msg: Eleanor hits the Kumhau for 43 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Kumhau misses Margritli.
+----------
+Mode: combat_x Channel:110Msg: The Kumhau readies Permafrost Requiem.
+----------
+Mode: combat_n Channel:41Msg: The Kumhau misses Margritli.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 37 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 18 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_x Channel:191Msg: The Kumhau's Flash effect wears off.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Kumhau for 7 points of damage.
+----------
+Mode: combat_? Channel:42Msg: Additional effect: 3 HP drained from the Kumhau. (chn: 42)
+----------
+Mode: combat_n Channel:40Msg: The Kumhau uses Permafrost Requiem. Margritli takes 0 points of damage.
+----------
+Mode: combat_y Channel:28Msg: Eleanor takes 198 points of damage.
+----------

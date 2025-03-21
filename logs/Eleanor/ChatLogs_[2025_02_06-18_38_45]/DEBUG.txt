@@ -1,0 +1,574 @@
+Mode: local Channel:1Msg: [Addons] Loaded addon: fancychat version: 0.2 - by: Arielfy
+----------
+Mode: combat_p Channel:32Msg: The Leaping Chapuli hits Icespice for 59 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:32Msg: Additional effect: 16 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Igor uses Tachi: Shoha. The Waggling Wasp takes 5767 points of damage.
+----------
+Mode: combat_x Channel:110Msg: Igor readies Tachi: Shoha.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_x Channel:122Msg: The Colkhab is out of range.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:131Msg: Igor earns a merit point! (Total: 8)
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: The Rapier Hornet hits Igor for 90 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 11 points of damage.
+----------
+Mode: combat_t Channel:44Msg: Igor defeats the Leaping Chapuli.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: The Colkhab hits Igor for 92 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Rapier Hornet hits Igor for 55 points of damage.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 16 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 25 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_x Channel:110Msg: Icespice readies Ruinator.
+----------
+Mode: combatspell_x Channel:52Msg: Eleanor starts casting Cure IV on Eleanor.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 38 points of damage.
+----------
+Mode: combat_y Channel:101Msg: Eleanor uses Provoke.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: Igor uses Tachi: Shoha. The Leaping Chapuli takes 5842 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Rapier Hornet hits Margritli for 88 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 11 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 30 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Colkhab hits Igor for 95 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 31 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 6 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 6 points of damage.
+----------
+Mode: combat_x Channel:114Msg: Icespice uses Ruinator, but misses the Colkhab.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Altimus> nope
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: The Rapier Hornet scores a critical hit! Margritli takes 159 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 38 points of damage.
+----------
+Mode: combat_n Channel:41Msg: Igor parries the Colkhab's attack with his weapon.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 48 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 9 points of damage.
+----------
+Mode: combatspell_y Channel:31Msg: Eleanor casts Cure IV. Eleanor recovers 398 HP.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: Margritli scores a critical hit! The Rapier Hornet takes 21 points of damage.
+----------
+Mode: system7NPC Channel:142Msg: You obtain 1 pinch of mana powder!
+----------
+Mode: combat_n Channel:40Msg: The Rapier Hornet hits Margritli for 105 points of damage.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 39 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 10 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Colkhab hits Igor for 104 points of damage.
+----------
+Mode: combat_p Channel:25Msg: Icespice hits the Rapier Hornet for 110 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 13 points of damage.
+----------
+Mode: combat_p Channel:106Msg: Icespice uses Retaliation.
+----------
+Mode: combat_p Channel:25Msg: Icespice hits the Rapier Hornet for 75 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 11 points of damage.
+----------
+Mode: combat_p Channel:25Msg: Icespice hits the Rapier Hornet for 77 points of damage.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 49 points of damage.
+----------
+Mode: system7NPC Channel:142Msg: You obtain 1 bottle of body boost!
+----------
+Mode: combat_p Channel:32Msg: The Rapier Hornet hits Icespice for 71 points of damage.
+----------
+Mode: combat_n Channel:41Msg: Igor parries the Colkhab's attack with his weapon.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 10 points of damage.
+----------
+Mode: combat_p Channel:32Msg: Additional effect: 30 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 10 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Eferial> poopy
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 8 points of damage.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:25Msg: Icespice hits the Rapier Hornet for 100 points of damage.
+----------
+Mode: combat_p Channel:25Msg: Icespice hits the Rapier Hornet for 78 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Colkhab hits Igor for 109 points of damage.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 34 points of damage.
+----------
+Mode: combat_p Channel:32Msg: The Rapier Hornet hits Icespice for 78 points of damage.
+----------
+Mode: combat_p Channel:25Msg: Icespice hits the Rapier Hornet for 58 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Colkhab hits Igor for 73 points of damage.
+----------
+Mode: combat_p Channel:32Msg: Additional effect: 11 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 27 points of damage.
+----------
+Mode: combat_p Channel:25Msg: Icespice retaliates. The Rapier Hornet takes 87 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: Margritli scores a critical hit! The Rapier Hornet takes 95 points of damage.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 7 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 11 points of damage.
+----------
+Mode: combat_x Channel:110Msg: The Rapier Hornet readies Pollen.
+----------
+Mode: combat_p Channel:25Msg: Icespice hits the Rapier Hornet for 89 points of damage.
+----------
+Mode: combat_p Channel:32Msg: The Rapier Hornet hits Icespice for 69 points of damage.
+----------
+Mode: combat_p Channel:32Msg: Additional effect: 20 points of damage.
+----------
+Mode: combat_n Channel:40Msg: The Colkhab hits Igor for 86 points of damage.
+----------
+Mode: combat_p Channel:26Msg: Icespice misses the Rapier Hornet.
+----------
+Mode: combat_n Channel:40Msg: Margritli hits the Rapier Hornet for 6 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 26 points of damage.
+----------
+Mode: combat_x Channel:191Msg: Eleanor's Regain effect wears off.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_x Channel:110Msg: Icespice readies Ruinator.
+----------
+Mode: combat_p Channel:25Msg: Icespice scores a critical hit! The Rapier Hornet takes 127 points of damage.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:37Msg: Icespice defeats the Rapier Hornet.
+----------
+Mode: system8 Channel:127Msg: Records of Eminence: Vanquish Multiple Enemies I.
+----------
+Mode: system8 Channel:127Msg: Progress: 26/200.
+----------
+Mode: combat_y Channel:131Msg: Limit chain #1! Eleanor gains 613 limit points.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combatspell_x Channel:52Msg: Eleanor starts casting Cure IV on Eleanor.
+----------
+Mode: combat_y Channel:101Msg: Eleanor uses Majesty.
+----------
+Mode: combat_x Channel:110Msg: The Colkhab readies Incisive Denouement.
+----------
+Mode: combat_n Channel:40Msg: The Colkhab hits Igor for 59 points of damage.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 13 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_x Channel:122Msg: Eleanor's casting is interrupted.
+----------
+Mode: combatspell_n Channel:43Msg: The Rapier Hornet uses Pollen. The Rapier Hornet recovers 288 HP.
+----------
+Mode: combat_p Channel:25Msg: Icespice uses Ruinator. The Rapier Hornet takes 2708 points of damage.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: The Colkhab uses Incisive Denouement. Igor takes 362 points of damage.
+----------
+Mode: craft Channel:121Msg: You find a Kindred's seal on the Rapier Hornet.
+----------
+Mode: combat_p Channel:109Msg: Icespice evades.
+----------
+Mode: combat_y Channel:28Msg: Eleanor takes 457 points of damage.
+----------
+Mode: combat_x Channel:114Msg: Margritli evades.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: Igor parries the Colkhab's attack with his weapon.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_x Channel:191Msg: Eleanor's Rampart effect wears off.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_x Channel:191Msg: The Colkhab's Magic Def. Boost effect wears off.
+----------
+Mode: combatspell_x Channel:52Msg: Eleanor starts casting Cure IV on Eleanor.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: The Colkhab hits Igor for 100 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:40Msg: Additional effect: 14 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Altimus> :(
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: The Colkhab hits Eleanor for 93 points of damage.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: Additional effect: 14 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combatspell_y Channel:31Msg: Eleanor casts Cure IV. Eleanor recovers 398 HP.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:23Msg: Icespice recovers 0 HP.
+----------
+Mode: emote2 Channel:15Msg: Igor cheers Margritli on!
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: The Colkhab hits Eleanor for 16 points of damage.
+----------
+Mode: combat_y Channel:28Msg: Additional effect: 19 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:29Msg: Eleanor parries the Colkhab's attack with her weapon.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: The Colkhab hits Eleanor for 106 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: Additional effect: 36 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_x Channel:191Msg: Eleanor's Regain effect wears off.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: The Colkhab scores a critical hit! Eleanor takes 48 points of damage.
+----------
+Mode: combat_y Channel:28Msg: Additional effect: 15 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combatspell_x Channel:52Msg: Eleanor starts casting Cure IV on Eleanor.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: The Colkhab hits Eleanor for 103 points of damage.
+----------
+Mode: combat_y Channel:28Msg: Additional effect: 31 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Suca> is the #
+----------
+Mode: linkshell2 Channel:214Msg:  fight soloable with trusts?
+----------
+Mode: combat_x Channel:122Msg: Unable to use job ability.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: The Colkhab hits Eleanor for 21 points of damage.
+----------
+Mode: combat_y Channel:28Msg: Additional effect: 16 points of damage.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: The Colkhab hits Eleanor for 25 points of damage.
+----------
+Mode: combatspell_y Channel:31Msg: Eleanor casts Cure IV. Eleanor recovers 398 HP.
+----------
+Mode: combat_p Channel:23Msg: Icespice recovers 0 HP.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: Additional effect: 29 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combatspell_x Channel:52Msg: Eleanor starts casting Reprisal on Eleanor.
+----------
+Mode: combat_y Channel:101Msg: Eleanor uses Defender. Defense is enhanced but attacks weaken.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_x Channel:122Msg: Eleanor's casting is interrupted.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: The Colkhab hits Eleanor for 78 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: Additional effect: 31 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combatspell_x Channel:52Msg: Eleanor starts casting Reprisal on Eleanor.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Ticmew> yes
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_? Channel:129Msg: Eleanor's enhancing magic skill rises 0.9 points. (chn: 129)
+----------
+Mode: combat_? Channel:129Msg: Eleanor's enhancing magic skill reaches level 120. (chn: 129)
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:29Msg: Eleanor parries the Colkhab's attack with her weapon.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:20Msg: Eleanor uses Shield Bash. The Colkhab takes 232 points of damage.
+----------
+Mode: linkshell2 Channel:214Msg: [2]<Oppie> did we all Ro
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combatspell_y Channel:56Msg: Eleanor casts Reprisal. Eleanor gains the effect of Reprisal.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:29Msg: Eleanor parries the Colkhab's attack with her weapon.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: unity Channel:212Msg: {Apururu} Looks like our forces-warses are gathering for domain invasion! Hurry-worry and join them!
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: system8 Channel:127Msg: Icespice obtains a Kindred's seal.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_p Channel:26Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: The Colkhab hits Eleanor for 19 points of damage.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:28Msg: Additional effect: 29 points of damage.
+----------
+Mode: combat_y Channel:20Msg: Eleanor's spikes deal 19 points of damage to the Colkhab.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_y Channel:21Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
+Mode: combat_n Channel:41Msg: The Colkhab dodges the attack.
+----------
