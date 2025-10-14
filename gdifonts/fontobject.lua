@@ -103,7 +103,7 @@ function object:get_texture()
         if (self.settings.text == '') then
             return;
         end
-        local tx = self.renderer.CreateTexture(self.interface, CreateFontData(self.settings));
+        local tx = self.renderer.CreateTextureColor(self.interface, CreateFontData(self.settings));
         if (tx.Texture == nil) or (tx.Width == 0) or (tx.Height == 0) then
             return;
         else

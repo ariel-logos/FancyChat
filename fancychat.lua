@@ -1,6 +1,6 @@
 addon.name      = 'fancychat';
 addon.author    = 'Arielfy';
-addon.version   = '0.4';
+addon.version   = '0.9';
 addon.desc      = 'Fancy Chat!';
 addon.link      = '';
 
@@ -20,17 +20,13 @@ local utils = require('utils');
 local targets = require ('targets');
 local help = require('help');
 local http = require("socket.http")
+local imguiWrap = require('imguiWrap')
 
-local timeStart = 0;
-local timeMax = 0;
-local fpsTimer = 0
-local fpsCount = 0
-local fpsFrame = 0
-local testWindow = 0
-local testResult = 0
--- Legacy chat window variables --
+-- --dofile(addon.path.."\\imguiwrap.lua")
+
 
 local uiw = T{
+		UpperMenuPTR,
 		MenuDescPTR,
 		MenuDesc,
 		LegacyChatOpen = false,
@@ -38,7 +34,6 @@ local uiw = T{
 		MenuCD = 0,
 		InvIdx = 0,
 		NoShiftIdx = 0,
-		InvType = 0,
 		MenuExt = 0,
 		MenuList = {},
 		WasInEquip = false,
@@ -49,13 +44,11 @@ local uiw = T{
 		RefWinOpenPtr,
 		RefWinOpenPtr2,
 		DialogPtr,
-		DisplayItemPtr,
 		WinOpenPtr,
 		WinOpenPtr2,
 		UISizeYPtr,
 		UISizeXPtr,
 		EventPtr,
-		--MaxWinSizeY,
 		UISizeX,
 		UISizeY,
 		WinPtr1,
@@ -70,6 +63,7 @@ local mvc_Menu2 = false;
 local mvc_Menu3 = false;
 local mvc_Menu4 = false;
 local mvc_Menu5 = false;
+local mvc_Menu6 = false;
 local mvc_targetposY = 0;
 local mvc_targetposX = 0;
 
@@ -77,6 +71,12 @@ local mvc_targetposX = 0;
 
 local fcw = T{
 	T{	
+		itemIcons = T{{},{},{},{}},
+		itemTexture = T{{},{},{},{}},
+		autoHideFadeTime = 0,
+		autoHideFade = 0,
+		autoHideTime = 0,
+		isHiddenGUI = false,
 		LoginStatus,
 		Zoning = false,
 		ProcessingText = false,
@@ -207,8 +207,8 @@ local fcw = T{
 
 local tab_NextTab = 'All';
 local tab_NextTab2 = 'All';
-local tab_Tabs = {'All','Combat','Linkshell','Party','Tell','Shout','NPC'};
---local tab_Tabs_Alt = {'All','Combat','Linkshell','Party','Tell','Shout','NPC'};
+local tab_Tabs = {'All','Combat','Linkshell','Party','Tell','Shout','Custom'};
+--local tab_Tabs_Alt = {'All','Combat','Linkshell','Party','Tell','Shout','Custom'};
 local tab_ButtonColorStylesNormal = {
 	T{ImGuiCol_Text,                 {1.0, 1.0, 1.0, 0.8}},  
 	T{ImGuiCol_Button,               {0, 0, 0, 0.3}},              
@@ -226,30 +226,34 @@ local tab_ButtonColorStylesSelected = {
 }
 
 -- Settings window variables --
+local set_alertList = {} 
+local set_alertBuffer = T{}
 local set_Popup = {false}
 local set_PickedColor = T{1,1,1,1}
 local set_ChatLineMaxL = 100
 local set_PlateBGColor = 0x4D000000
 local set_FontHeight = 20;
 local set_ChatLines = 8;
+local set_CustomTabModes = T{}
 local set_SecondChat = T{false}
 local set_AdjWin1 = T{false};
 local set_AdjWin2 = T{false};
-local set_CombatSplitCharList = {{'Greater >',0x003E}, {'Column :',0x003A}, {'Tilde ~',0x007E}, {'Bullet',0x2022}, {'Bullet hypen',0x2043}, {'R.Triangle',0x25B6}};
+local set_CombatSplitCharList = {{'Greater >',0x003E}, {'Column :',0x0589}, {'Tilde ~',0x007E}, {'Bullet',0x2022}, {'Bullet hypen',0x2043}, {'R.Triangle',0x25B6}};
 
 -- Debug window variables --
 local dw_PLRCount = 0;
 local dw_WindowOpened = T{false};
-local dw_Window_W = 600;
-local dw_Window_H = 400;
 local dw_TestMessage = '';
 local dw_TestMessage2 = '';
 local dw_ShowMessageMode = T{false};
 local dw_ChannelColorMode = T{false};
 local dw_testPTR;
+local dw_frameID = 1
+local dw_addr = 0
 
 -- Text parsing variables --
 
+local par_allowed = {0, 0};
 local par_dumping = false;
 local par_LastMsgLength = 0;
 local par_customFilters = {};
@@ -265,14 +269,23 @@ local par_DamageDone = false;
 local par_DamageGot = false;
 local par_MessageMode;
 local par_LastMode = '';
+local par_isCustom = false;
 local par_LastMessageMode = 0;
 local par_promptEnd = {};
+local par_actor1 = '';
+local par_actor2 = '';
+local par_actorP = '';
+local par_actorE = '';
+local par_action1 = '';
+local par_handled_actors = false;
+local par_party_names = {};
 
 -- Chat buffers variables --
 local b_LogBuffer = T{}; --<<<--------------------DELETE FOR RELEASE----------------
-local b_OriginalBuffer = T{}; --<<<--------------------DELETE FOR RELEASE----------------
+local b_OriginalBuffer = T{};
 local b_msgID = 1;
-local b_ChatBufferMaxSize = 800;
+local b_ChatBufferMaxSize = 600;
+local b_CombatBufferMaxSize = 300;
 local b_ChatBufferN_All = 0;
 local b_ChatBufferN_AllAlt = 0;
 local b_ChatBufferN_Linkshell = 0;
@@ -280,20 +293,20 @@ local b_ChatBufferN_Party = 0;
 local b_ChatBufferN_Tell = 0;
 local b_ChatBufferN_Combat = 0;
 local b_ChatBufferN_Shout = 0;
-local b_ChatBufferN_NPC = 0;
+local b_ChatBufferN_Custom = 0;
 local b_CleanupThresh = 100;
 local b_ChatBufferIdx = T{0, 0};
 local b_ChatBufferN = T{0, 0};
-local b_ChatBufferMode = T{1, 1}; -- 1=All, 2=combat, 3=Linkshell, 4=Party, 5= tell,  6=shout, 7 = npc
+local b_ChatBufferMode = T{1, 1}; -- 1=All, 2=combat, 3=Linkshell, 4=Party, 5= tell,  6=shout, 7 = Custom
 local b_ChatBuffer = T{
 	{	'All',		T{ text = T{};	mode = T{}; color = T{}; auxText = T{}; auxColor = T{}; url = T{};} },
-	{	'AllAlt',	T{ text = T{};	mode = T{}; color = T{}; auxText = T{}; auxColor = T{}; url = T{};}	},
-	{	'Combat',	T{ text = T{};	mode = T{}; color = T{}; auxText = T{}; auxColor = T{}; url = T{};}	},
-	{	'Linkshell',T{ text = T{};	mode = T{}; color = T{}; auxText = T{}; auxColor = T{};	url = T{};}	},
-	{	'Party',	T{ text = T{};	mode = T{}; color = T{}; auxText = T{}; auxColor = T{};	url = T{};}	},
-	{	'Tell',		T{ text = T{};	mode = T{}; color = T{}; auxText = T{}; auxColor = T{};	url = T{};}	},
-	{	'Shout',	T{ text = T{};	mode = T{}; color = T{}; auxText = T{}; auxColor = T{};	url = T{};}	},
-	{	'NPC',		T{ text = T{};	mode = T{}; color = T{}; auxText = T{}; auxColor = T{};	url = T{};}	}
+	{	'AllAlt',	T{ text = T{};  color = T{}; auxText = T{}; auxColor = T{}; url = T{};}	},
+	{	'Combat',	T{ text = T{};  color = T{}; auxText = T{}; auxColor = T{}; url = T{};}	},
+	{	'Linkshell',T{ text = T{};  color = T{}; auxText = T{}; auxColor = T{};	url = T{};}	},
+	{	'Party',	T{ text = T{};  color = T{}; auxText = T{}; auxColor = T{};	url = T{};}	},
+	{	'Tell',		T{ text = T{};  color = T{}; auxText = T{}; auxColor = T{};	url = T{};}	},
+	{	'Shout',	T{ text = T{};  color = T{}; auxText = T{}; auxColor = T{};	url = T{};}	},
+	{	'Custom',		T{ text = T{};  color = T{}; auxText = T{}; auxColor = T{};	url = T{};}	}
 };
 
 -- Font/Rect objects --
@@ -306,6 +319,13 @@ local ro_RectBG = T{};
 local ro_Scroll = T{};
 
 local allSettings = T{
+	MoveChatATMenu = T{true},
+	CustomFilters = T{false},
+	autoDumpChat = T{false},
+	CustomTabModes = T{false, false, false, false, false}, --npc, ls, party, tell, shout
+	ItemPreview = T{true},
+	AutoHideWindow = T{false},
+	AutoHideTimeMax = 10,
 	Notes = T{},
 	CSMode = {'Hide 2nd', 2}, 
 	CompactCombat = {true},
@@ -325,21 +345,7 @@ local allSettings = T{
 	chatLineMaxL = 100,
 	ChatLines = 8,
 	WindowPosOffset =	T{0,0,0,0},
-	defaultColor = 		T{1,1,1,1},
-	linkshellColor = 	T{1,1,1,1},
-	linkshell2Color = 	T{1,1,1,1},
-	partyColor = 		T{1,1,1,1},
-	tellColor = 		T{1,1,1,1},
-	shoutColor = 		T{1,1,1,1},
-	emoteColor = 		T{1,1,1,1},
-	combatColor = 		T{1,1,1,1},
-	combatspellColor = 	T{1,1,1,1},
-	dmgColor = 			T{1,1,1,1},
-	dmgDoneColor = 		T{1,1,1,1},
-	dmgGotColor = 		T{1,1,1,1},
-	spelldmgColor = 	T{1,1,1,1},
-	spelldmgDoneColor = T{1,1,1,1},
-	spelldmgGotColor = 	T{1,1,1,1},
+	defaultColor = 0xFFFFFFFF,
 	ColorBlind = 		T{false},
 	shortcutHide = 	46,
 	shortcutTab = 	45,
@@ -362,6 +368,12 @@ local allSettings = T{
 	selectedNotification = 'notification_1',
 	boostNotification =T{false},
 	tellNotification = T{false},
+	alertwords = '',
+	selectedAlert = 'notification_1',
+	boostAlert =T{false},
+	Alert = T{false},
+	alertOptions = {false,true,true,true,true},
+	firstLoadMessage = T{false},
 	settingsOpened = T{false},
 	fontSettings = {    
 		bg_overlap = -2,
@@ -398,13 +410,73 @@ local allSettings = T{
 		visible = true,
 		z_order = -1,
 	},
-	
+	colors = {},
+}
+
+local defaultColors = {
+	tell 			= {0xFFD35AFF},
+	party 			= {0xFF7BD3FF},
+	shout			= {0xFFFF5E5E},
+	linkshell1		= {0xFF50FFD0},
+	linkshell2		= {0xFF00FF80},
+	emote			= {0xFFC797FF},
+	combat			= {0xFFDCF1FC},
+	damage			= {0xFFFFFFFF},
+	combatspell		= {0xFFDDC9FF},
+	spelldamage		= {0xFFF0FFF0},
+	lot				= {0xFFE2FA0C},
+	obtained		= {0xFFA1FF3D},
+	keyitem			= {0xFFC797FF},
+	learn			= {0xFF5C71FF},
+	found			= {0xFFE5FF3D},
+	ability			= {0xFFF3A6FF},
+	actor1			= {0xFF6BD5FF},
+	actor2			= {0xFFF7CF05},
+	helm			= {0xFFE5FF3D},
+	dmgdone			= {0xFF91FF47, 0xFF91FFF0},
+	dmggot			= {0xFFFA4343, 0xFFFFA269},
+	spelldmgdone 	= {0xFFADFF33, 0xFF5EE0DE},
+	spelldmggot		= {0xFFFC2B43, 0xFFE6874C},
+	cexi			= {0xFF00FFB3, 0xFFFF0055},
+}
+
+local colorDesc =
+{
+	tell 			= {'Tell','/tell messages'},
+	party 			= {'Party','/party messages'},
+	shout			= {'Shout','/shout messages'},
+	linkshell1		= {'Linkshell 1','/linkshell messages'},
+	linkshell2		= {'Linkshell 2','/linkshell2 messages'},
+	emote			= {'Emotes','/emote messages'},
+	combat			= {'Combat','Combat base color'},
+	damage			= {'Damage','Default DMG color'},
+	combatspell		= {'Combat Spell','Spell base color'},
+	spelldamage		= {'Spell Dmg','Default spell DMG color'},
+	lot				= {'Cast Lot','Casting lot color'},
+	obtained		= {'Obtain/Gain', 'For messages such as x obtains/gains y'},
+	keyitem			= {'Key Item','Obtained key item messages'},
+	learn			= {'Learn','Learning new skills/spells messages'},
+	found			= {'Drops','For messages such as Found on x: y'},
+	dmgdone			= {'Damage Done', 'Highlights damage done'},
+	dmggot			= {'Damage Taken', 'Highlights damage taken'},
+	spelldmgdone 	= {'Spell Dmg Done', 'Highlights spell damage done'},
+	spelldmggot		= {'Spell Dmg Taken', 'Highlights spell damage taken'},
+	cexi			= {'CEXI', 'CEXI content messages'},
+	ability			= {'Ability/Spell', 'Highlights an ability or spell used by an Entity'},
+	actor1			= {'Friend Entity', 'Color highlighting the friendly entity in combat text.\n(i.e. the player, party members, etc.'},
+	actor2			= {'Foe Entity', 'Color highlighting the foe entity in combat text.\n(i.e. a monster, boss, etc.'},
+	helm			= {'HELM result', 'Color highlighting the yelded item from an HELM action'},
 }
 
 ashita.events.register('d3d_present', 'present_cb', function ()
 
-	timeStart = os.clock()
-	--print('hello'..tostring(os.clock()))
+	
+	--dw_frameID = dw_frameID + 1;
+	--AshitaCore:GetChatManager():AddChatMessage(24, false, 'attack')
+	
+	--timeStart = os.clock()
+	
+	--	print('hello')--..tostring(os.clock())
 	fcw[1].LoginStatus = AshitaCore:GetMemoryManager():GetPlayer():GetLoginStatus();
 	--Debug(tostring(fcw[1].LoginStatus)..' - '..tostring(fcw[1].ReLogStart), 1, false)
 	
@@ -447,7 +519,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				fcw[1].ReLogStart = os.clock()
 			else
 				if (os.clock() - fcw[1].ReLogStart > fcw[1].ReLogCD) then	
-					Debug('restarting', 1, false)
+					--Debug('restarting', 1, false)
 					--if fcw[1].LoggedLobby == 1 then fcw[1].LoggedLobby = 0; end
 					allSettings.PlayerName = settings.name;
 					SaveSettings();
@@ -457,7 +529,11 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			end
 			return
 		end;
-	
+		
+		local imIO = imgui.GetIO()
+		local dsize = imIO.DisplaySize;
+		--if imIO.KeysDown[10] then imgui.SetWindowFocus() end
+		
 		if allSettings.timeStampLine[1] then
 			local secondsTime = os.time() % allSettings.timeStampLineFreq[2]
 			--Debug(tostring(allSettings.timeStampLineFreq[2]), 1, false);
@@ -486,6 +562,12 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 		if (uiw.MemValue ~= 0) then
 			local margin = 15;
 			if (uiw.LastMemValue ~= -1 and uiw.LastMemValue >= uiw.MemValue and uiw.MemValue < uiw.UISizeY-19-margin) then
+				if not uiw.LegacyChatOpen then
+					if allSettings.autoDumpChat[1] then
+						DumpChat()
+					end
+					b_OriginalBuffer = T{}
+				end
 				uiw.LegacyChatOpen = true;
 			else
 				if (uiw.LastMemValue ~= -1 and uiw.LastMemValue < uiw.MemValue) then
@@ -525,17 +607,21 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			MenuName = string.gsub(MenuName, '\x00', ''):trimex()
 			
 			--uiw.MenuExt = ashita.memory.read_uint32(uiw.MenuPtr-0x40)
-			if not MenuName:match('menu[%s]+inline') then
-				mvc_Menu1 = false;  mvc_Menu2 = false;  mvc_Menu3 = false;  mvc_Menu4 = false; mvc_Menu5 =false;
+			if allSettings.EnabledChatMove[1] and allSettings.MoveChatATMenu[1] and (MenuName:match('menu[%s]+fep')) then mvc_Menu6 = true; else mvc_Menu6 = false; end
+			if not MenuName:match('menu[%s]+inline') and not mvc_Menu6 then
+				mvc_Menu1 = false;  mvc_Menu2 = false;  mvc_Menu3 = false;  mvc_Menu4 = false; mvc_Menu5 = false; mvc_Menu6 = false;
 				if (MenuName:match('menu[%s]+inventor')) or (MenuName:match('menu[%s]+loot')) or (MenuName:match('menu[%s]+comyn')) or (MenuName:match('menu[%s]+comment')) then mvc_Menu1 = true; 
 				elseif (MenuName:match('menu[%s]+magic')) or (MenuName:match('menu[%s]+ability'))  or (MenuName:match('menu[%s]+mount')) or (MenuName:match('menu[%s]+emote')) then mvc_Menu2 = true; 
 				elseif (MenuName:match('menu[%s]+magselec')) then mvc_Menu3 = true; 
 				elseif  (MenuName:match('menu[%s]+jobcselu')) then mvc_Menu4 = true;
 				elseif (MenuName:match('menu[%s]+mogdoor')) or (MenuName:match('menu[%s]+arealist')) or (MenuName:match('menu[%s]+maplist')) or MenuName:match('menu[%s]+gmtell')  or MenuName:match('menu[%s]+merityn') then mvc_Menu5 = true;
 				end
+			--elseif mvc_Menu6 then
+				--mvc_Menu6 = false
 			end
+			
 		else
-			mvc_Menu1 = false;  mvc_Menu2 = false;  mvc_Menu3 = false;  mvc_Menu4 = false; mvc_Menu5 =false;
+			mvc_Menu1 = false;  mvc_Menu2 = false;  mvc_Menu3 = false;  mvc_Menu4 = false; mvc_Menu5 =false; mvc_Menu6 =false;
 		end
 		if MenuName:find('auc1') and #uiw.MenuList > 0 and uiw.MenuList[#uiw.MenuList][1]=='menucomyn' then uiw.MenuList = {{'menuauc1',0}} end
 		Debug(MenuName, 2, false);	
@@ -551,12 +637,25 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			Debug(MenuLabel[1]..'-'..MenuLabel[2], 2, false);	
 		
 			if MenuLabel[1]=='menuinventor' then
-				uiw.MenuDescPTR2 = ashita.memory.read_uint32(uiw.MenuDescPTR+0x54);
-				uiw.MenuDescPTR2 = ashita.memory.read_uint32(uiw.MenuDescPTR2+0x0C);
-			
-				uiw.MenuDescPTR2 = ashita.memory.read_uint32(uiw.MenuDescPTR2+0x40);
-				uiw.MenuDesc =  ashita.memory.read_string(uiw.MenuDescPTR2,64);
-				MenuLabel[3] = uiw.MenuDesc;
+				-- uiw.MenuDescPTR2 = ashita.memory.read_uint32(uiw.MenuDescPTR+0x54);
+				-- uiw.MenuDescPTR2 = ashita.memory.read_uint32(uiw.MenuDescPTR2+0x0C);
+
+				-- uiw.MenuDescPTR2 = ashita.memory.read_uint32(uiw.MenuDescPTR2+0x40);
+				-- uiw.MenuDesc =  ashita.memory.read_string(uiw.MenuDescPTR2,64);
+				-- MenuLabel[3] = uiw.MenuDesc;
+				local UpperMenuPTR2 = ashita.memory.read_uint32(uiw.UpperMenuPTR+0x04)
+
+				local UpperMenuPTR3 = ashita.memory.read_uint32(UpperMenuPTR2+0x14)
+
+				local UpperMenuPTR4 = ashita.memory.read_uint32(UpperMenuPTR3+0x10)
+
+				local UpperMenuPTR5 = ashita.memory.read_uint32(UpperMenuPTR4+0x2C)
+
+				UpperMenuString = ashita.memory.read_string(UpperMenuPTR5,16)
+
+				MenuLabel[3] = UpperMenuString;
+				--if not tostring(uiw.MenuDesc):find('item') and dw_addr < 300  then dw_addr = dw_addr+1 end
+				--Debug(tostring(UpperMenuString),1,false)
 			end
 			
 			if MenuID ~= 0 and MenuLabel[1]~='menuinline' and MenuLabel[1]~='menumcr1pall' and MenuLabel[1]~= 'menumcr2pall' then
@@ -565,7 +664,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					--print((MenuLabel[2] == 11));
 					if 	((MenuLabel[1]==uiw.MenuList[M_i][1] and	MenuLabel[1]~='menuinventor')
 						or
-						--(MenuLabel[1]=='menuinventor'and MenuLabel[1]==uiw.MenuList[M_i][1] and uiw.MenuList[#uiw.MenuList][1]~='menuinventor')
+						--(MenuLabel[1]=='menuinventor'and MenuLabel[1]==uiw.MenuList[M_i][1] and uiw.MenuList[#uiw.MenuList][1]~='menuinventor') and MenuLabel[2] >= uiw.MenuList[M_i][2]
 						(MenuLabel[1]=='menuinventor' and MenuLabel[1]==uiw.MenuList[M_i][1] and MenuLabel[3] == uiw.MenuList[M_i][3] and MenuLabel[2] >= uiw.MenuList[M_i][2])) and (LastMenu==nil or uiw.LastMenu[2] == MenuLabel[2] and uiw.LastMenu[1] == MenuLabel[1]		)				--change the uiw.MenuList[][2] at the first inventor+iuse				
 						
 					then
@@ -616,7 +715,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				elseif uiw.MenuList[i][1]:find('menudelivery') then uiw.NoShiftIdx = i 
 				elseif uiw.MenuList[i][1]:find('menuhandover') then uiw.NoShiftIdx = i 
 				elseif uiw.MenuList[i][1]:find('menutrade') then uiw.NoShiftIdx = i 
-				elseif uiw.MenuList[i][1]:find('menubank') then uiw.NoShiftIdx = i 
+				elseif uiw.MenuList[i][1]:find('menubank%s*$') then uiw.NoShiftIdx = i 
 				elseif uiw.MenuList[i][1]:find('lootope') then uiw.NoShiftIdx = i 
 				elseif uiw.MenuList[i][1]:find('lootnowin') then uiw.NoShiftIdx = i 
 				elseif uiw.MenuList[i][1]:find('moneyctr') then uiw.NoShiftIdx = i 
@@ -668,10 +767,10 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 		uiw.LastMenu = MenuLabel;
 		local list = '';
 		for i = 1, #uiw.MenuList do
-			list = list..','..uiw.MenuList[i][1]..'-'..tostring(uiw.MenuList[i][2])
+			list = list..','..uiw.MenuList[i][1]..'-'..tostring(uiw.MenuList[i][2])..'-'..tostring(uiw.MenuList[i][3])
 		end
 		--menu list
-		--Debug(tostring(list),1,false);
+		--Debug(list,1,false);
 				
 		
 		if (par_InEvent or MenuName:match('menu[%s]+query'))  or uiw.DialogCDStart ~= 0 or uiw.DialogPromptStart ~= 0 then
@@ -716,7 +815,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 		
 		local chat2moved = false;
 		if not fcw[1].MoveChat or not allSettings.SecondChat[1] then
-			fcw[1].MoveChat = (mvc_Menu1 or mvc_Menu2 or mvc_Menu3 or mvc_Menu4 or mvc_Menu5 or uiw.DialogShown) and allSettings.LockWindowPos[1] and allSettings.EnabledChatMove[1];
+			fcw[1].MoveChat = (mvc_Menu1 or mvc_Menu2 or mvc_Menu3 or mvc_Menu4 or mvc_Menu5 or mvc_Menu6 or uiw.DialogShown) and allSettings.LockWindowPos[1] and allSettings.EnabledChatMove[1];
 		else
 			chat2moved = true;
 		end
@@ -734,6 +833,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			ChangeTab(1, tab_NextTab);
 			b_ChatBufferN[1] = SetBufferN(allSettings.SelectedTab);
 			ResetScrolling(1);
+			--GoToLine()
 		else
 			b_ChatBufferN[1] = SetBufferN(allSettings.SelectedTab);
 		end
@@ -741,18 +841,34 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 		
 		
 		
-		if allSettings.SelectedTab == 'All' and allSettings.HideCombatFromAll[1] then b_ChatBufferN[1]=b_ChatBufferN_AllAlt;  end
+		-- if allSettings.SelectedTab == 'All' and allSettings.HideCombatFromAll[1] then b_ChatBufferN[1]=b_ChatBufferN_AllAlt;  end
 		
 
-		local dsize = imgui.GetIO().DisplaySize;
+		
 		
 		
 		--Debug(tors(not LegacyChatOpen and not fcw[1].HideChat and not fcw[1].Closing)), 1, true);
 	-- Render All FancyChat windows --
 		local windowFlags = 0
-	
-		if (not uiw.LegacyChatOpen and not fcw[1].HideChat and not fcw[1].Closing) then
-			
+		
+		
+		if AshitaCore:GetChatManager():IsInputOpen() ~= 0x00 then fcw[1].autoHideTime = os.time() end
+		if (allSettings.AutoHideWindow[1] and os.time() - fcw[1].autoHideTime > allSettings.AutoHideTimeMax) then
+			if fcw[1].autoHideFadeTime == 0 then fcw[1].autoHideFadeTime = os.clock() end
+			fcw[1].autoHideFade = (os.clock()-fcw[1].autoHideFadeTime)/0.135
+			if fcw[1].autoHideFade > 1 then fcw[1].autoHideFade = 1 end
+		elseif fcw[1].autoHideFade > 0 then
+			if fcw[1].autoHideFade == 1 then fcw[1].autoHideFadeTime = os.clock() fcw[1].autoHideFade = 0.99 end
+			fcw[1].autoHideFade = 0.99-((os.clock()-fcw[1].autoHideFadeTime)/0.07)
+			if fcw[1].autoHideFade < 0 then fcw[1].autoHideFade = 0 end
+		else
+			fcw[1].autoHideFadeTime = 0
+			fcw[1].autoHideFade = 0
+		end
+		--Debug(tostring(fcw[1].autoHideFadeTime),1,false)
+		
+		if (not uiw.LegacyChatOpen and not fcw[1].HideChat and not fcw[1].Closing and fcw[1].autoHideFade ~= 1) then
+			ro_RectBG[1]:set_fill_color(bit.band(allSettings.rectSettings.fill_color -(fcw[1].autoHideFade * allSettings.rectSettings.fill_color), 0xFF000000));
 			
 			--fcw[1].BG_W = allSettings.fontSettings.font_height*allSettings.ChatLines*fcw[1].BGScale*2;
 			
@@ -779,15 +895,20 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			mvc_targetposY = 0;
 			mvc_targetposX = 0;
 			if fcw[1].MoveChat then
-				mvc_targetposX = SetTargetPosX(dsize.x,dsize.y);
+				mvc_targetposX = SetTargetPosX(dsize.x,dsize.y,positionStartX);
 			end
 			
 			if not chat2moved then
 				if not allSettings.GuideMeSecondWindow[1] then fcw[1].GuideMeClosedTmp = false; end
-				if fcw[1].MoveChat and positionStartX < mvc_targetposX
+				if fcw[1].MoveChat and mvc_Menu6 and positionStartY+fcw[1].BG_H > mvc_targetposY then
+					--print(positionStartY+fcw[1].BG_H..'-'..mvc_targetposY)
+					positionStartY = mvc_targetposY-fcw[1].BG_H
+					
+				elseif fcw[1].MoveChat and positionStartX < mvc_targetposX
 				and fcw[1].Anchor_Y > mvc_targetposY
 				then
 					positionStartX = mvc_targetposX;
+				
 				else
 					fcw[1].MoveChat = false;
 				end
@@ -841,7 +962,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				mouseX > centerPosX - fcw[1].BG_W and mouseX < centerPosX + fcw[1].BG_W
 				and mouseY > centerPosY - fcw[1].BG_H/2 and mouseY < centerPosY + fcw[1].BG_H/2
 				and imgui.IsMouseDragging(ImGuiMouseButton_Left) and not fcw[1].DraggingScroll
-				and imgui.IsWindowHovered(ImGuiHoveredFlags_RectOnly)
+				and imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly)
 				)
 			then
 				fcw[1].Dragging = true;
@@ -891,12 +1012,13 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 							end
 							if (mouseX > fcw[1].Anchor_X and mouseX < fcw[1].Anchor_X+fcw[1].BG_W and
 							mouseY > positionStartY+lineOffset and mouseY < positionStartY+lineOffset+allSettings.fontSettings.font_height and
-							(imgui.IsWindowHovered(ImGuiHoveredFlags_RectOnly) or (fcw[1].MoveChat and IsRectHovered(ro_RectBG[1].settings,0)))
+							(imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) or (fcw[1].MoveChat and IsRectHovered(ro_RectBG[1].settings,0)))
 							)
 							then
 							--local targetLine = 8-HL_i+fcw[1].ChatHead-1; if targetLine > 8 then targetLine = targetLine -8 end
 							--dw_TestMessage = tostring(targetLine)..'-'..tostring(fo_Chat[1][targetLine] ~= nil);
 							--if fo_Chat[1][targetLine] ~= nil then Debug(fo_Chat[1][targetLine].settings.text, 1, false); end
+							
 							fcw[1].HoverLine = allSettings.ChatLines-HL_i;
 							highlight_alpha = 0.3;
 							imgui.GetWindowDrawList():AddRectFilledMultiColor({fcw[1].Anchor_X, positionStartY+lineOffset}, {fcw[1].Anchor_X+imageSizeX, (positionStartY+lineOffset+allSettings.fontSettings.font_height)},
@@ -916,8 +1038,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			
 			if (fcw[1].HoverLine > 0 and imgui.IsMouseClicked(ImGuiMouseButton_Left)) then fcw[1].Clicking = true; end
 			
-			if (fcw[1].HoverLine > 0 and fcw[1].Clicking and imgui.IsMouseReleased(ImGuiMouseButton_Left) and imgui.IsWindowHovered(ImGuiHoveredFlags_RectOnly)) then
-				fcw[1].Clicking = false;
+			if (fcw[1].HoverLine > 0  and imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly)) then
+				
 				local copyBufferIdx = utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[1]][2].text)-fcw[1].HoverLine-fcw[1].ScrolledBack-(b_ChatBufferN[1]-b_ChatBufferIdx[1])+1;
 				local copyBufferText = '';
 				if (copyBufferIdx > 0 ) then
@@ -947,16 +1069,24 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					IDi = IDi + 1;
 				end
 				end
+				
+				copyBufferText = cleanMC(copyBufferText)
+				if allSettings.ItemPreview[1] then
+					DrawInfo(copyBufferText)
+				end
 				--print(copyBufferText)
-				if(copyBufferText ~=nil) then
-					if imgui.GetIO().KeyShift then
-						if #allSettings.Notes < 10 and #copyBufferText > 0 then
-							table.insert(allSettings.Notes, copyBufferText)
-							SaveSettings();
+				if (fcw[1].Clicking and imgui.IsMouseReleased(ImGuiMouseButton_Left)) then
+				fcw[1].Clicking = false;
+					if(copyBufferText ~=nil) then
+						if imgui.GetIO().KeyShift then
+							if #allSettings.Notes < 10 and #copyBufferText > 0 then
+								table.insert(allSettings.Notes, copyBufferText)
+								SaveSettings();
+							end
+						else
+							utils.SetClipboardText(utils.RevertShiftJIS(copyBufferText))
+							AshitaCore:GetChatManager():QueueCommand(1, "/echo Text successfully copied to clipboard!");
 						end
-					else
-						utils.SetClipboardText(utils.RevertShiftJIT(copyBufferText))
-						AshitaCore:GetChatManager():QueueCommand(1, "/echo Text successfully copied to clipboard!");
 					end
 				end
 			end
@@ -969,7 +1099,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 
 			if (mouseX > fcw[1].Anchor_X and mouseX < fcw[1].Anchor_X+fcw[1].BG_W and
 			mouseY > positionStartY+scrollOffset and mouseY < positionStartY+scrollOffset+allSettings.fontSettings.font_height*(allSettings.ChatLines+1)
-			and imgui.IsWindowHovered(ImGuiHoveredFlags_RectOnly)
+			and imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) and fcw[1].ChatShift == allSettings.fontSettings.font_height
 			)
 			then
 				if (
@@ -1029,7 +1159,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			--local compactPos, compactSize
 			--PositionLines();
 			if fcw[1].PosChanged or not fcw[1].compactPos or not fcw[1].compactSize then
-				fcw[1].compactPos = {fcw[1].Anchor_X+(ro_RectBG[1].settings.width-(tabsW/#tab_Tabs))*0.994-9, fcw[1].Anchor_Y - ro_RectBG[1].settings.height+(allSettings.fontSettings.font_height*2/allSettings.fontSettings.font_height)+allSettings.fontSettings.font_height*1.3}
+				fcw[1].compactPos = {fcw[1].Anchor_X+(ro_RectBG[1].settings.width-(tabsW/#tab_Tabs))*0.994-9, fcw[1].Anchor_Y - ro_RectBG[1].settings.height+(allSettings.fontSettings.font_height*2/allSettings.fontSettings.font_height)+allSettings.fontSettings.font_height*1.3-1}
 				fcw[1].compactSize = { tabsW/#tab_Tabs+(tabsH-(allSettings.fontSettings.font_height/1.2)+3), ro_RectBG[1].settings.height/8 }
 			end
 			if not allSettings.CompactTabs then
@@ -1054,7 +1184,12 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			--local font = imgui.GetFont();
 			--local prevFontSize = font.FontSize;
 			--font.FontSize = 450/allSettings.fontSettings.font_height;
-			imgui.SetWindowFontScale(allSettings.fontSettings.font_height/25);
+			-- imguiWrap.Branch(
+				-- function() imgui.SetWindowFontScale(allSettings.fontSettings.font_height/25) end,
+				-- function() end
+				-- )
+			
+			local IWwindowfont = imguiWrap.SetWindowFontScale(allSettings.fontSettings.font_height/25)
 			--imgui.SetWindowPos({fcw[1].Anchor_X-(allSettings.fontSettings.font_height*2/allSettings.fontSettings.font_height)-((allSettings.fontSettings.font_height*5)/allSettings.fontSettings.font_height),fcw[1].Anchor_Y+(allSettings.fontSettings.font_height*2/allSettings.fontSettings.font_height)+allSettings.fontSettings.font_height*1.2});
 			--imgui.SetWindowSize({ tabsW+tabsH*2, tabsH });
 			--imgui.SetWindowSizeConstraints({ tabsW, tabsH }, { FLT_MAX, FLT_MAX, });
@@ -1070,10 +1205,10 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					imgui.SetCursorPos({cursx+(reserved/#tab_Tabs)*(T_i-1),cursY});
 					if (tab_Tabs[T_i] == allSettings.SelectedTab) then
 						PushColorStyles(tab_ButtonColorStylesSelected);
-						imgui.Button(tab_Tabs[T_i],{reserved/#tab_Tabs,tabsH-2});
+						imgui.Button(tab_Tabs[T_i]:gsub('Alt','##Alt'),{reserved/#tab_Tabs,tabsH-2});
 						PopColorStyles(tab_ButtonColorStylesSelected);
 					else
-						if (imgui.Button(tab_Tabs[T_i],{reserved/#tab_Tabs,tabsH-2})) then
+						if (imgui.Button(tab_Tabs[T_i]:gsub('Alt','##Alt'),{reserved/#tab_Tabs,tabsH-2})) then
 							tab_NextTab = tab_Tabs[T_i]; 
 						end
 					end
@@ -1082,7 +1217,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				imgui.SetCursorPos({reserved+4,imgui.GetCursorPosY()-(tabsH+1.6)});
 			
 				if(fcw[1].TextureIDGuideMe ~= nil) then
-					if (imgui.ImageButton(fcw[1].TextureIDGuideMe,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
+					if (imguiWrap.ImageButton('TextureIDGuideMe',fcw[1].TextureIDGuideMe,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
 						fcw[1].GuideMeOpened[1] = not fcw[1].GuideMeOpened[1];
 						if fcw[1].GuideMeOpened[1] then	fcw[1].NotepadOpened[1]  = false end
 					end
@@ -1090,7 +1225,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				imgui.SetCursorPos({imgui.GetCursorPosX()+reserved+4+(tabsH-8),imgui.GetCursorPosY()-(tabsH+1.6)});
 			
 				if(fcw[1].TextureIDNotepad ~= nil) then
-					if (imgui.ImageButton(fcw[1].TextureIDNotepad,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
+					if (imguiWrap.ImageButton('TextureIDNotepad',fcw[1].TextureIDNotepad,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
 						fcw[1].NotepadOpened[1] = not fcw[1].NotepadOpened[1]
 						if fcw[1].NotepadOpened[1] then	fcw[1].GuideMeOpened[1] = false end
 					end
@@ -1098,14 +1233,14 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				
 				imgui.SetCursorPos({imgui.GetCursorPosX()+reserved+4+(tabsH*2-8),imgui.GetCursorPosY()-(tabsH+1.6)});
 				if(fcw[1].TextureIDSettings ~= nil) then
-					if (imgui.ImageButton(fcw[1].TextureIDSettings,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
+					if (imguiWrap.ImageButton('TextureIDSettings',fcw[1].TextureIDSettings,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
 						allSettings.settingsOpened[1] = not allSettings.settingsOpened[1];
 					end
 				end
 				
 				imgui.SetCursorPos({imgui.GetCursorPosX()+reserved+4+(tabsH*3-8),imgui.GetCursorPosY()-(tabsH+1.6)});
 				if(fcw[1].TextureIDCompact ~= nil) then
-					if (imgui.ImageButton(fcw[1].TextureIDCompact,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
+					if (imguiWrap.ImageButton('TextureIDCompact',fcw[1].TextureIDCompact,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
 						allSettings.CompactTabs = true;
 						fcw[1].PosChanged = true
 						fcw[2].PosChanged = true
@@ -1121,7 +1256,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				-- imgui.PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0);
 				
 				-- if(fcw[1].TextureIDCompact ~= nil) then
-					-- if (imgui.ImageButton(fcw[1].TextureIDCompact,{tabsH-8,tabsH-12},{-0.05,-0.05},{1.05,1.05},-1,{0,0,0,0},{1,1,1,0.5})) then
+					-- if (imguiWrap.ImageButton(fcw[1].TextureIDCompact,{tabsH-8,tabsH-12},{-0.05,-0.05},{1.05,1.05},-1,{0,0,0,0},{1,1,1,0.5})) then
 						-- allSettings.CompactTabs = true;
 						-- SaveSettings();
 					-- end
@@ -1138,7 +1273,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				for T_i = 1, utils.GetTableLen(tab_Tabs) do
 				if (tab_Tabs[T_i] == allSettings.SelectedTab) then
 						imgui.SetCursorPos({0,0});
-						if imgui.Button(tab_Tabs[T_i],{tabsW/#tab_Tabs-(tabsH-8),tabsH-6}) then
+						if imgui.Button(tab_Tabs[T_i]:gsub('Alt','##Alt'),{tabsW/#tab_Tabs-(tabsH-8),tabsH-6}) then
 							if T_i+1 <= #tab_Tabs then tab_NextTab = tab_Tabs[T_i+1]; else  tab_NextTab = tab_Tabs[1] end
 						end
 					end
@@ -1147,7 +1282,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				imgui.SetCursorPos({(tabsW/#tab_Tabs)-(tabsH-8),0});
 			
 				if(fcw[1].TextureIDCompact ~= nil) then
-					if (imgui.ImageButton(fcw[1].TextureIDCompact,{tabsH-8,tabsH-12},{1.05,1.05},{-0.05,-0.05},-1,{0,0,0,0},{1,1,1,0.5})) then
+					if imguiWrap.ImageButton('TextureIDCompact', fcw[1].TextureIDCompact, {tabsH-8,tabsH-12},{1.05,1.05},{-0.05,-0.05},-1,{0,0,0,0},{1,1,1,0.5}) then
+					--if (imguiWrap.ImageButton(fcw[1].TextureIDCompact,{tabsH-8,tabsH-12},{1.05,1.05},{-0.05,-0.05},-1,{0,0,0,0},{1,1,1,0.5})) then
 						allSettings.CompactTabs = false;
 						fcw[1].PosChanged = true
 						fcw[2].PosChanged = true
@@ -1159,12 +1295,13 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			end
 			PopColorStyles(tab_ButtonColorStylesNormal);
 			--font.FontSize = prevFontSize;
-			--imgui.PopFont();
+			if IWwindowfont then imgui.PopFont(); end
 			imgui.End();
 			
-			
+			fcw[1].isHiddenGUI = not AshitaCore:GetGuiManager():GetVisible()
 			if fcw[1].GuideMeOpened[1] and not fcw[1].GuideMeClosedTmp then
 				
+				if fcw[1].isHiddenGUI then utils.ImguiVis(true) end
 				local GuideMeW = fcw[1].BG_W;
 				local GuideMeH = fcw[1].BG_H+100;
 				if (fcw[1].GuideMeDocked) then
@@ -1185,7 +1322,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				
 				PushWindowStyle()
 								
-				if imgui.Begin('FancyChat - GuideMe (beta)', fcw[1].GuideMeOpened, windowFlags) then
+				if imgui.Begin('FancyChat - GuideMe (experimental)', fcw[1].GuideMeOpened, windowFlags) then
 					local response, status, headers;
 					
 					--InputText(const char* label, char* buf, size_t buf_size, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void* user_data = nullptr)
@@ -1278,7 +1415,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						end
 					end
 					
-					imgui.SameLine(); imgui.Text('%[x'..string.format("%.2f", allSettings.GuideMeFontScale)..'%]');
+					imgui.SameLine(); imgui.Text('[x'..string.format("%.2f", allSettings.GuideMeFontScale)..']');
 					
 					imgui.SameLine(); imgui.Dummy({10,0});
 					imgui.SameLine();
@@ -1292,10 +1429,13 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						end
 					end
 					
-					imgui.BeginChild('GuideMe child', {imgui.GetWindowWidth()*0.983,(imgui.GetWindowHeight()-70)*0.983}, true)
+					imguiWrap.BeginChild('GuideMe child', {imgui.GetWindowWidth()*0.983,(imgui.GetWindowHeight()-70)*0.983}, true)
 
 					--imgui.PushFont(fontBox)
-					imgui.SetWindowFontScale(allSettings.GuideMeFontScale);
+					
+					--imgui.SetWindowFontScale(allSettings.GuideMeFontScale);
+					local IWwindowfontG = imguiWrap.SetWindowFontScale(allSettings.GuideMeFontScale)
+					
 					imgui.PushTextWrapPos(imgui.GetWindowWidth()*0.96);
 					if fcw[1].GuideMeWalkthrough then
 						imgui.TextUnformatted(fcw[1].GuideMeWalkthrough, #fcw[1].GuideMeWalkthrough)
@@ -1305,15 +1445,18 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					end;
 					imgui.PopTextWrapPos()
 					--imgui.PopFont()
+					if IWwindowfontG then imgui.PopFont() end
 					imgui.EndChild()
 					imgui.End();
 				end
 				PopWindowStyle();
+				
 			end
 		
 		
 			if fcw[1].NotepadOpened[1] and not fcw[1].NotepadClosedTmp then
 				
+				if fcw[1].isHiddenGUI then utils.ImguiVis(true) end
 				local GuideMeW = fcw[1].BG_W;
 				local GuideMeH = fcw[1].BG_H+100;
 				if (fcw[1].NotepadDocked) then
@@ -1334,7 +1477,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				
 				PushWindowStyle()
 								
-				if imgui.Begin('FancyChat - Notes (beta)', fcw[1].NotepadOpened, windowFlags) then
+				if imgui.Begin('FancyChat - Notes (experimental)', fcw[1].NotepadOpened, windowFlags) then
 					imgui.PushItemWidth(imgui.GetWindowWidth()-290);
 					if imgui.InputText('##NoteInput', fcw[1].Note, 300, bit.bor(ImGuiInputTextFlags_AutoSelectAll)) then
 					end imgui.SameLine()
@@ -1360,12 +1503,12 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						end
 					end
 					local font = imgui.GetFont();
-					local fontSize = font.FontSize;
+					local fontSize = font.FontSize or font.LegacySize;
 					local R = {};
 					for i = 1, #allSettings.Notes do
 					
 					
-					imgui.BeginChild('##Chat Window Child_'..tostring(i), {imgui.GetWindowWidth()-110,fontSize+fontSize*math.floor(imgui.CalcTextSize(allSettings.Notes[i])/(imgui.GetWindowWidth()-math.min(imgui.CalcTextSize(help.GetLongestWord(allSettings.Notes[i])),(imgui.GetWindowWidth()-100)/2)))+16}, true);
+					imguiWrap.BeginChild('##Chat Window Child_'..tostring(i), {imgui.GetWindowWidth()-110,fontSize+fontSize*math.floor(imgui.CalcTextSize(allSettings.Notes[i])/(imgui.GetWindowWidth()-math.min(imgui.CalcTextSize(help.GetLongestWord(allSettings.Notes[i])),(imgui.GetWindowWidth()-100)/2)))+16}, true);
 					imgui.PushTextWrapPos(imgui.GetWindowWidth())
 					imgui.TextWrapped(allSettings.Notes[i])
 					imgui.PopTextWrapPos()
@@ -1388,7 +1531,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					imgui.End();
 				end
 				PopWindowStyle();
-		
+				
 			
 			end
 		end
@@ -1398,6 +1541,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 		-- Setting up the Settings window elements --
 		
 		if (allSettings.settingsOpened[1]) then
+			fcw[1].autoHideTime = os.time()
 			PushWindowStyle()
 			--print('hello')
 			imgui.SetNextWindowSize({ dsize.x/3.8, dsize.y/2.7 });
@@ -1405,6 +1549,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			--imgui.SetWindowPos({100,100});
 			imgui.SetNextWindowSizeConstraints({ 550,300 }, { FLT_MAX, FLT_MAX, });
 			imgui.Begin('FancyChat Settings##_'+fcw[1].PlayerName, allSettings.settingsOpened, bit.bor( ImGuiWindowFlags_NoResize,ImGuiWindowFlags_NoCollapse, ImGuiWindowFlags_NoNav) );
+
+			--imgui.SetWindowFocus()
 			--if imgui.IsWindowHovered(ImGuiHoveredFlags_RectOnly) then set_WinHovered = true; else set_WinHovered = false; end
 			local setsizex, setsizey = imgui.GetWindowSize();--
 			--if (wposx > dsize.x or wposy > dsize.y or wposx <0 or wposy <0) then  end
@@ -1413,8 +1559,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			if (imgui.BeginTabBar('##fancychat_tabbar', ImGuiTabBarFlags_NoCloseWithMiddleMouseButton))	then
 				
 				if (imgui.BeginTabItem('Chat Window', nil)) then
-					imgui.BeginChild('##Chat Window Child', {(setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3,setsizey*2.7/2.8-60}, true);
-					--imgui.BeginChild('##Chat Window Child', {300,300}, true);
+					imguiWrap.BeginChild('##Chat Window Child', {(setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3,setsizey*2.7/2.8-60}, true);
+					--imguiWrap.BeginChild('##Chat Window Child', {300,300}, true);
 					local fontSize = T{set_FontHeight};
 					local cposY = imgui.GetCursorPosY();
 					local cposX = imgui.GetCursorPosX();
@@ -1475,8 +1621,29 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					imgui.Dummy({0,5});
 					if (imgui.Checkbox('Enable second chat window',{set_SecondChat[1]})) then 
 						set_SecondChat[1] = not set_SecondChat[1];
-						SaveSettings();
+						--SaveSettings();
 					end
+					imgui.Dummy({0,5});
+					imgui.Text('Messages shown in Custom tab') --npc ls party tell shout
+					AddTooltip('The messages selected for the custom tab won\'t appear in All if Hide from All is enabled in \'Extra\' settings.',0,true);
+					if (imgui.Checkbox('NPC',{set_CustomTabModes[1]})) then 
+						set_CustomTabModes[1] = not set_CustomTabModes[1];
+					end imgui.SameLine()
+					cposY = imgui.GetCursorPosY();
+					AddTooltip('Depending on the server settings, this might not catch all NPC messages or catch some /say messages.',4); imgui.SameLine()imgui.SetCursorPosY(cposY);  	  
+					if (imgui.Checkbox('Tell',{set_CustomTabModes[4]})) then 
+						set_CustomTabModes[4] = not set_CustomTabModes[4];
+					end imgui.SameLine()
+					if (imgui.Checkbox('Party',{set_CustomTabModes[3]})) then 
+						set_CustomTabModes[3] = not set_CustomTabModes[3];
+					end imgui.SameLine()
+					if (imgui.Checkbox('LS',{set_CustomTabModes[2]})) then 
+						set_CustomTabModes[2] = not set_CustomTabModes[2];
+					end imgui.SameLine()
+					if (imgui.Checkbox('Shout',{set_CustomTabModes[5]})) then 
+						set_CustomTabModes[5] = not set_CustomTabModes[5];
+					end
+					
 					imgui.Dummy({0,5});
 					if imgui.Button('Reset default values') then
 						set_ChatLineMaxL = 100;
@@ -1484,6 +1651,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						set_FontHeight = 20;
 						set_ChatLines = 8;
 						set_SecondChat[1] = false;
+						set_CustomTabModes = T{false,false,false,false,false};
 						--SaveSettings();
 					end
 					imgui.Dummy({0,5});
@@ -1511,6 +1679,9 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						allSettings.fontSettings.font_height = set_FontHeight;
 						allSettings.rectSettings.fill_color = set_PlateBGColor;
 						allSettings.chatLineMaxL = set_ChatLineMaxL;
+						for ct = 1, #set_CustomTabModes do
+							allSettings.CustomTabModes[ct] = set_CustomTabModes[ct];
+						end
 						SaveSettings();
 						AshitaCore:GetChatManager():QueueCommand(1, "/addon reload fancychat");
 					end
@@ -1591,7 +1762,29 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						allSettings.LockWindowPos[1] = not allSettings.LockWindowPos[1];
 					end
 					imgui.Dummy({0,5});
-					if (imgui.Checkbox('Prevent Obstructing FFXI UI',{allSettings.EnabledChatMove[1]})) then 
+					if (imgui.Checkbox('Enable Auto-Hide window',{allSettings.AutoHideWindow[1]})) then 
+						allSettings.AutoHideWindow[1] = not allSettings.AutoHideWindow[1];
+						SaveSettings();
+					end
+					imgui.PushItemWidth(dsize.x/10);
+					cposY = imgui.GetCursorPosY();
+					cposX = imgui.GetCursorPosX();
+					imgui.Dummy({3,0}); imgui.SameLine(); imgui.Text('L');
+					imgui.SetCursorPosY(imgui.GetCursorPosY()-18);
+					imgui.Dummy({20,0}); imgui.SameLine();
+					imgui.Text('Auto-Hide time (seconds) >');
+					imgui.SameLine();
+					imgui.SetCursorPosY(cposY+0.5);
+					imgui.SetCursorPosX((dsize.x/3.7-dsize.x/8)*(1920/dsize.x));
+					local ahtime = {allSettings.AutoHideTimeMax}
+					if (imgui.SliderInt('##AutoHideSlider', ahtime, 5, 60, "%d", ImGuiSliderFlags_AlwaysClamp )) then
+						allSettings.AutoHideTimeMax = ahtime[1];
+						--PositionLines();
+						SaveSettings();
+					end
+					imgui.PopItemWidth();
+					imgui.Dummy({0,5});
+					if (imgui.Checkbox('Prevent obstructing FFXI UI',{allSettings.EnabledChatMove[1]})) then 
 						allSettings.EnabledChatMove[1] = not allSettings.EnabledChatMove[1];
 					end
 					imgui.Dummy({1,0}); imgui.SameLine(); imgui.Text('|  Set what happens to the 2nd chat')
@@ -1606,10 +1799,14 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						end
 					imgui.EndCombo();
 					end
+					imgui.Dummy({1,0}); imgui.SameLine(); imgui.Text('| ');	imgui.SameLine();
+					if (imgui.Checkbox('Prevent obstructing Auto-Translate menu as well',{allSettings.MoveChatATMenu[1]})) then 
+						allSettings.MoveChatATMenu[1] = not allSettings.MoveChatATMenu[1];
+					end
 					imgui.Dummy({3,0}); imgui.SameLine(); imgui.Text('L');
 					imgui.SetCursorPosY(imgui.GetCursorPosY()-18);
 					imgui.Dummy({27,0}); imgui.SameLine();
-					imgui.Text('[ BETA ]\n[ Reposition chats if FFXI UI elements overlap ]\n[ Works with the most common game UI elements ]\n[ Only works with chat positions locked ]');
+					imgui.Text('[ Experimental ]\n[ Reposition chats if FFXI UI elements overlap ]\n[ Works with the most common game UI elements ]\n[ Only works with chat positions locked ]');
 					--imgui.Text('Lock manual\npositioning');
 					imgui.EndChild();
 				imgui.EndTabItem();
@@ -1617,43 +1814,63 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				
 				
 				if (imgui.BeginTabItem('Font Colors', nil)) then
-					imgui.BeginChild('leftpane', { ((setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3)*0.4,setsizey*2.7/3-60 }, true);
-				
-					AddSetColor('Default', allSettings.defaultColor)
-					AddSetColor('Linkshell 1', allSettings.linkshellColor)
-					AddSetColor('Linkshell 2', allSettings.linkshell2Color)
-					AddSetColor('Party', allSettings.partyColor)
-					AddSetColor('Tell', allSettings.tellColor)
-					AddSetColor('Shout', allSettings.shoutColor)
-					AddSetColor('Emote', allSettings.emoteColor)
-					AddSetColor('Combat', allSettings.combatColor)
-					AddSetColor('Damage', allSettings.dmgColor)
-					AddSetColor('Combat Spell', allSettings.combatspellColor)
-					AddSetColor('Spell Damage', allSettings.spelldmgColor)
+					imguiWrap.BeginChild('leftpane', { ((setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3)*0.4,setsizey*2.7/3-60 }, true);
+
+					local keys = {}
+					for key in pairs(allSettings.colors) do
+						table.insert(keys, key)
+					end
+					table.sort(keys)
+					local skip = {'combat','combatspell','cexi'}
+					for _, key in ipairs(keys) do
+						if not utils.FindInStringTable(key, skip, 0) then
+							AddSetColor(key, allSettings.colors[key])
+						end
+					end
 
 					imgui.EndChild();
 
 					imgui.SameLine();
 					
-					imgui.BeginChild('righttpane', { ((setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3)*0.59, setsizey*2.7/3-60 }, true);
-					--imgui.BeginChild('righttpane', { 100, 100}, true);
+					imguiWrap.BeginChild('righttpane', { ((setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3)*0.59, setsizey*2.7/3-60 }, true);
+					--imguiWrap.BeginChild('righttpane', { 100, 100}, true);
 					
 					imgui.Text('Color Picker');
+					imgui.Separator();
+					--AddTooltip('Pick a color on the color picker, then click the arrow buttons on the left pane to assignt the color to the desired chat mode.',0)
+					imgui.TextWrapped('Pick a color and click an arrow button on the left pane to assign it.')
 					if imgui.ColorPicker3('Preview', set_PickedColor) then
 					end
 				
 					imgui.EndChild();
 					
 					if imgui.Button('Reset Colors') then
-						ResetColors();
+						allSettings.colors = utils.cloneTable(defaultColors)
 						SaveSettings();
 					end
+					imgui.SameLine();
+					if imgui.Button('Export Colors') then
+						local exportedcolors = {}
+						for _, key in ipairs(keys) do
+							if not utils.FindInStringTable(key, skip, 0) then
+								exportedcolors[key] = allSettings.colors[key]
+							end
+						end
+						utils.ExportColors(addon.path, fcw[1].PlayerName, exportedcolors);
+					end
+					imgui.SameLine();
+					if imgui.Button('Import Colors') then
+						allSettings.colors = utils.ImportColors(addon.path, fcw[1].PlayerName ,allSettings.colors);
+						SaveSettings();
+					end
+					imgui.SameLine();
+					AddTooltip('Do not alter the files!',3,true)
 					imgui.EndTabItem();
 				end
 				
 				if (imgui.BeginTabItem('Shortcuts', nil)) then
-					imgui.BeginChild('##Shortcuts Child', {(setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3,setsizey*2.7/2.8-60}, true);
-					--imgui.BeginChild('##Shortcuts Child', {300,300}, true);
+					imguiWrap.BeginChild('##Shortcuts Child', {(setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3,setsizey*2.7/2.8-60}, true);
+					--imguiWrap.BeginChild('##Shortcuts Child', {300,300}, true);
 					local letter = utils.keycodes[utils.findIndexOfValue(utils.keycodes, allSettings.shortcutHide)][1];
 					local letterS = utils.keycodesSpecial[utils.findIndexOfValue(utils.keycodesSpecial, allSettings.shortcutHideS)][1];
 					local letter2 = utils.keycodes[utils.findIndexOfValue(utils.keycodes, allSettings.shortcutTab)][1];
@@ -1662,6 +1879,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					local letterS3 = utils.keycodesSpecial[utils.findIndexOfValue(utils.keycodesSpecial, allSettings.shortcutTab2S)][1];
 		
 					imgui.Text('Hide FancyChat Addon');
+					AddTooltip('Quickly hide FancyChat temporarily re-enabling the legacy chat.',0)
 					local cposY = imgui.GetCursorPosY();
 
 					imgui.SetCursorPosY(cposY+5);
@@ -1787,20 +2005,21 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					imgui.Text('/fancychat manual');
 					imgui.Dummy({23,0}); imgui.SameLine();
 					imgui.Text('[Opens the addon Manual]');
-					imgui.Dummy({0,5});imgui.Dummy({3,0}); imgui.SameLine();
-					imgui.Text('/fancychat dumpchat');
-					imgui.Dummy({23,0}); imgui.SameLine();
-					imgui.Text('[Dumps FancyChat text in the legacy chat]');
+					-- imgui.Dummy({0,5});imgui.Dummy({3,0}); imgui.SameLine();
+					-- imgui.Text('/fancychat dumpchat');
+					-- imgui.Dummy({23,0}); imgui.SameLine();
+					-- imgui.Text('[Dumps FancyChat text in the legacy chat]');
 					
 					imgui.EndChild();
 				imgui.EndTabItem();
 				end
 				if (imgui.BeginTabItem('Extra', nil)) then
-					imgui.BeginChild('##Extra Child', {(setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3,setsizey*2.7/2.8-60}, true);
-					--imgui.BeginChild('##Extra Child', {300,300}, true);
+					imguiWrap.BeginChild('##Extra Child', {(setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3,setsizey*2.7/2.8-60}, true);
+					--imguiWrap.BeginChild('##Extra Child', {300,300}, true);
 				
-					imgui.Text('Block legacy chat messages'); 
-					imgui.Text('[Blocks legacy chat resize animation]');
+					imgui.Text('Block legacy chat messages');
+					AddTooltip('Blocks incoming messages to the legacy chat and only display them on FancyChat. This will block the window resize animation that makes it flicker when new chat messages arrive.',0)
+					--imgui.Text('[Blocks legacy chat resize animation]');
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0}); imgui.SameLine();
 					if (imgui.Checkbox('All',{allSettings.blockAll[1]})) then 
@@ -1809,11 +2028,12 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 							if not set_Popup[1] then set_Popup[1] = true; end
 						else
 							set_Popup[1] = false;
+							allSettings.autoDumpChat[1] = false
 						end
 						SaveSettings();
 					end
 					if set_Popup[1] then
-						AddWarning('While this option has been tested throughfully, it might lead to getting stuck in dialgoues in untested scenarios.\n\nDisable it if you experience such issues.')
+						AddWarning('While this option has been tested throughfully, it might lead to getting stuck in dialgoues in untested scenarios.\n\nDisable it if you experience such issues.\n\nTo submit chat logs for support tickets, use the \"Restore Legacy Chat Logs\" function under \"Tools\" and take a screenshot of the legacy chat!',350)
 					end
 					AddTooltip('Disable this if you are experiencing getting stuck in conversations with NPCs',4,1)
 					imgui.Dummy({5,0}); imgui.SameLine();
@@ -1822,18 +2042,40 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						SaveSettings();
 					end
 					imgui.Dummy({0,15});
-					imgui.Text('Chat message filtering'); 
-					imgui.Text('[These are meant for quick changes on the fly]\n[Use the in-game filter system first!]');
+					imgui.Text('Chat message filtering (experimental)'); 
+					AddTooltip('These are meant for quick changes on the fly. Use the in-game filter system first!',0,1)
+					--imgui.Text('[These are meant for quick changes on the fly]\n[Use the in-game filter system first!]');
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0}); imgui.SameLine();
-					if (imgui.Checkbox('Hide combat log from \'All\' tab.',{allSettings.HideCombatFromAll[1]})) then 
+					if (imgui.Checkbox('Hide combat and custom logs from \'All\' tab.',{allSettings.HideCombatFromAll[1]})) then 
 						allSettings.HideCombatFromAll[1] = not allSettings.HideCombatFromAll[1];
-						ChangeTab(1, 'All');
-						ResetScrolling(1);
-						if allSettings.SecondChat[1] then
-							ChangeTab(2, 'All');
-							ResetScrolling(2);
+						if allSettings.HideCombatFromAll[1] then
+							tab_Tabs[1] = 'AllAlt'
+							if allSettings.SelectedTab == 'All' then
+								tab_NextTab = 'AllAlt'
+							end
+							if allSettings.SecondChat[1] then
+								if allSettings.SelectedTab2 == 'All' then
+									tab_NextTab2 = 'AllAlt'
+								end
+							end
+						else
+							tab_Tabs[1] = 'All'
+							if allSettings.SelectedTab == 'AllAlt' then
+								tab_NextTab = 'All'
+							end
+							if allSettings.SecondChat[1] then
+								if allSettings.SelectedTab2 == 'AllAlt' then
+									tab_NextTab2 = 'All'
+								end
+							end
 						end
+						-- ChangeTab(1, 'All');
+						-- ResetScrolling(1);
+						-- if allSettings.SecondChat[1] then
+							-- ChangeTab(2, 'All');
+							-- ResetScrolling(2);
+						-- end
 						SaveSettings();
 					end
 					imgui.Dummy({0,5});
@@ -1850,10 +2092,10 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						if not allSettings.hideNonParty[1] then allSettings.hideNonYou[1] = false; end
 						SaveSettings();
 					end
-					imgui.Dummy({15,0}); imgui.SameLine(); imgui.Text('L');
-					imgui.SetCursorPosY(imgui.GetCursorPosY()-18);
-					imgui.Dummy({27,0}); imgui.SameLine();
-					imgui.Text('[ Experimental. Blocks most non-party log. ]');
+					--imgui.Dummy({15,0}); imgui.SameLine(); imgui.Text('L');
+					--imgui.SetCursorPosY(imgui.GetCursorPosY()-18);
+					--imgui.Dummy({27,0}); imgui.SameLine();
+					--imgui.Text('[ Experimental. Blocks most non-party log. ]');
 					imgui.Dummy({15,0}); imgui.SameLine(); imgui.Text('L');
 					imgui.SetCursorPosY(imgui.GetCursorPosY()-20);
 					imgui.Dummy({27,0}); imgui.SameLine();
@@ -1866,13 +2108,22 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					
 					imgui.Dummy({0,5});
 					imgui.Text('Other settings'); 
-					imgui.Text('[Read the manual for more detailed info]');
+					AddTooltip('Read the manual for more detailed info',0)
+					--imgui.Text('[Read the manual for more detailed info]');par_extraspace[1]
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0}); imgui.SameLine();
 					if (imgui.Checkbox('Compact Combat Log',{allSettings.CompactCombat[1]})) then 
 						allSettings.CompactCombat[1] = not allSettings.CompactCombat[1];
 						SaveSettings();
 					end		
+					AddTooltip('Disable if you have other addons such as simplelog enabled.',4)
+					-- imgui.Dummy({0,5});
+					-- imgui.Dummy({5,0}); imgui.SameLine();
+					-- if (imgui.Checkbox('Compact party names',{not allSettings.extraspace[1]})) then 
+						-- allSettings.extraspace[1] = not allSettings.extraspace[1];
+						-- SaveSettings();
+					-- end		
+					-- AddTooltip('In combat logs\nEnabled:[Name]\nDisabled:[ Name ]',4)
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0}); imgui.SameLine();
 					if (imgui.Checkbox('Timestamp',{allSettings.timeStamp[1]})) then 
@@ -1930,6 +2181,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						allSettings.tellNotification[1] = not allSettings.tellNotification[1];
 						SaveSettings();
 					end
+					AddTooltip('Plays a notification sound of choice when an incoming Tell message is received.',4)
 					imgui.Dummy({15,0}); imgui.SameLine(); imgui.Text('L');
 					imgui.SetCursorPosY(imgui.GetCursorPosY()-20);
 					imgui.Dummy({27,0}); imgui.SameLine();
@@ -1958,14 +2210,100 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						allSettings.boostNotification[1] = not allSettings.boostNotification[1];
 						SaveSettings();
 					end
-					imgui.PushItemWidth(dsize.x/10);
-					--imgui.PushItemWidth(100);
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0}); imgui.SameLine();
-					imgui.Text('Colored-line splitting character')
+					if (imgui.Checkbox('Chat word alert',{allSettings.Alert[1]})) then 
+						allSettings.Alert[1] = not allSettings.Alert[1];
+						SaveSettings();
+					end
+					AddTooltip('Plays a notification sound of choice when one of the alert words appears in a message.',4)
+					imgui.Dummy({15,0}); imgui.SameLine(); imgui.Text('L');
+					imgui.SetCursorPosY(imgui.GetCursorPosY()-18);
+					imgui.Dummy({30,0}); imgui.SameLine();
+					imgui.Text('Alert words'); imgui.SameLine()
+					imgui.SetCursorPosY(imgui.GetCursorPosY()-2);
+					imgui.PushItemWidth(dsize.x/10);--ImGuiInputTextFlags_CharsNoBlank
+					imgui.InputText('##AlertWords', set_alertBuffer, 255, bit.bor(ImGuiInputTextFlags_CharsNoBlank, ImGuiInputTextFlags_CallbackAlways), (
+					function()
+						allSettings.alertwords = set_alertBuffer[1]:gsub('\0','')
+						set_alertList = utils.stringsplit(allSettings.alertwords, ',')
+						SaveSettings()
+					end
+					)); imgui.SameLine()
+					AddTooltip('Separate words with commas. Case insensitive.',4);
+					imgui.Dummy({15,0}); imgui.SameLine(); imgui.Text('L');
+					imgui.SetCursorPosY(imgui.GetCursorPosY()-20);
+					imgui.Dummy({27,0}); imgui.SameLine();
+					imgui.PushItemWidth(dsize.x/8);
+					--imgui.PushItemWidth(100);
+					if imgui.BeginCombo('##AlertShould', allSettings.selectedAlert , ImGuiComboFlags_None) then
+						for AS_i = 1, 6 do
+							if imgui.Selectable('notification_'..tostring(AS_i)) then
+								allSettings.selectedAlert = 'notification_'..tostring(AS_i);
+								SaveSettings();
+							end
+						end
+					imgui.EndCombo();
+					end
+					imgui.PopItemWidth();
+					imgui.SameLine();
+					if imgui.ArrowButton('PlayAlert', ImGuiDir_Right) then
+						ashita.misc.play_sound(string.format('%s\\notifications\\%s%s.wav', addon.path, allSettings.selectedAlert, allSettings.boostAlert[1] and 'B' or ''));
+					end
+					imgui.SameLine();
+					imgui.Text('Play!');
+					imgui.Dummy({15,0}); imgui.SameLine(); imgui.Text('L');
+					imgui.SetCursorPosY(imgui.GetCursorPosY()-20);
+					imgui.Dummy({27,0}); imgui.SameLine();
+					if (imgui.Checkbox('Volume Boost##Alert',{allSettings.boostAlert[1]})) then 
+						allSettings.boostAlert[1] = not allSettings.boostAlert[1];
+						SaveSettings();
+					end
+					if allSettings.Alert[1] then
+						imgui.Dummy({15,0}); imgui.SameLine(); imgui.Text('L');
+						imgui.SetCursorPosY(imgui.GetCursorPosY()-18);
+						imgui.Dummy({30,0}); imgui.SameLine();
+						imgui.Text('Checked channels')
+						--imgui.Dummy({0,5});
+						imgui.Dummy({30,0}); imgui.SameLine();
+						if (imgui.Checkbox('Say',{allSettings.alertOptions[1]})) then 
+							allSettings.alertOptions[1] = not allSettings.alertOptions[1];
+							SaveSettings();
+						end
+						imgui.Dummy({0,5});
+						imgui.Dummy({30,0}); imgui.SameLine();
+						if (imgui.Checkbox('Shout',{allSettings.alertOptions[2]})) then 
+							allSettings.alertOptions[2] = not allSettings.alertOptions[2];
+							SaveSettings();
+						end
+						imgui.Dummy({0,5});
+						imgui.Dummy({30,0}); imgui.SameLine();
+						if (imgui.Checkbox('Party',{allSettings.alertOptions[3]})) then 
+							allSettings.alertOptions[3] = not allSettings.alertOptions[3];
+							SaveSettings();
+						end
+						imgui.Dummy({0,5});
+						imgui.Dummy({30,0}); imgui.SameLine();
+						if (imgui.Checkbox('Linkshell',{allSettings.alertOptions[4]})) then 
+							allSettings.alertOptions[4] = not allSettings.alertOptions[4];
+							SaveSettings();
+						end
+						imgui.Dummy({0,5});
+						imgui.Dummy({30,0}); imgui.SameLine();
+						if (imgui.Checkbox('Unity',{allSettings.alertOptions[5]})) then 
+							allSettings.alertOptions[5] = not allSettings.alertOptions[5];
+							SaveSettings();
+						end
+					end
+					imgui.PushItemWidth(dsize.x/10);
+					--imgui.PushItemWidth(100);
+					imgui.Dummy({0,10});
 					imgui.Dummy({5,0}); imgui.SameLine();
-					imgui.Text('[ Combat log character before the colored part ]')
+					imgui.Text('Combat log separator character')
+					AddTooltip('Customize the character that, in Combat log, separates the main message from the result (the main and colored parts).',0)
 					imgui.Dummy({5,0}); imgui.SameLine();
+					--imgui.Text('[ Combat log character before the colored part ]')
+					--imgui.Dummy({5,0}); imgui.SameLine();
 					if imgui.BeginCombo('##SplittingChar', allSettings.CombatSplitChar[1] , ImGuiComboFlags_None) then
 						for SC_i = 1, #set_CombatSplitCharList do
 							if imgui.Selectable(set_CombatSplitCharList[SC_i][1]) then
@@ -1978,16 +2316,25 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					imgui.PopItemWidth();
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0}); imgui.SameLine();
-					if (imgui.Checkbox('Colorblind mode for damage text',{allSettings.ColorBlind[1]})) then 
+					if (imgui.Checkbox('Preview Items/Abilities/Spells on mouse hover',{allSettings.ItemPreview[1]})) then 
+						allSettings.ItemPreview[1] = not allSettings.ItemPreview[1];
+						SaveSettings();
+					end
+					imgui.Dummy({0,5});
+					imgui.Dummy({5,0}); imgui.SameLine();
+					if (imgui.Checkbox('Auto-restore logs when opening Legacy Chat',{allSettings.autoDumpChat[1]})) then
+						if not allSettings.autoDumpChat[1] and allSettings.blockAll[1] then 
+							allSettings.autoDumpChat[1] = true;
+						elseif allSettings.autoDumpChat[1] then
+							allSettings.autoDumpChat[1] = false
+						end
+						SaveSettings();
+					end
+					AddTooltip('Available when Block All Messages from Legacy Chat is enabled.\nAutomatically restores chat messages in the Legacy Chat upon opening it.',4)
+					imgui.Dummy({0,5});
+					imgui.Dummy({5,0}); imgui.SameLine();
+					if (imgui.Checkbox('Colorblind mode for damage done/taken text',{allSettings.ColorBlind[1]})) then 
 						allSettings.ColorBlind[1] = not allSettings.ColorBlind[1];
-						a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(allSettings.ColorBlind[1] and 0xFF91FFF0 or 0xFF91FF47)));
-						allSettings.dmgDoneColor = T{r/255,g/255,b/255,a/255};						
-						a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(allSettings.ColorBlind[1] and 0xFFFFA269 or 0xFFFA4343)));
-						allSettings.dmgGotColor = T{r/255,g/255,b/255,a/255};		
-						a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(allSettings.ColorBlind[1] and 0xFF5EE0DE or 0xFFADFF33)));
-						allSettings.spelldmgDoneColor = T{r/255,g/255,b/255,a/255};						
-						a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(allSettings.ColorBlind[1] and 0xFFE6874C or 0xFFFC2B43)));
-						allSettings.spelldmgGotColor = T{r/255,g/255,b/255,a/255};
 						SaveSettings();
 					end
 					imgui.Dummy({0,5});
@@ -1996,12 +2343,13 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						allSettings.EnableFastScroll[1] = not allSettings.EnableFastScroll[1];
 						SaveSettings();
 					end
-					imgui.Dummy({15,0}); imgui.SameLine(); imgui.Text('L');
-					imgui.SetCursorPosY(imgui.GetCursorPosY()-18);
-					imgui.Dummy({27,0}); imgui.SameLine();
-					imgui.Text('[ Use [Shift] + [<] or [>] ]');
-					imgui.Dummy({27,0}); imgui.SameLine();
-					imgui.Text('[ Only while already scrolling chat ]');
+					AddTooltip('While scrolling the chat and hovering the chat window, use [Shift] + [<] or [>] to quickly scroll the history more than one line at the time.',4)
+					-- imgui.Dummy({15,0}); imgui.SameLine(); imgui.Text('L');
+					-- imgui.SetCursorPosY(imgui.GetCursorPosY()-18);
+					-- imgui.Dummy({27,0}); imgui.SameLine();
+					-- imgui.Text('[ Use [Shift] + [<] or [>] ]');
+					-- imgui.Dummy({27,0}); imgui.SameLine();
+					-- imgui.Text('[ Only while already scrolling chat ]');
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0}); imgui.SameLine();
 					if (imgui.Checkbox('Dock GuideMe/Notes on the second chat window',{allSettings.GuideMeSecondWindow[1]})) then 
@@ -2010,26 +2358,79 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 							SaveSettings();
 						end
 					end
-					imgui.Dummy({15,0}); imgui.SameLine(); imgui.Text('L');
-					imgui.SetCursorPosY(imgui.GetCursorPosY()-18);
-					imgui.Dummy({27,0}); imgui.SameLine();
-					imgui.Text('[ Requires second chat window enabled ]');
+					AddTooltip('Requires second chat window enabled.',4)
+					-- imgui.Dummy({15,0}); imgui.SameLine(); imgui.Text('L');
+					-- imgui.SetCursorPosY(imgui.GetCursorPosY()-18);
+					-- imgui.Dummy({27,0}); imgui.SameLine();
+					-- imgui.Text('[ Requires second chat window enabled ]');
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0}); imgui.SameLine();
 					if (imgui.Checkbox(allSettings.heartEmoji[1] and ' <3' or ' ',{allSettings.heartEmoji[1]})) then 
 						allSettings.heartEmoji[1] = not allSettings.heartEmoji[1];
 						SaveSettings();
 					end
+					--AddTooltip((allSettings.heartEmoji[1] and '<3' or '?'),4)
+					imgui.EndChild();
+					imgui.EndTabItem();
+				end
+				if imgui.BeginTabItem('CL Filters', nil) then
+					imguiWrap.BeginChild('##Filters Child', {(setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3,setsizey*2.7/2.8-60}, true);
+					imgui.PushTextWrapPos(imgui.GetWindowWidth()*0.96);
+					imgui.TextWrapped('You can filter combat messages by editing the custom_combat_filters file and using words that would appear in unwanted messages.\n(e.g. effect wears off)\n\n> Words must be present in the original game combat message\n  (i.e. not words modified by addons)\n> Word matching is non case sensitive\n> More details in the custom_combat_filters file\n\n!!! Very long lists could cause performance issues !!!')
+					imgui.Dummy({0,5});
+					if imgui.Button('Edit Custom Filters') then
+						local filepath = addon.path.."\\custom_combat_filters.txt"
+						os.execute('start "" "' .. filepath .. '"')
+					end
+					if imgui.Button('Reload Custom Filters') then
+						par_customFilters = utils.LoadCustomFilters();
+					end
+					imgui.Separator();
+					imgui.Dummy({0,5});
+					if (imgui.Checkbox('Enable Combat Log chat filters',{allSettings.CustomFilters[1]})) then 
+						allSettings.CustomFilters[1] = not allSettings.CustomFilters[1];
+						SaveSettings();
+					end
+					imgui.Dummy({0,5});
+					
+					if allSettings.CustomFilters[1] then
+						imgui.Text('Current Combat Log Filters:')
+						if imgui.BeginTable("resultTable", 2,bit.bor(ImGuiTableFlags_RowBg, ImGuiTableFlags_BordersH, ImGuiTableFlags_BordersV, ImGuiTableFlags_ContextMenuInBody)) then
+							imgui.TableSetupColumn('Filter', ImGuiTableColumnFlags_WidthFixed, imgui.GetWindowWidth()*0.7, 0);imgui.TableSetupColumn('Applied to', ImGuiTableColumnFlags_WidthStretch, 0, 0);
+							imgui.TableHeadersRow();
+							for cf = 1, #par_customFilters do
+								imgui.TableNextRow();
+								imgui.TableSetColumnIndex(0);
+								imgui.PushTextWrapPos(imgui.GetWindowWidth()*0.7);
+								imgui.TextWrapped(par_customFilters[cf][1]:replace('%','%%'))
+								imgui.PopTextWrapPos();
+								imgui.TableSetColumnIndex(1);
+								local cf_scope = ''
+								if par_customFilters[cf][2] then	
+									if par_customFilters[cf][2] == '_z' then cf_scope = cf_scope + 'All'
+									elseif par_customFilters[cf][2] == '_y' then cf_scope = cf_scope + 'All but you'
+									elseif par_customFilters[cf][2] == '_p' then cf_scope = cf_scope + 'All but party' end
+								end
+								imgui.PushTextWrapPos(imgui.GetWindowWidth()*0.9);
+								imgui.TextWrapped(cf_scope)	
+								imgui.PopTextWrapPos();
+							end
+							imgui.PopTextWrapPos();
+							imgui.EndTable();
+						end
+					end
+					
+					
 					imgui.EndChild();
 					imgui.EndTabItem();
 				end
 				if imgui.BeginTabItem('Tools', nil) then
-					imgui.BeginChild('##Tools Child', {(setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3,setsizey*2.7/2.8-60}, true);
-					--imgui.BeginChild('##Extra Child', {300,300}, true);
+					imguiWrap.BeginChild('##Tools Child', {(setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3,setsizey*2.7/2.8-60}, true);
+					--imguiWrap.BeginChild('##Extra Child', {300,300}, true);
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0});  imgui.SameLine();
 					if(fcw[1].TextureIDLogs ~= nil and fcw[1].TextureIDLoading ~= nil) then
-						if (imgui.ImageButton(fcw[1].SaveStart == 0 and fcw[1].TextureIDLogs or fcw[1].TextureIDLoading,{dsize.x/100,dsize.x/100},{-0.01,-0.01},{1.01,1.01},-1,{0,0,0,0},{1,1,1,1})) then
+						if (imguiWrap.ImageButton('TextureIDLogs',fcw[1].SaveStart == 0 and fcw[1].TextureIDLogs or fcw[1].TextureIDLoading,{dsize.x/100,dsize.x/100},{-0.01,-0.01},{1.01,1.01},-1,{0,0,0,0},{1,1,1,1})) then
 							if fcw[1].SaveStart == 0 then
 								fcw[1].SaveStart = os.clock()-fcw[1].SaveStart
 								AshitaCore:GetChatManager():QueueCommand(-1, "/fancychat savelogs");
@@ -2050,7 +2451,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0});  imgui.SameLine();
 					if(fcw[1].TextureIDFolder ~= nil) then
-						if (imgui.ImageButton(fcw[1].TextureIDFolder,{dsize.x/100,dsize.x/100},{-0.01,-0.01},{1.01,1.01},-1,{0,0,0,0},{1,1,1,1})) then
+						if (imguiWrap.ImageButton('TextureIDFolder',fcw[1].TextureIDFolder,{dsize.x/100,dsize.x/100},{-0.01,-0.01},{1.01,1.01},-1,{0,0,0,0},{1,1,1,1})) then
 							os.execute("mkdir "..addon.path .."logs\\"..fcw[1].PlayerName) 
 							os.execute('start "" "' .. addon.path .."logs\\"..fcw[1].PlayerName.. '"')
 						end
@@ -2061,7 +2462,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0});  imgui.SameLine();
 					if(fcw[1].TextureIDManual ~= nil) then
-						if (imgui.ImageButton(fcw[1].TextureIDManual,{dsize.x/100,dsize.x/100},{0.01,0.01},{0.99,0.99},-1,{0,0,0,0},{1,1,1,1})) then
+						if (imguiWrap.ImageButton('TextureIDManual',fcw[1].TextureIDManual,{dsize.x/100,dsize.x/100},{0.01,0.01},{0.99,0.99},-1,{0,0,0,0},{1,1,1,1})) then
 							help.opened[1] = not help.opened[1];
 						end
 					end
@@ -2071,13 +2472,15 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0});  imgui.SameLine();
 					if(fcw[1].TextureIDDumpchat ~= nil) then
-						if (imgui.ImageButton(fcw[1].TextureIDDumpchat,{dsize.x/100,dsize.x/100},{0.05,0.01},{0.98,1.0},-1,{0,0,0,0},{1,1,1,1})) then
-							DumpChat(1)
+						if (imguiWrap.ImageButton('TextureIDDumpchat',fcw[1].TextureIDDumpchat,{dsize.x/100,dsize.x/100},{0.05,0.01},{0.98,1.0},-1,{0,0,0,0},{1,1,1,1})) then
+							DumpChat('-------------- Chat restored --------------')
+							b_OriginalBuffer = T{}
 						end
 					end
 					imgui.SameLine();
 					imgui.SetCursorPosY(imgui.GetCursorPosY()+dsize.x/300);
 					imgui.Text('Restore Legacy Chat Logs');
+					AddTooltip('Use this to restore chat logs in the legacy chat window. Use this to take chat log screenshots to submit for support tickets',0,1)
 					imgui.EndChild();
 					imgui.EndTabItem();
 					
@@ -2092,10 +2495,13 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			set_ChatLineMaxL = allSettings.chatLineMaxL;
 			set_PlateBGColor = allSettings.rectSettings.fill_color;
 			set_FontHeight = allSettings.fontSettings.font_height;
+			for ct = 1, #allSettings.CustomTabModes do
+				set_CustomTabModes[ct] = allSettings.CustomTabModes[ct];
+			end
 			set_ChatLines = allSettings.ChatLines;
 		end
 		
-		if not fcw[1].HideChat and not fcw[1].Closing and not fcw[1].ProcessingText then 
+		if not fcw[1].HideChat and not fcw[1].Closing and not fcw[1].ProcessingText and fcw[1].autoHideFade ~= 1 then 
 		-- Updating chat lines status (must be done even if chat is not displayed) ?? --and b_ChatBufferIdx[1] < b_ChatBufferN[1]
 			if fcw[1].PrevHideChat ~= fcw[1].HideChat and fcw[1].PrevHideChat  then  ResetScrolling(1) end;
 			
@@ -2226,8 +2632,9 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			--end
 			if allSettings.SelectedTab2 == 'All' and allSettings.HideCombatFromAll[1] then b_ChatBufferN[2]=b_ChatBufferN_AllAlt;  end
 			
-			
-			if (not uiw.LegacyChatOpen and not fcw[1].HideChat and not fcw[1].Closing ) then
+			if (not uiw.LegacyChatOpen and not fcw[1].HideChat and not fcw[1].Closing and fcw[1].autoHideFade ~= 1) then
+				
+				ro_RectBG[2]:set_fill_color(bit.band(allSettings.rectSettings.fill_color -(fcw[1].autoHideFade * allSettings.rectSettings.fill_color), 0xFF000000));
 				
 				imgui.SetNextWindowSize({ fcw[2].BG_W, ro_RectBG[2].settings.height+16 }, ImGuiCond_Once);
 				imgui.SetNextWindowSizeConstraints({ fcw[2].BG_W, ro_RectBG[2].settings.height+16 }, { FLT_MAX, FLT_MAX, }, ImGuiCond_Once);
@@ -2239,24 +2646,29 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				local positionStartX, positionStartY = imgui.GetCursorScreenPos();
 				positionStartX = positionStartX + allSettings.WindowPosOffset[3];
 				positionStartY = positionStartY + allSettings.WindowPosOffset[4];
-				if fcw[1].MoveChat then
+				if fcw[1].MoveChat and not mvc_Menu6 then
 					if allSettings.CSMode[2] == 2 then
 						positionStartY = dsize.y;
 						if fcw[1].GuideMeDocked and allSettings.GuideMeSecondWindow[1] then fcw[1].GuideMeClosedTmp = true; end
 						if fcw[1].NotepadDocked and allSettings.GuideMeSecondWindow[1] then fcw[1].NotepadClosedTmp = true; end
 					elseif allSettings.CSMode[2] == 3 then
 						positionStartX = mvc_targetposX + math.floor(fcw[1].BG_W)
+					
 					end
 					fcw[1].MoveChat = false;
 				else
 					fcw[1].NotepadClosedTmp = false
 					fcw[1].GuideMeClosedTmp = false
 					if allSettings.GuideMeSecondWindow[1] then fcw[1].GuideMeClosedTmp = false; end
-					fcw[1].MoveChat = (mvc_Menu1 or mvc_Menu2 or mvc_Menu3 or mvc_Menu4 or mvc_Menu5 or uiw.DialogShown) and allSettings.LockWindowPos[1] and allSettings.EnabledChatMove[1];
+					fcw[1].MoveChat = (mvc_Menu1 or mvc_Menu2 or mvc_Menu3 or mvc_Menu4 or mvc_Menu5 or mvc_Menu6 or uiw.DialogShown) and allSettings.LockWindowPos[1] and allSettings.EnabledChatMove[1];
 					if fcw[1].MoveChat and positionStartX < mvc_targetposX
 					and fcw[2].Anchor_Y > mvc_targetposY then
 						positionStartX = mvc_targetposX;
 						fcw[1].MoveChat = true;
+					elseif fcw[1].MoveChat and mvc_Menu6 and positionStartY+fcw[1].BG_H > mvc_targetposY then
+						--print(positionStartY+fcw[1].BG_H..'-'..mvc_targetposY)
+						positionStartY = mvc_targetposY-fcw[1].BG_H
+						fcw[1].MoveChat = false;
 					else
 						fcw[1].MoveChat = false;
 					end
@@ -2301,7 +2713,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					mouseX > centerPosX - fcw[2].BG_W and mouseX < centerPosX + fcw[2].BG_W
 					and mouseY > centerPosY - fcw[2].BG_H/2 and mouseY < centerPosY + fcw[2].BG_H/2
 					and imgui.IsMouseDragging(ImGuiMouseButton_Left)
-					and (imgui.IsWindowHovered(ImGuiHoveredFlags_RectOnly))
+					and imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly)
 					)
 				then
 					fcw[2].Dragging = true;
@@ -2348,7 +2760,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 							end
 							if (mouseX > fcw[2].Anchor_X and mouseX < fcw[2].Anchor_X+fcw[2].BG_W and
 							mouseY > positionStartY+lineOffset and mouseY < positionStartY+lineOffset+allSettings.fontSettings.font_height and
-							imgui.IsWindowHovered(ImGuiHoveredFlags_RectOnly)
+							imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly)
 							)
 							then
 								--local targetLine = 8-HL_i+fcw[1].ChatHead-1; if targetLine > 8 then targetLine = targetLine -8 end
@@ -2371,8 +2783,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				
 				if (fcw[2].HoverLine > 0 and imgui.IsMouseClicked(ImGuiMouseButton_Left)) then fcw[2].Clicking = true; end
 				
-				if (fcw[2].HoverLine > 0 and fcw[2].Clicking and imgui.IsMouseReleased(ImGuiMouseButton_Left) and imgui.IsWindowHovered(ImGuiHoveredFlags_RectOnly)) then
-					fcw[2].Clicking = false;
+				if (fcw[2].HoverLine > 0 and imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly)) then
+					
 					local copyBufferIdx = utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[2]][2].text)-fcw[2].HoverLine-fcw[2].ScrolledBack-(b_ChatBufferN[2]-b_ChatBufferIdx[2])+1;
 					local copyBufferText = '';
 					if (copyBufferIdx > 0 ) then
@@ -2402,15 +2814,22 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					IDi = IDi + 1;
 					end
 					end
-					if(copyBufferText ~=nil) then
-						if imgui.GetIO().KeyShift then
-							if #allSettings.Notes < 10 and #copyBufferText > 0 then
-								table.insert(allSettings.Notes, copyBufferText)
-								SaveSettings()
+					copyBufferText = cleanMC(copyBufferText)
+					if allSettings.ItemPreview[1] then
+						DrawInfo(copyBufferText)
+					end
+					if (fcw[2].Clicking and imgui.IsMouseReleased(ImGuiMouseButton_Left)) then
+						fcw[2].Clicking = false;
+						if(copyBufferText ~=nil) then
+							if imgui.GetIO().KeyShift then
+								if #allSettings.Notes < 10 and #copyBufferText > 0 then
+									table.insert(allSettings.Notes, copyBufferText)
+									SaveSettings()
+								end
+							else
+								utils.SetClipboardText(utils.RevertShiftJIS(copyBufferText))
+								AshitaCore:GetChatManager():QueueCommand(1, "/echo Text successfully copied to clipboard!");
 							end
-						else
-							utils.SetClipboardText(utils.RevertShiftJIT(copyBufferText))
-							AshitaCore:GetChatManager():QueueCommand(1, "/echo Text successfully copied to clipboard!");
 						end
 					end
 				end
@@ -2422,7 +2841,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				--if (mouseX > fcw[1].Anchor_X and mouseX < fcw[1].Anchor_X+fcw[1].BG_W and
 				if (mouseX > fcw[2].Anchor_X and mouseX < fcw[2].Anchor_X+fcw[2].BG_W and
 				mouseY > positionStartY+scrollOffset and mouseY < positionStartY+scrollOffset+allSettings.fontSettings.font_height*(allSettings.ChatLines+1)
-				and imgui.IsWindowHovered(ImGuiHoveredFlags_RectOnly)
+				and imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) and fcw[2].ChatShift == allSettings.fontSettings.font_height
 				)
 				then
 					if (
@@ -2472,7 +2891,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					imgui.SetNextWindowSize({ tabsW+8, ro_RectBG[2].settings.height/(allSettings.ChatLines*0.7) });
 				else
 					if fcw[2].PosChanged or not fcw[2].compactPos or not fcw[2].compactSize then
-						fcw[2].compactPos= {fcw[2].Anchor_X+(ro_RectBG[2].settings.width-(tabsW/#tab_Tabs))*0.995-1, fcw[2].Anchor_Y - ro_RectBG[2].settings.height+(allSettings.fontSettings.font_height*2/allSettings.fontSettings.font_height)+allSettings.fontSettings.font_height*1.3}; 
+						fcw[2].compactPos = {fcw[2].Anchor_X+(ro_RectBG[2].settings.width-(tabsW/#tab_Tabs))*0.995-1, fcw[2].Anchor_Y - ro_RectBG[2].settings.height+(allSettings.fontSettings.font_height*2/allSettings.fontSettings.font_height)+allSettings.fontSettings.font_height*1.3-1}; 
 				
 						fcw[2].compactSize = { tabsW/#tab_Tabs+(tabsH-(allSettings.fontSettings.font_height/1.2)+3), ro_RectBG[2].settings.height/8 };
 					end
@@ -2488,7 +2907,9 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				--local font = imgui.GetFont();
 				--local prevFontSize = font.FontSize;
 				--font.FontSize = 450/allSettings.fontSettings.font_height;
-				imgui.SetWindowFontScale(allSettings.fontSettings.font_height/25);
+				
+				--imgui.SetWindowFontScale(allSettings.fontSettings.font_height/25);
+				local IWwindowfont2 = imguiWrap.SetWindowFontScale(allSettings.fontSettings.font_height/25)
 				--imgui.SetWindowPos({fcw[1].Anchor_X-(allSettings.fontSettings.font_height*2/allSettings.fontSettings.font_height)-((allSettings.fontSettings.font_height*5)/allSettings.fontSettings.font_height),fcw[1].Anchor_Y+(allSettings.fontSettings.font_height*2/allSettings.fontSettings.font_height)+allSettings.fontSettings.font_height*1.2});
 				--imgui.SetWindowSize({ tabsW+tabsH*2, tabsH });
 				--imgui.SetWindowSizeConstraints({ tabsW, tabsH }, { FLT_MAX, FLT_MAX, });
@@ -2503,10 +2924,10 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						imgui.SetCursorPos({cursx+(reserved/#tab_Tabs)*(T_i-1),cursY});
 						if (tab_Tabs[T_i] == allSettings.SelectedTab2) then
 							PushColorStyles(tab_ButtonColorStylesSelected);
-							imgui.Button(tab_Tabs[T_i],{reserved/#tab_Tabs,tabsH-2});
+							imgui.Button(tab_Tabs[T_i]:gsub('Alt','##Alt'),{reserved/#tab_Tabs,tabsH-2});
 							PopColorStyles(tab_ButtonColorStylesSelected);
 						else
-							if (imgui.Button(tab_Tabs[T_i],{reserved/#tab_Tabs,tabsH-2})) then
+							if (imgui.Button(tab_Tabs[T_i]:gsub('Alt','##Alt'),{reserved/#tab_Tabs,tabsH-2})) then
 								tab_NextTab2 = tab_Tabs[T_i]; 
 							end
 						end
@@ -2518,7 +2939,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					for T_i = 1, utils.GetTableLen(tab_Tabs) do
 						if (tab_Tabs[T_i] == allSettings.SelectedTab2) then
 							imgui.SetCursorPos({0,0});
-							if imgui.Button(tab_Tabs[T_i],{tabsW/#tab_Tabs,tabsH-6}) then
+							if imgui.Button(tab_Tabs[T_i]:gsub('Alt','##Alt'),{tabsW/#tab_Tabs,tabsH-6}) then
 								if T_i+1 <= #tab_Tabs then tab_NextTab2 = tab_Tabs[T_i+1]; else  tab_NextTab2 = tab_Tabs[1] end
 							end
 						end
@@ -2529,10 +2950,11 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				end
 				PopColorStyles(tab_ButtonColorStylesNormal);
 				--font.FontSize = prevFontSize;
+				if IWwindowfont2 then imgui.PopFont() end
 				imgui.End();
 			end
 			--print(tostring(b_ChatBufferN[2]))
-			if not fcw[1].HideChat and not fcw[1].Closing and not fcw[1].ProcessingText then 	
+			if not fcw[1].HideChat and not fcw[1].Closing and not fcw[1].ProcessingText and (not allSettings.AutoHideWindow[1] or os.time() - fcw[1].autoHideTime < allSettings.AutoHideTimeMax) then 	
 				
 				if fcw[1].PrevHideChat ~= fcw[1].HideChat and fcw[1].PrevHideChat then ResetScrolling(2) end;
 				
@@ -2659,30 +3081,43 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			end
 		end
 		fcw[1].PrevHideChat = fcw[1].HideChat
-	end
 		
+		if not allSettings.firstLoadMessage[1] then
+			AddWarning(
+			'Please Read!\n\nWelcome to FancyChat addon!\n\nThis is addon provides a highly customizable and interactive chat replacemante for Final Fantasy XI.\nPlease take your time to check all the settings by either clicking the cog wheel icon at the bottom of the chat window or by typing the command \"/fancychat settings\".\n\nYou can hover with your mouse over the (i) icons to learn more about each functionality. This addon features some advanced options that can include unwanted behaviors for certain players. Therefore, please pay extra attention to the (i) marked in red to learn about important critical information about such features.\n\nFor further help you can check the addon manual accessible from the settings menu or through the command \"/fancychat manual\".\n\nHave fun!'
+			,
+			dsize.y/2, allSettings.firstLoadMessage, dsize.x/2, 'Welcome to FancyChat')
+		end
+	end
+	
 	--if fcw[1].DisplayManual then
 	if help.opened[1] then
 		PushWindowStyle()
 		help.ShowManual(fcw[1].PlayerName);
 		PopWindowStyle()
 	end
+	
+	
+	
 	--end
 	--fcw[1].PrevHideChat = fcw[1].HideChat
 ------------------------------------------
 		
 	--if fcw[1].LoggedIn then
 	-- Render Debug Window if opened --
+	
 	if (dw_WindowOpened[1]) then DebugWindow(); end
+	
 end);
 
 
 ashita.events.register('d3d_endscene', 'd3d_endscene_callback1', function (isRenderingBackBuffer)
-    if (not isRenderingBackBuffer) then return; end
+
+	if (not isRenderingBackBuffer) then return; end
 	
     -- isRenderingBackBuffer is a flag that will be true when the game is currently rendering to the back buffer.
 	--and fcw[1].LoggedLobby ~= 1
-	if (fcw[1].PlayerName ~= '---' and fcw[1].LoggedLobby ~= 1 and not fcw[1].Zoning and fcw[1].LoggedIn and #settings.name > 0 and fcw[1].RenderFOs and not fcw[1].HideChat and not uiw.LegacyChatOpen and not fcw[1].Closing) then
+	if (fcw[1].PlayerName ~= '---' and fcw[1].LoggedLobby ~= 1 and not fcw[1].Zoning and fcw[1].LoggedIn and #settings.name > 0 and fcw[1].RenderFOs and not fcw[1].HideChat and not uiw.LegacyChatOpen and not fcw[1].Closing and fcw[1].autoHideFade ~= 1) then
 		PositionLines(1);
 		if allSettings.SecondChat[1] then PositionLines(2); end
 		-- if fcw[1].ResetCD ~= 0 and os.clock()-fcw[1].ResetCD > 0.2 then
@@ -2710,7 +3145,6 @@ ashita.events.register('d3d_endscene', 'd3d_endscene_callback1', function (isRen
 	-- end
 	-- timeMax = (os.clock()-timeStart)*(fpsFrame/60) > timeMax and (os.clock()-timeStart)*(fpsFrame/60) or timeMax
 	-- Debug(tostring((os.clock()-timeStart)*(fpsFrame/60))..'\n'..tostring(testResult)..'\n'..tostring(fpsFrame), 1, false)
-	
 	
 end);
 
@@ -2754,17 +3188,20 @@ ashita.events.register('text_in', 'text_in_cb', function (e)
 	
 	---------------------------------------------------------------------------------------------------
 	---------------------------------------------------------------------------------------------------
-	
+	-- and #e.message == par_LastMsgLength
 	local e_message;
 	
 	local mode_pre = bit.band(e.mode,  0x000000FF);--(mode_pre == 190 and e.message:find('__')) or
-	if (mode_pre == 190 and #e.message == par_LastMsgLength) or mode_pre == 152 or e.blocked then e.blocked = true; return; end
+	if mode_pre == 152 or e.blocked then e.blocked = true; return; end
+	if mode_pre == 190 then if allSettings.blockAll[1] and not(fcw[1].HideChat or uiw.LegacyChatOpen) then e.blocked = true; end return end
 	if (mode_pre == 191 and string.find(e.message, 'version')) then AshitaCore:GetChatManager():AddChatMessage(0, false, e.message) return end
 	table.insert(b_OriginalBuffer,  tostring(bit.band(e.mode,  0x000000FF))..'|'..os.date('[%H:%M:%S]', os.time())..' '..e.message)
-	if #b_OriginalBuffer > 400 then
-		for _ = 1, 100 do
-			table.remove(b_OriginalBuffer,1)
+	if #b_OriginalBuffer >= 300 then
+		local newBuffer = {}
+		for i = 51, #b_OriginalBuffer do
+			newBuffer[#newBuffer+1] = b_OriginalBuffer[i]
 		end
+		b_OriginalBuffer = newBuffer
 	end
 	
 	if (mode_pre < 20 or mode_pre > 212) then
@@ -2845,10 +3282,18 @@ end
 
 ashita.events.register('load', 'load_cb', function ()
 
-	dw_testPTR = ashita.memory.find('FFxiMain.dll', 0, 'B9????????50E8????????8BF085F674??8B46',0,0);
 
+	--dw_testPTR = ashita.memory.find('FFxiMain.dll', 0, 'B9????????50E8????????8BF085F674??8B46',0,0);
+	--A1????????3BC374??660FBE56
+	dw_testPTR = ashita.memory.find('FFXiMain.dll', 0, '8B480C85C974??8B510885D274??3B05', 16, 0)
+	dw_testPTR = ashita.memory.read_uint32(dw_testPTR)
+	
+	uiw.UpperMenuPTR = ashita.memory.find('FFXiMain.dll', 0, '8B480C85C974??8B510885D274??3B05', 16, 0)
+	uiw.UpperMenuPTR = ashita.memory.read_uint32(uiw.UpperMenuPTR)
+	--print(bit.tohex(dw_testPTR))
 	
 	--print(bit.tohex(dw_testPTR+0x54));
+	
 	
 	
 	
@@ -2915,10 +3360,14 @@ ashita.events.register('load', 'load_cb', function ()
 	--local uiw.DialogPtr;
 	
 	uiw.MenuDescPTR = ashita.memory.find('FFxiMain.dll', 0, 'B9????????50E8????????8BF085F674??8B46',1,0);
+	
+	--uiw.MenuDescPTR = ashita.memory.find('FFXiMain.dll', 0, '8B480C85C974??8B510885D274??3B05', 16, 0)
+	--print(bit.tohex(tostring(uiw.MenuDescPTR)))
 	--uiw.MenuDescPTR = ashita.memory.read_uint32(uiw.MenuDescPTR+0x01);
 	
 	uiw.UIVisiblePtr = ashita.memory.find('FFXiMain.dll', 0, '8B4424046A016A0050B9????????E8????????F6D81BC040C3', 0, 0)
 	uiw.MenuPtr = ashita.memory.find('FFXiMain.dll', 0, '8B480C85C974??8B510885D274??3B05', 16, 0)
+	
 	
 	uiw.MenuPtr = ashita.memory.read_uint32(uiw.MenuPtr);
 	
@@ -2944,13 +3393,26 @@ ashita.events.register('load', 'load_cb', function ()
 	--test_Ptr = ashita.memory.read_uint32(test_Ptr+0x00);
 	--print(bit.tohex(test_Ptr));
 
-	ResetColors();
+	--ResetColors();
+	--allSettings.colors = defaultColors;
+	allSettings.colors = utils.cloneTable(defaultColors)
 	
 	--local dsize = imgui.GetIO().DisplaySize
 	--fcw[1].Anchor_X = dsize.x/2;
 	--fcw[1].Anchor_X = dsize.y/2;
 	
 	allSettings = settings.load(allSettings, 'allSettings');
+	
+	for k,v in pairs(defaultColors) do
+		if not allSettings.colors[k] then
+			allSettings.colors.k = utils.cloneTable(v)
+			SaveSettings()
+		end
+	end
+	
+	fcw[1].autoHideTime = os.time()
+	set_alertList = utils.stringsplit(allSettings.alertwords, ',')
+	set_alertBuffer[1] = allSettings.alertwords;
 	par_customFilters = utils.LoadCustomFilters();
 	
 	fcw[1].PlayerName = allSettings.PlayerName;
@@ -2964,6 +3426,9 @@ ashita.events.register('load', 'load_cb', function ()
 	set_PlateBGColor = allSettings.rectSettings.fill_color;
 	set_FontHeight = allSettings.fontSettings.font_height;
 	set_ChatLines = allSettings.ChatLines;
+	for ct = 1, #allSettings.CustomTabModes do
+		set_CustomTabModes[ct] = allSettings.CustomTabModes[ct];
+	end
 	
 	fcw[1].ChatShift = allSettings.fontSettings.font_height;
 	fcw[1].ChatShiftScale = fcw[1].ChatShiftScale_Min;
@@ -3081,10 +3546,15 @@ ashita.events.register('load', 'load_cb', function ()
 
 	for W_i = 1, 2 do 
 
-		table.insert(b_ChatBuffer[W_i][2].text, '-- Welcome to ');
-		table.insert(b_ChatBuffer[W_i][2].mode, '0|welcome');
+		--table.insert(b_ChatBuffer[W_i][2].text, '-- We\\!FF0000FF?\\lcom\\!--------?\\e to ');
+		--[12:56] Strolling Sapling > [Volker] > 10 DMG 
+		--table.insert(b_ChatBuffer[W_i][2].text, '\\!FFFFFFFF?\\Test\\!--------?\\ \\!FFDBF5C9?\\Hello\\!--------?\\ \\!FFDBF510?\\Hello\\!--------?\\ \\!FFDB30C9?\\Hello\\!--------?\\');
+		--table.insert(b_ChatBuffer[W_i][2].text, utf8.char(0x22EF)..utf8.char(0x25AE)..utf8.char(0x3010)..utf8.char(0x3011));
+		table.insert(b_ChatBuffer[W_i][2].text, '--Welcome to \\§FF44CCFFç\\Fancy Chat--\\§--------ç\\');
+		--table.insert(b_ChatBuffer[W_i][2].mode, '0|welcome');
 		table.insert(b_ChatBuffer[W_i][2].color, 0xFFFFFFFF);
-		table.insert(b_ChatBuffer[W_i][2].auxText,  'FancyChat --');
+		--table.insert(b_ChatBuffer[W_i][2].auxText,  'FancyChat --');
+		table.insert(b_ChatBuffer[W_i][2].auxText,  '');
 		table.insert(b_ChatBuffer[W_i][2].auxColor, 0xFF44CCFF);
 		table.insert(b_ChatBuffer[W_i][2].url, 0);
 	end
@@ -3094,6 +3564,27 @@ ashita.events.register('load', 'load_cb', function ()
 		
 	if allSettings.SelectedTab ~= 'All' then tab_NextTab = allSettings.SelectedTab end
 	if allSettings.SelectedTab2 ~= 'All' then tab_NextTab2 = allSettings.SelectedTab2 end
+	if allSettings.HideCombatFromAll[1] then
+		tab_Tabs[1] = 'AllAlt'
+		if allSettings.SelectedTab == 'All' then
+			tab_NextTab = 'AllAlt'
+		end
+		if allSettings.SecondChat[1] then
+			if allSettings.SelectedTab2 == 'All' then
+				tab_NextTab2 = 'AllAlt'
+			end
+		end
+	else
+		tab_Tabs[1] = 'All'
+		if allSettings.SelectedTab == 'AllAlt' then
+			tab_NextTab = 'All'
+		end
+		if allSettings.SecondChat[1] then
+			if allSettings.SelectedTab2 == 'AllAlt' then
+				tab_NextTab2 = 'All'
+			end
+		end
+	end
 
 	
 	--fcw[1].MoveChatPos1 = ((dsize.x/6.5)*dsize.x/uiw.UISizeX)-1;
@@ -3108,12 +3599,50 @@ ashita.events.register('load', 'load_cb', function ()
 	PositionLines(1);
 	if allSettings.SecondChat[1] then fcw[2].PositionLinesRequest = {true,true}; PositionLines(2); end
 	--gdi:render();
-	testWindow = os.clock()
+	--testWindow = os.clock()
 end);
+
+local function DestroyAllGDIObjects()
+    for _, fo in ipairs(fo_Fwd) do
+        if fo and fo.destroy then
+            fo:destroy()
+        end
+    end
+    for _, fo in ipairs(fo_Bkw) do
+        if fo and fo.destroy then
+            fo:destroy()
+        end
+    end
+    for _, winFonts in ipairs(fo_Chat) do
+        for _, fo in ipairs(winFonts) do
+            if fo and fo.destroy then
+                fo:destroy()
+            end
+        end
+    end
+    for _, winFonts in ipairs(fo_Aux) do
+        for _, fo in ipairs(winFonts) do
+            if fo and fo.destroy then
+                fo:destroy()
+            end
+        end
+    end
+    for _, ro in ipairs(ro_RectBG) do
+        if ro and ro.destroy then
+            ro:destroy()
+        end
+    end
+    for _, ro in ipairs(ro_Scroll) do
+        if ro and ro.destroy then
+            ro:destroy()
+        end
+    end
+end
 
 ashita.events.register('unload', 'unload_cb', function ()
 	fcw[1].Closing = true;
 	SaveSettings();
+	DestroyAllGDIObjects()
 	gdi:destroy_interface();
 end);
 
@@ -3206,15 +3735,15 @@ ashita.events.register('command', 'command_cb', function (e)
 		coroutine.sleep(0.5);	
 		utils.SaveLogs(b_ChatBuffer[7][2].text, b_ChatBuffer[7][2].auxText, 'Shout', fcw[1].PlayerName, addon.path, ts)
 		coroutine.sleep(0.5);	
-		utils.SaveLogs(b_ChatBuffer[8][2].text, b_ChatBuffer[8][2].auxText, 'NPC', fcw[1].PlayerName, addon.path, ts)
+		utils.SaveLogs(b_ChatBuffer[8][2].text, b_ChatBuffer[8][2].auxText, 'Custom', fcw[1].PlayerName, addon.path, ts)
 		coroutine.sleep(0.5);			
 		
 		return;
 	end
-	if (#args == 2 and args[2] == 'dumpchat') then
-		DumpChat(2)
-		return
-	end
+	-- if (#args == 2 and args[2] == 'dumpchat') then
+		-- DumpChat(2)
+		-- return
+	-- end
 	if (#args == 2 and args[2] == 'savedebug') then
 		
 		local ts = os.date('[%Y_%m_%d-%H_%M_%S]', os.time());
@@ -3223,10 +3752,7 @@ ashita.events.register('command', 'command_cb', function (e)
 		end
 		return;
 	end
-	if (#args == 3 and args[2] == 'goto') then
-		GoToLine(1, tonumber(args[3]));
-		return;
-	end
+
 	if (#args > 3 and args[2] == 'test' and tonumber(args[3]) >= 0 and tonumber(args[3]) <= 255) then
 		local test_string = ''
 		local test_i = 4
@@ -3234,10 +3760,11 @@ ashita.events.register('command', 'command_cb', function (e)
 			test_string = test_string..args[test_i]..' '
 			test_i = test_i + 1
 		end
-		AshitaCore:GetChatManager():AddChatMessage(tonumber(args[3]), false, test_string)
+		AshitaCore:GetChatManager():AddChatMessage(tonumber(args[3]), false, test_string:trimex()..'\127\49')
 		return;
 	end
 	if (#args == 2 and args[2] == 'printdebug') then
+		
 		
 		--print('\31\121\72\97\104\101\32\115\121\110\116\104\101\115\105\122\101\100\32\54\32\30\2\102\114\105\101\100\32\112\111\112\111\116\111\101\115\30\1\46')
 		--print('\131\159\131\160\131\161\131\162\131\163\131\164\131\165\131\166\131\167\131\168\131\169\131\170\131\171\131\172\131\173\131\174\131\175\131\176\131\177\131\178\131\179\131\180\131\181\131\182\131\183\131\184\131\185\131\186\131\187\131\188\131\189\131\190\131\191\131\192\131\193\131\194\131\195\131\196\131\197\131\198\131\199\131\200\131\201\131\202\131\203\131\204\131\205\131\206\131\207\131\208\131\209\131\210\131\211\131\212\131\213\131\214\131\215\131\216\131\217\131\218\131\219')
@@ -3267,7 +3794,32 @@ ashita.events.register('command', 'command_cb', function (e)
 		
 		--print(string.find('You find a bronze knife in the Drahbah.',' in '))
 		
-		print('\73\110\32\116\104\101\32\71\117\115\116\97\98\101\114\103\32\77\111\117\110\116\97\105\110\115\32\111\102\32\83\111\117\116\104\101\114\110\32\81\117\111\110\32\108\105\101\115\32\116\104\101\32\105\110\100\117\115\116\114\105\97\108\32\110\97\116\105\111\110\32\107\110\111\119\110\32\97\115\32\116\104\101\32\82\101\112\117\98\108\105\99\32\111\102\32\66\97\115\116\111\107\46\127\52\6')
+		-- print('\73\110\32\116\104\101\32\71\117\115\116\97\98\101\114\103\32\77\111\117\110\116\97\105\110\115\32\111\102\32\83\111\117\116\104\101\114\110\32\81\117\111\110\32\108\105\101\115\32\116\104\101\32\105\110\100\117\115\116\114\105\97\108\32\110\97\116\105\111\110\32\107\110\111\119\110\32\97\115\32\116\104\101\32\82\101\112\117\98\108\105\99\32\111\102\32\66\97\115\116\111\107\46\127\52\6')
+		--print('\129\153\129\154')
+		--AshitaCore:GetChatManager():AddChatMessage(1, false, '\129\168 A new Summit of the Stars perk is now active: Gilfinder\129\169\129\170\129\171')
+		-- AshitaCore:GetChatManager():AddChatMessage(36, false, ('\30%c%s\30\01'):fmt(69, 'Eleanor defeats King Behemoth.'))
+		-- AshitaCore:GetChatManager():AddChatMessage(121, false, ('\30%c%s\30\01'):fmt(96, 'You find a ')..('\30%c%s\30\01'):fmt(2, 'Defending Ring'..('\30%c%s\30\01'):fmt(96,' on King Behemoth.')))
+		-- AshitaCore:GetChatManager():AddChatMessage(121, false, ('\30%c%s\30\01'):fmt(96, 'Eleanor obtains a ')..('\30%c%s\30\01'):fmt(2, 'Defending Ring'..('\30%c%s\30\01'):fmt(96, '.')))
+		-- print('\90\101\114\97\116\105\97\32\100\101\102\101\97\116\115\32\116\104\101\32\171\65\119\122\100\101\105\46\127\49')
+		--print(bit.tobit(utils.RGBAToHex(allSettings.dmgDoneColor)))
+	--	print(string.format("%08X", imgui.GetColorU32(allSettings.dmgDoneColor)))
+		--print(bit.tohex(utils.rgbaToHexNum(allSettings.dmgDoneColor)))
+		--print(MC(utils.rgbaToHexNum(allSettings.dmgDoneColor)));
+		-- local t = '\89\111\117\32\111\98\116\97\105\110\101\100\32\97\32\112\114\101\115\116\105\103\101\32\117\112\103\114\97\100\101\33\32\84\104\105\101\102\58\32\129\154\129\154\129\153\129\153\129\153\32\40\84\72\43\50\32\47\32\69\118\97\115\105\111\110\43\53\41\10'
+		-- print(t);
+		-- local ct = CleanText(t, 'local')
+		-- --print(ct)
+		-- ---print('\89\111\117\32\111\98\116\97\105\110\101\100\32\97\32\112\114\101\115\116\105\103\101\32\117\112\103\114\97\100\101\33\32\84\104\105\101\102\58\32\129\154\129\154\129\153\129\153\129\153\32\40\84\72\43\50\32\47\32\69\118\97\115\105\111\110\43\53\41\10')
+		-- local bytes = {}
+		-- for i = 1, #ct do
+        -- bytes[#bytes + 1] = string.byte(ct, i)
+		-- end
+		--print(table.concat(bytes, " "))
+
+		--print("\129\97 \129\99 \129\121 \129\122")
+		--print(utf8.char(0x1F604)..' '..utf8.char(0x1F605)..' '..utf8.char(0x1F606)..' '..utf8.char(0x1F607)..' '..utf8.char(0x1F608))
+		print(utf8.char(0x2727))
+
 		return;
 	end
 	if (#args == 2 and args[2] == 'helpdebug') then
@@ -3319,19 +3871,32 @@ ashita.events.register('key_state', 'key_state_callback1', function (e)
 	--local uiw.RefInputWinOpenPtr = ashita.memory.read_uint32(uiw.InputWinOpenPtr+0x01);
 	--uiw.InputWinOpen = ashita.memory.read_uint32(uiw.InputWinOpenPtr+0x74) == 1 and true or false;
 	--print(keyptr[42]);
-	if allSettings.EnableFastScroll[1] and keyptr[42]~= 0 then 
-		if (fcw[1].PrevKeyptr[1] == 0 or os.clock()-fcw[1].PrevKeyptr[3] > 0.8) and keyptr[203] ~= 0 and fcw[1].Scrolling and IsRectHovered(ro_RectBG[1].settings, 0) then
-			GoToLine(1,math.max(b_ChatBufferIdx[1]-(fcw[1].ScrolledBack+5), allSettings.ChatLines));
-			if fcw[1].PrevKeyptr[1] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
-		elseif (fcw[1].PrevKeyptr[2] == 0 or os.clock()-fcw[1].PrevKeyptr[3] > 0.8) and keyptr[205] ~= 0 and fcw[1].Scrolling and IsRectHovered(ro_RectBG[1].settings, 0) then
-			GoToLine(1,math.min(b_ChatBufferIdx[1]-(fcw[1].ScrolledBack-5), b_ChatBufferIdx[1]-1));
-			if fcw[1].PrevKeyptr[2] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
-		elseif (fcw[1].PrevKeyptr[1] == 0 or os.clock()-fcw[1].PrevKeyptr[3] > 0.8) and keyptr[203] ~= 0 and fcw[2].Scrolling and IsRectHovered(ro_RectBG[2].settings, 0) then
-			GoToLine(2,math.max(b_ChatBufferIdx[2]-(fcw[2].ScrolledBack+5), allSettings.ChatLines));
-			if fcw[1].PrevKeyptr[1] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
-		elseif (fcw[1].PrevKeyptr[2] == 0 or os.clock()-fcw[1].PrevKeyptr[3] > 0.8) and keyptr[205] ~= 0 and fcw[2].Scrolling and IsRectHovered(ro_RectBG[2].settings, 0) then
-			GoToLine(2,math.min(b_ChatBufferIdx[2]-(fcw[2].ScrolledBack-5), b_ChatBufferIdx[2]-1));
-			if fcw[1].PrevKeyptr[2] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
+	if allSettings.EnableFastScroll[1] and keyptr[42]~= 0  then
+		if fcw[1].ChatShift == allSettings.fontSettings.font_height then
+			if (fcw[1].PrevKeyptr[1] == 0 or os.clock()-fcw[1].PrevKeyptr[3] > 0.8) and keyptr[203] ~= 0 and fcw[1].Scrolling and IsRectHovered(ro_RectBG[1].settings, 0) then
+				--GoToLine(1,math.max(b_ChatBufferIdx[1]-(fcw[1].ScrolledBack+5), allSettings.ChatLines));
+				local currentIdx = #b_ChatBuffer[b_ChatBufferMode[1]][2].text - (b_ChatBufferN[1]-b_ChatBufferIdx[1]) - 1
+				GoToLine(1,math.max(currentIdx-(fcw[1].ScrolledBack+5), allSettings.ChatLines), currentIdx);
+				if fcw[1].PrevKeyptr[1] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
+			elseif (fcw[1].PrevKeyptr[2] == 0 or os.clock()-fcw[1].PrevKeyptr[3] > 0.8) and keyptr[205] ~= 0 and fcw[1].Scrolling and IsRectHovered(ro_RectBG[1].settings, 0) then
+				--GoToLine(1,math.min(b_ChatBufferIdx[1]-(fcw[1].ScrolledBack-5), b_ChatBufferIdx[1]-1));
+				local currentIdx = #b_ChatBuffer[b_ChatBufferMode[1]][2].text - (b_ChatBufferN[1]-b_ChatBufferIdx[1]) - 1
+				GoToLine(1,math.min(currentIdx-(fcw[1].ScrolledBack-5), currentIdx-1), currentIdx);
+				if fcw[1].PrevKeyptr[2] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
+			end
+		end
+		if fcw[2].ChatShift == allSettings.fontSettings.font_height then
+			if (fcw[1].PrevKeyptr[1] == 0 or os.clock()-fcw[1].PrevKeyptr[3] > 0.8) and keyptr[203] ~= 0 and fcw[2].Scrolling and IsRectHovered(ro_RectBG[2].settings, 0) then
+				--GoToLine(2,math.max(b_ChatBufferIdx[2]-(fcw[2].ScrolledBack+5), allSettings.ChatLines));
+				local currentIdx = #b_ChatBuffer[b_ChatBufferMode[2]][2].text - (b_ChatBufferN[2]-b_ChatBufferIdx[2]) - 1
+				GoToLine(2,math.max(currentIdx-(fcw[2].ScrolledBack+5), allSettings.ChatLines), currentIdx);
+				if fcw[1].PrevKeyptr[1] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
+			elseif (fcw[1].PrevKeyptr[2] == 0 or os.clock()-fcw[1].PrevKeyptr[3] > 0.8) and keyptr[205] ~= 0 and fcw[2].Scrolling and IsRectHovered(ro_RectBG[2].settings, 0) then
+				--GoToLine(2,math.min(b_ChatBufferIdx[2]-(fcw[2].ScrolledBack-5), b_ChatBufferIdx[2]-1));
+				local currentIdx = #b_ChatBuffer[b_ChatBufferMode[2]][2].text - (b_ChatBufferN[2]-b_ChatBufferIdx[2]) - 1
+				GoToLine(2,math.min(currentIdx-(fcw[2].ScrolledBack-5), currentIdx-1), currentIdx);
+				if fcw[1].PrevKeyptr[2] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
+			end
 		end
 		fcw[1].PrevKeyptr[1] = keyptr[203];
 		fcw[1].PrevKeyptr[2] = keyptr[205];
@@ -3339,6 +3904,7 @@ ashita.events.register('key_state', 'key_state_callback1', function (e)
 	
     if (allSettings.shortcutHideEnabled[1] and keyptr[allSettings.shortcutHide] ~= 0 and keyptr[allSettings.shortcutHideS] ~= 0 and not fcw[1].Keydown and AshitaCore:GetChatManager():IsInputOpen() == 0x00) then
 		fcw[1].HideChat = not fcw[1].HideChat;
+		fcw[1].autoHideTime = os.time();
 		fcw[1].Keydown = true;
 	else if (keyptr[allSettings.shortcutHide] == 0) then
 			fcw[1].Keydown = false;
@@ -3354,6 +3920,7 @@ ashita.events.register('key_state', 'key_state_callback1', function (e)
 			else
 				tab_NextTab = tab_Tabs[tab_id+1];
 			end
+			fcw[1].autoHideTime = os.time()
 		end
 	else if (keyptr[allSettings.shortcutTab] == 0) then
 			fcw[1].Keydown2 = false;
@@ -3370,6 +3937,7 @@ ashita.events.register('key_state', 'key_state_callback1', function (e)
 				else
 					tab_NextTab2 = tab_Tabs[tab_id+1];
 				end
+				fcw[1].autoHideTime = os.time()
 			end
 		else if (keyptr[allSettings.shortcutTab2] == 0) then
 				fcw[1].Keydown3 = false;
@@ -3439,13 +4007,31 @@ function DebugWindow()
 		--2=combat, 3=Linkshell, 4=Party, 5= tell,  6=shout, 7 = npc
 		--imgui.Text(bit.tohex(fcw[2].OutlineColor));
 		--imgui.Text(tostring());
+		dw_testPTR2 = ashita.memory.read_uint32(dw_testPTR+0x04)
+		imgui.Text('dw_testPTR: '..bit.tohex(dw_testPTR+0x04));
+		imgui.Text('dw_testPTR Value: '..bit.tohex(dw_testPTR2));
+		dw_testPTR3 = ashita.memory.read_uint32(dw_testPTR2+0x14)
+		imgui.Text('dw_testPTR2: '..bit.tohex(dw_testPTR2+0x14));
+		imgui.Text('dw_testPTR2 Value: '..bit.tohex(dw_testPTR3));
+		dw_testPTR4 = ashita.memory.read_uint32(dw_testPTR3+0x10)
+		imgui.Text('dw_testPTR3: '..bit.tohex(dw_testPTR3+0x10));
+		imgui.Text('dw_testPTR3 Value: '..bit.tohex(dw_testPTR4));
+		dw_testPTR5 = ashita.memory.read_uint32(dw_testPTR4+0x2C)
+		imgui.Text('dw_testPTR4: '..bit.tohex(dw_testPTR4+0x2C));
+		imgui.Text('dw_testPTR5 Value: '..bit.tohex(dw_testPTR5));
+		dw_testString = ashita.memory.read_string(dw_testPTR5,16)
+		imgui.Text('dw_testPTRString: '..tostring(dw_testString));
+;
+		
+		
+		imgui.Text('buff_idx '..tostring(b_ChatBufferIdx[1]));
 		imgui.Text('buff_All '..tostring(#b_ChatBuffer[1][2].text)..',N: '..tostring(b_ChatBufferN_All));
 		imgui.Text('buff_AA '..tostring(#b_ChatBuffer[2][2].text)..',N: '..tostring(b_ChatBufferN_AllAlt));
 		imgui.Text('buff_C '..tostring(#b_ChatBuffer[3][2].text)..',N: '..tostring(b_ChatBufferN_Combat));
 		imgui.Text('buff_LS '..tostring(#b_ChatBuffer[4][2].text)..',N: '..tostring(b_ChatBufferN_Linkshell));
 		imgui.Text('buff_PT '..tostring(#b_ChatBuffer[5][2].text)..',N: '..tostring(b_ChatBufferN_Party));
 		imgui.Text('buff_SH '..tostring(#b_ChatBuffer[7][2].text)..',N: '..tostring(b_ChatBufferN_Shout));
-		imgui.Text('buff_NPC '..tostring(#b_ChatBuffer[6][2].text)..',N: '..tostring(b_ChatBufferN_NPC));
+		imgui.Text('buff_Custom '..tostring(#b_ChatBuffer[6][2].text)..',N: '..tostring(b_ChatBufferN_Custom));
 		local buffsum = 0;
 		for i = 3, 7 do
 			buffsum = buffsum + #b_ChatBuffer[i][2].text;
@@ -3454,8 +4040,8 @@ function DebugWindow()
 		imgui.Text('buff_AA+C '..tostring(#b_ChatBuffer[2][2].text+#b_ChatBuffer[3][2].text));
 		local MBcheck = false;
 		if
-			#b_ChatBuffer[1][2].text == #b_ChatBuffer[1][2].mode and
-			#b_ChatBuffer[1][2].mode == #b_ChatBuffer[1][2].color and
+			--#b_ChatBuffer[1][2].text == #b_ChatBuffer[1][2].mode and
+			--#b_ChatBuffer[1][2].mode == #b_ChatBuffer[1][2].color and
 			#b_ChatBuffer[1][2].color == #b_ChatBuffer[1][2].auxText and
 			#b_ChatBuffer[1][2].auxText == #b_ChatBuffer[1][2].auxColor and
 			#b_ChatBuffer[1][2].auxColor == #b_ChatBuffer[1][2].url
@@ -3498,10 +4084,13 @@ function DebugWindow()
 		--imgui.Text(bit.tohex(ashita.memory.read_uint32(uiw.WinOpenPtr)))
 		imgui.Text(tostring(b_ChatBuffer[2][2].url[utils.GetTableLen(b_ChatBuffer[2][2].url)]));
 		--imgui.Text(tostring(fcw[1].PlayerName )); 
-
+		--for cf = 1, #par_customFilters do
+		--	imgui.Text(tostring(par_customFilters[cf][1]))
+		--	imgui.Text(tostring(par_customFilters[cf][2]))
+		--end
 		--imgui.Text();
-	--	imgui.BeginChild('DebugPrints',{ dw_WindowW*0.9, dw_WindowH*0.9 }, true)
-		imgui.BeginChild('Debugchild',{imgui.GetWindowWidth()*0.8, imgui.GetWindowHeight()*0.8,true})
+	--	imguiWrap.BeginChild('DebugPrints',{ dw_WindowW*0.9, dw_WindowH*0.9 }, true)
+		imguiWrap.BeginChild('Debugchild',{imgui.GetWindowWidth()*0.8, imgui.GetWindowHeight()*0.8,true})
 		imgui.Text(dw_TestMessage);
 		imgui.Text(dw_TestMessage2);
 		imgui.EndChild()
@@ -3563,7 +4152,7 @@ function Init()
 	fcw[1].RoRectBaseX = ((allSettings.fontSettings.font_height*2.5)/allSettings.fontSettings.font_height)
 	fcw[1].RoRectBaseY = (allSettings.ChatLines*allSettings.fontSettings.font_height) + (allSettings.fontSettings.font_height/(allSettings.fontSettings.font_height-100))- (allSettings.fontSettings.font_height/10) --+ (allSettings.fontSettings.font_height/10)+(allSettings.fontSettings.font_height/(allSettings.fontSettings.font_height-100))+1
 	fcw[1].FWDBaseX = (allSettings.fontSettings.font_height/1.35)+(allSettings.chatLineMaxL*allSettings.fontSettings.font_height/400)
-	fcw[1].BKWBaseY = (allSettings.fontSettings.font_height*allSettings.ChatLines)+((allSettings.fontSettings.font_height*5)/allSettings.fontSettings.font_height)
+	fcw[1].BKWBaseY = (allSettings.fontSettings.font_height*allSettings.ChatLines)-((allSettings.fontSettings.font_height*5)/allSettings.fontSettings.font_height)
 	fcw[1].BKWBaseX = ((allSettings.fontSettings.font_height*1.5)/allSettings.fontSettings.font_height)
 
 end
@@ -3577,8 +4166,8 @@ function ResetScrolling(id)
 end
 
 function ChangeTab(fo_id, tabName)
-
-	if fo_id == 1 then
+	--print('---'..tostring(fo_id)..'-'..tostring(dw_frameID))
+	if fo_id == 1 then	
 		allSettings.SelectedTab = tabName;
 		--if tabName == 'AllAlt' then selectedTab = 'All'; end
 	else
@@ -3587,16 +4176,18 @@ function ChangeTab(fo_id, tabName)
 	end
 	b_ChatBufferIdx[fo_id] = (function()
 		if (tabName == 'All') then			b_ChatBufferMode[fo_id] = 1; return b_ChatBufferN_All; 			end
+		if (tabName == 'AllAlt') then		b_ChatBufferMode[fo_id] = 2; return b_ChatBufferN_AllAlt; 		end
 		if (tabName == 'Combat') then 		b_ChatBufferMode[fo_id] = 3; return b_ChatBufferN_Combat; 		end
 		if (tabName == 'Linkshell') then	b_ChatBufferMode[fo_id] = 4; return b_ChatBufferN_Linkshell; 	end
 		if (tabName == 'Party') then 		b_ChatBufferMode[fo_id] = 5; return b_ChatBufferN_Party; 		end
 		if (tabName == 'Tell') then 		b_ChatBufferMode[fo_id] = 6; return b_ChatBufferN_Tell; 		end
 		if (tabName == 'Shout') then 		b_ChatBufferMode[fo_id] = 7; return b_ChatBufferN_Shout;		end
-		if (tabName == 'NPC') then			b_ChatBufferMode[fo_id] = 8; return b_ChatBufferN_NPC;			end
+		if (tabName == 'Custom') then		b_ChatBufferMode[fo_id] = 8; return b_ChatBufferN_Custom;			end
 		return b_ChatBufferIdx[fo_id];
 	end)();
 	
-	if tabName == 'All' and allSettings.HideCombatFromAll[1] then  b_ChatBufferMode[fo_id] = 2; b_ChatBufferIdx[fo_id] = b_ChatBufferN_AllAlt end
+	-- print(b_ChatBufferIdx[fo_id])
+	-- if tabName == 'All' and allSettings.HideCombatFromAll[1] then print('hello') b_ChatBufferMode[fo_id] = 2; b_ChatBufferIdx[fo_id] = b_ChatBufferN_AllAlt end
 
 	--if fo_id > 1 then print(tostring(b_ChatBufferMode[fo_id]));end
 	local L_i = fcw[fo_id].ChatHead;
@@ -3611,6 +4202,7 @@ function ChangeTab(fo_id, tabName)
 			fo_Chat[fo_id][L_i]:set_text('');
 			fo_Chat[fo_id][L_i]:set_font_color(0xFFFFFFFF);
 			fo_Aux[fo_id][L_i]:set_text('');
+			fo_Aux[fo_id][L_i]:set_visible(false);
 			fo_Aux[fo_id][L_i]:set_font_color(0xFFFFFFFF);
 		end
 		L_i = L_i +1;
@@ -3629,15 +4221,17 @@ function ResetLines(fo_id)
 			fo_Chat[fo_id][L_i]:set_text(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].text[utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].text)-C_i+1]:trimex());
 			fo_Chat[fo_id][L_i]:set_font_color(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].color[utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].color)-C_i+1]);
 			fo_Aux[fo_id][L_i]:set_text(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].auxText[utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].auxText)-C_i+1]:trimex());
+			--if fo_Aux[fo_id][L_i].settings.text == '' then fo_Aux[fo_id][L_i]:set_visible(false) end
 			fo_Aux[fo_id][L_i]:set_font_color(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].auxColor[utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].auxColor)-C_i+1]);
 			fo_Chat[fo_id][L_i]:set_outline_color(0xFF000000);
 			fo_Aux[fo_id][L_i]:set_outline_color(0xFF000000);
 			--fo_Chat[fo_id][L_i]:set_visible(false);
 			fo_Aux[fo_id][L_i]:set_visible(false);
 		else
-			fo_Chat[fo_id][L_i]:set_text(' ');
+			fo_Chat[fo_id][L_i]:set_text('');
 			fo_Chat[fo_id][L_i]:set_font_color(0xFF000000);
-			fo_Aux[fo_id][L_i]:set_text(' ');
+			fo_Aux[fo_id][L_i]:set_text('');
+			fo_Aux[fo_id][L_i]:set_visible(false);
 			fo_Aux[fo_id][L_i]:set_font_color(0xFF000000);
 			fo_Chat[fo_id][L_i]:set_outline_color(0xFF000000);
 			fo_Aux[fo_id][L_i]:set_outline_color(0xFF000000);
@@ -3656,7 +4250,8 @@ function ResetLines(fo_id)
 	--SetLinesVisible(fo_id, false)
 end
 
-function GoToLine(fo_id, line)
+function GoToLine(fo_id, line, currentIdx)
+	--LegacyDebug(tostring(line))
 	--fcw[fo_id].ScrolledBack = 0;
 	--print(line);
 	if line <= utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].text)
@@ -3665,7 +4260,8 @@ function GoToLine(fo_id, line)
 		--
 		fcw[fo_id].Scrolling = true;
 		fcw[fo_id].ChatShift = allSettings.fontSettings.font_height
-		fcw[fo_id].ScrolledBack = b_ChatBufferIdx[fo_id]-line;
+	--	fcw[fo_id].ScrolledBack = b_ChatBufferIdx[fo_id]-line;
+		fcw[fo_id].ScrolledBack = currentIdx-line;
 		local L_i = fcw[fo_id].ChatHead;
 	--print(tostring(L_i));
 		for C_i = 1, allSettings.ChatLines do
@@ -3673,15 +4269,17 @@ function GoToLine(fo_id, line)
 				fo_Chat[fo_id][L_i]:set_text(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].text[utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].text)-C_i+1-fcw[fo_id].ScrolledBack]:trimex());
 				fo_Chat[fo_id][L_i]:set_font_color(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].color[utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].color)-C_i+1-fcw[fo_id].ScrolledBack]);
 				fo_Aux[fo_id][L_i]:set_text(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].auxText[utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].auxText)-C_i+1-fcw[fo_id].ScrolledBack]:trimex());
+				--if fo_Aux[fo_id][L_i].settings.text == '' then fo_Aux[fo_id][L_i]:set_visible(false) end
 				--fo_Chat[fo_id][L_i]:set_visible(false);
 				fo_Aux[fo_id][L_i]:set_visible(false);
 				fo_Aux[fo_id][L_i]:set_font_color(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].auxColor[utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].auxColor)-C_i+1-fcw[fo_id].ScrolledBack]);
 				fo_Chat[fo_id][L_i]:set_outline_color(0xFF000000);
 				fo_Aux[fo_id][L_i]:set_outline_color(0xFF000000);
 			else
-				fo_Chat[fo_id][L_i]:set_text(' ');
+				fo_Chat[fo_id][L_i]:set_text('');
 				--fo_Chat[fo_id][L_i]:set_font_color(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].color[utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].color)-C_i+1-line]);
-				fo_Aux[fo_id][L_i]:set_text(' ');
+				fo_Aux[fo_id][L_i]:set_text('');
+				fo_Aux[fo_id][L_i]:set_visible('false')
 				--fo_Aux[fo_id][L_i]:set_font_color(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].auxColor[utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[fo_id]][2].auxColor)-C_i+1-line]);
 			end
 
@@ -3725,6 +4323,7 @@ function ScrollLines(fo_id, message, color, auxMessage, auxColor, mode)
 	fo_Chat[fo_id][NL_i]:set_text(message:trimex());
 	fo_Aux[fo_id][NL_i]:set_font_color(auxColor);
 	fo_Aux[fo_id][NL_i]:set_text(auxMessage:trimex());
+	--if fo_Aux[fo_id][NL_i].settings.text == '' then fo_Aux[fo_id][L_i]:set_visible(false) end
 	
 	fo_Chat[fo_id][NL_i]:set_outline_color(0xFF000000);
 	fo_Aux[fo_id][NL_i]:set_outline_color(0xFF000000);
@@ -3837,7 +4436,7 @@ function PositionLines(fo_id)
 				 -- Cache fcw[fo_id] to avoid repeated table lookup
 				  -- Cache fo_Chat[fo_id][L_i] to avoid repeated table lookup
 				
-				-- Check if the clock difference is greater than 0.04
+				-- Check if the clock difference is greater than 0.05
 				if (os.clock() - fcwFoId.OsClockLastFade > 0.04) then
 					
 					-- Cache values to simplify the formula
@@ -3847,13 +4446,17 @@ function PositionLines(fo_id)
 
 					-- Check if font color is not nil
 					if chatLi.settings.font_color ~= nil then
-						local alpha = bit.lshift(math.max(bit.rshift(chatLi.settings.font_color, 24)-decr,0x00), 24)
+						local alpha = bit.lshift(math.max(bit.rshift(chatLi.settings.font_color, 24)-decr,0x02), 24)
 						chatLi:set_font_color(bit.bor(alpha,bit.band(chatLi.settings.font_color,0x00FFFFFF)));
-						auxLi:set_font_color(bit.bor(alpha,bit.band(auxLi.settings.font_color,0x00FFFFFF)));
-						alpha = math.max(bit.rshift(fcwFoId.OutlineColor, 24)-decr,0x02)
-						fcwFoId.OutlineColor = bit.lshift(alpha, 24)
+						
+						local alpha2 = math.max(bit.rshift(fcwFoId.OutlineColor, 24)-decr,0x02)
+						fcwFoId.OutlineColor = bit.lshift(alpha2, 24)
 						chatLi:set_outline_color(fcwFoId.OutlineColor);
-						auxLi:set_outline_color(fcwFoId.OutlineColor);
+						
+						if #auxLi.settings.text > 0 then
+							auxLi:set_font_color(bit.bor(alpha,bit.band(auxLi.settings.font_color,0x00FFFFFF)));
+							auxLi:set_outline_color(fcwFoId.OutlineColor);
+						end
 					end
 
 					-- Update the OsClockLastFade to the current time
@@ -3892,7 +4495,7 @@ function PositionLines(fo_id)
 				--fo_Aux[fo_id][L_i]:set_outline_color(0xFF000000);
 				
 	
-				if (chatLi.rect ~= nil and not chatLi.is_dirty ) then 
+				if ( #auxLi.settings.text > 0 and chatLi.rect ~= nil and not chatLi.is_dirty ) then 
 					
 					auxLi:set_position_x(math.floor(fcwFoId.Anchor_X+chatLi.rect.right+allSettings.fontSettings.font_height/1.75));
 					auxLi:set_visible(true)
@@ -3904,7 +4507,7 @@ function PositionLines(fo_id)
 				end
 			end
 			
-			auxLi:set_position_y( fcwFoId.ChatShift + fcwFoId.Anchor_Y - (allSettings.fontSettings.font_height*(C_i)));
+			if  #auxLi.settings.text > 0 then auxLi:set_position_y( fcwFoId.ChatShift + fcwFoId.Anchor_Y - (allSettings.fontSettings.font_height*(C_i))); end
 			L_i = L_i +1;
 			if (L_i > allSettings.ChatLines) then L_i = 1; end 
 		end
@@ -3938,205 +4541,186 @@ function UpdateLines(fo_id, message, color, auxMessage, auxColor)
 end
 
 function CleanText(text, mode)
-	--text = AshitaCore:GetChatManager():ParseAutoTranslate(text, true);
-	--text = utils.processMsg(text, mode);
-	local systemChannel = false;
-	local cleantext = '';
-	local idx = 1;
-	local testString = '';
 	
-	local intString = {};
 	local addLog = true;
-	if not string.find(mode, 'combat') and not string.find(mode,'combatspell') and not string.find(mode,'shout') and not string.find(mode,'unity') and par_MessageMode ~= 152 and not string.find(mode, 'linkshell') then addLog = true; end
+	if not string.find(mode, '^combat') and not string.find(mode,'^combatspell') and not string.find(mode,'^shout') and not string.find(mode,'^unity') and par_MessageMode ~= 152 and not string.find(mode, '^linkshell') then addLog = true; end
 	
-	
-	
-	--1
-	--if addLog then table.insert(b_LogBuffer,  'Mode: '..mode..' Channel:'..tostring(par_MessageMode)); end
-	
-	--2
-	--if addLog then table.insert(b_LogBuffer,  'Dirty text: '..text); end
-	
-	for idx = 1, string.len(text) do
-		table.insert(intString, string.byte(string.sub(text,idx,idx)));
-	end
-	
-	-- and os.clock()-uiw.DialogCDStart > 0.02
 	if (par_MessageMode == 150 or par_MessageMode == 151) and par_LastMsgInConv then uiw.DialogPromptStart = os.clock(); end 
 	if (par_MessageMode == 150 or par_MessageMode == 151)	then 
 		if par_InEvent then
-			--Debug(text..tostring(par_MessageMode), 1, true);
-			--if ashita.memory.read_uint32(uiw.DialogPtr) ~= 1 and not par_LastMsgInConv then
-				par_LastMsgInConv = true;
-			--end
+		
+			par_LastMsgInConv = true;
+			
 		else
 			par_LastMsgInConv = false;
 		end
 	end
-
-	--3
-	--if addLog then table.insert(b_LogBuffer,  'Test string: \\'..table.concat(intString, '\\')); end
 	
+	-- local cleantext = '';
+	local intString = {};
+	
+	for idx = 1, #text do
+		table.insert(intString, string.byte(string.sub(text,idx,idx)));
+	end
+
 	local dtest = '';
 	for d = 1, #text do
 		
-		dtest = dtest..tostring(intString[d])..','..string.sub(text,d,d)..'|'
-		--Debug(tostring(intString[d])..' '..string.sub(text,d,d)..',', 1 , true);
-		--Debug(text, 1 , true );
+		dtest = dtest..tostring(intString[d])..','..string.sub(text,d,d)..'|';
 		
 	end
-	
-	--4
+
 	if addLog then table.insert(b_LogBuffer, 'Char-Int match: '..dtest); end
-	--[[
-	
-	then
-		par_promptEnd = {intString[#intString-1], intString[#intString]};
-		table.remove(intString, #intString);
-		table.remove(intString, #intString);
-	end
-	]]--
-	--Debug(text, 1 , table.concat(par_promptEnd, ',') );
-	
-	
-	if not string.find(mode, 'combat') or par_MessageMode == 80 or not allSettings.CompactCombat[1] then
-		-----intString = utils.ReplaceInts(intString, utils.badStringsCombat);
-	----else
-		intString = utils.ReplaceInts(intString);
-		intString = utils.CleanInts(intString);
-	else
-		table.remove(intString,#intString)
-		---intString = utils.ReplaceInts(intString, utils.badStringsCyrillic);
-	end
-	
-	---Debug(table.concat(intString, ','),1, true);
-	--intString = utils.ReplaceInts(intString, utils.badStrings);
-	
-	--5
-	--if addLog then table.insert(b_LogBuffer, 'After ReplaceInts: '..table.concat(intString, ',')); end
-	
-	--Debug(table.concat(intString, ','), 1 , true);
-	
-	
-	--6
-	--if addLog then table.insert(b_LogBuffer, 'After CleanInts: '..table.concat(intString, ',')); end
-	
-	
-	--Debug(table.concat(intString, ','), 1 , true);
-	--Debug(table.concat(intString, ','), 1 , true);
-	
-	--if #par_promptEnd > 0 then
-	--	table.insert(intString, par_promptEnd[#par_promptEnd-1])
-	--	table.insert(intString, par_promptEnd[#par_promptEnd])
-	--end
-	--intString = utils.ReplaceInts(intString, utils.badStrings);
-	
-	--Debug(table.concat(intString, ','), 1 , true);
-	
-	if intString[#intString] == 10 then table.remove(intString, #intString); end
 
+	-- if not string.find(mode, 'combat') or par_MessageMode == 80 or not allSettings.CompactCombat[1] then
+
+		-- intString = utils.ReplaceInts(intString);
+		-- intString = utils.CleanInts(intString);
+	-- else
+		-- table.remove(intString,#intString)
+		
+	-- end
 	
-	--local utf8count = 0;
+	-- if intString[#intString] == 10 then table.remove(intString, #intString); end
+	
 	if (#intString) > 0 then
-		cleanInts = {}
-		cleantext = utils.int2text(intString, utils.UTF8chars)
-		for a = 1, #cleantext do
+		-- cleanInts = {}
+		-- cleantext = utils.int2text(intString, utils.UTF8chars)
+		-- for a = 1, #cleantext do
 		
-		table.insert(cleanInts, string.byte(cleantext[a]));
-		--Debug(tostring(intString[d])..' '..string.sub(text,d,d)..',', 1 , true);
-		--Debug(text, 1 , true );
-		
-		end
-		if addLog then table.insert(b_LogBuffer, table.concat(cleanInts,',')); end
-		--  7/8
-		--if addLog then table.insert(b_LogBuffer, 'After int2text: '..cleantext); end
-		if addLog then table.insert(b_LogBuffer, 'Mode: '..mode..' Channel:'..tostring(par_MessageMode)..'Msg: '..cleantext); end
+			-- table.insert(cleanInts, string.byte(cleantext[a]));
+	
+		-- end
+		 if addLog then table.insert(b_LogBuffer, text); end
+	
+		 if addLog then table.insert(b_LogBuffer, 'Mode: '..mode..' Channel: '..tostring(par_MessageMode)); end
 		if addLog then table.insert(b_LogBuffer, '----------'); end
-		--Debug(cleantext, 1 , true);
-		if allSettings.heartEmoji[1] then cleantext = string.gsub(cleantext, '<3', utf8.char(0x2764)); end
+		
+		-- if allSettings.heartEmoji[1] then cleantext = string.gsub(cleantext, '<3', utf8.char(0x2764)); end
 
 	end
 	
-	-- Cleanup 10--
-	if #b_LogBuffer > 1000 then
+	if #b_LogBuffer > 100 then
 		for _ = 1, 4 do
 			table.remove(b_LogBuffer,1);
 		end
 	end
-	
-	--if #promptEnd > 0 then cleantext = cleantext..'\\'..tostring(promptEnd[1])..'\\'..tostring(promptEnd[2]) end;
-	
-	return cleantext:trimex();
+	if not string.find(mode, 'combat') or par_MessageMode == 80 or not allSettings.CompactCombat[1] then
+		while (true) do
+			local hasN = text:endswith('\n');
+			local hasR = text:endswith('\r');
+
+			if (not hasN and not hasR) then
+				break;
+			end
+
+			if (hasN) then text = text:trimend('\n'); end
+			if (hasR) then text = text:trimend('\r'); end
+		end
+		text = text:strip_colors()
+		local intString = {};
+		local cleantext
+		for idx = 1, #text do
+			table.insert(intString, string.byte(string.sub(text,idx,idx)));
+		end
+		--local debugString = ''
+		--for ds = 1, #intString do
+		--	 debugString = debugString..' 0x'..bit.tohex(intString[ds])
+		--end
+		--Debug(tostring(#intString),1,true)
+		intString = utils.ReplaceInts(intString);
+		--Debug(tostring(#intString),1,true)
+		intString = utils.CleanInts(intString);
+		--Debug(tostring(#intString),1,true)
+		cleantext = utils.int2text(intString, utils.UTF8chars)
+		--Debug(tostring(#cleantext),1,true)
+		text = cleantext:trimex()
+		if allSettings.heartEmoji[1] then text = string.gsub(text, '<3', utf8.char(0x2764)); end
+	else
+		
+		if text:sub(-2,-1) == '\127\49' then
+			text = text:sub(0, -3)
+		end
+		--text = AshitaCore:GetChatManager():ParseAutoTranslate(text, true);
+
+		text = text:strip_colors();
+		text = text:gsub('\32\171','\32')
+		text = text:gsub('\129\168','')
+		
+	end
+	return text
+	--return cleantext:trimex();
 end
 
-function ResetColors()
-	allSettings.defaultColor = T{1,1,1,1};
-	local a, r, g, b;
-	local done = 0x00000000;
-	local i = 1;
-	while bit.bxor(done,0xFFFFFFFF) ~= 0 and i <= #utils.modesDA do
-		if bit.band(0x0000000F, done) == 0 and string.find(utils.modesDA[i][2], 'linkshell1') then
-			a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
-			allSettings.linkshellColor = T{r/255,g/255,b/255,a/255};
-			done = bit.bor(0x0000000F, done)
-		end
-		if bit.band(0x000000F0, done) == 0 and string.find(utils.modesDA[i][2], 'linkshell2') then
-			a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
-			allSettings.linkshell2Color = T{r/255,g/255,b/255,a/255};
-			done = bit.bor(0x000000F0, done)
-		end
-		if bit.band(0x00000F00, done) == 0 and string.find(utils.modesDA[i][2], 'party') then
-			a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
-			allSettings.partyColor = T{r/255,g/255,b/255,a/255};
-			done = bit.bor(0x00000F00, done)
-		end
-		if bit.band(0x0000F000, done) == 0 and string.find(utils.modesDA[i][2], 'tell') then
-			a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
-			allSettings.tellColor = T{r/255,g/255,b/255,a/255};
-			done = bit.bor(0x0000F000, done)
-		end
-		if bit.band(0x000F0000, done) == 0 and string.find(utils.modesDA[i][2], 'shout') then
-			a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
-			allSettings.shoutColor = T{r/255,g/255,b/255,a/255};
-			done = bit.bor(0x000F0000, done)
-		end
-		if bit.band(0x00F00000, done) == 0 and string.find(utils.modesDA[i][2], 'emote') then
-			a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
-			allSettings.emoteColor = T{r/255,g/255,b/255,a/255};
-			done = bit.bor(0x00F00000, done)
-		end
-		if bit.band(0x0F000000, done) == 0 and string.find(utils.modesDA[i][2],'combat_') then
-			a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
-			allSettings.combatColor = T{r/255,g/255,b/255,a/255};
-			done = bit.bor(0x0F000000, done)
-		end
-		if bit.band(0xF0000000, done) == 0 and string.find(utils.modesDA[i][2], 'combatspell_') then
-			--print(tostring(i)..'.'..tostring(bit.tohex(utils.modesDA[i][3])))
-			a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
-			allSettings.combatspellColor = T{r/255,g/255,b/255,a/255};
-			done = bit.bor(0xF0000000, done)
-		end
-		i = i+1;
-	end
-		a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(0xFFF7CF05)));
-		allSettings.dmgColor = T{r/255,g/255,b/255,a/255};
+-- function ResetColors()
+	-- --allSettings.defaultColor = T{1,1,1,1};
+	-- local a, r, g, b;
+	-- local done = 0x00000000;
+	-- local i = 1;
+	-- while bit.bxor(done,0xFFFFFFFF) ~= 0 and i <= #utils.modesDA do
+		-- if bit.band(0x0000000F, done) == 0 and string.find(utils.modesDA[i][2], 'linkshell1') then
+			-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
+			-- allSettings.linkshellColor = T{r/255,g/255,b/255,a/255};
+			-- done = bit.bor(0x0000000F, done)
+		-- end
+		-- if bit.band(0x000000F0, done) == 0 and string.find(utils.modesDA[i][2], 'linkshell2') then
+			-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
+			-- allSettings.linkshell2Color = T{r/255,g/255,b/255,a/255};
+			-- done = bit.bor(0x000000F0, done)
+		-- end
+		-- if bit.band(0x00000F00, done) == 0 and string.find(utils.modesDA[i][2], 'party') then
+			-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
+			-- allSettings.partyColor = T{r/255,g/255,b/255,a/255};
+			-- done = bit.bor(0x00000F00, done)
+		-- end
+		-- if bit.band(0x0000F000, done) == 0 and string.find(utils.modesDA[i][2], 'tell') then
+			-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
+			-- allSettings.tellColor = T{r/255,g/255,b/255,a/255};
+			-- done = bit.bor(0x0000F000, done)
+		-- end
+		-- if bit.band(0x000F0000, done) == 0 and string.find(utils.modesDA[i][2], 'shout') then
+			-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
+			-- allSettings.shoutColor = T{r/255,g/255,b/255,a/255};
+			-- done = bit.bor(0x000F0000, done)
+		-- end
+		-- if bit.band(0x00F00000, done) == 0 and string.find(utils.modesDA[i][2], 'emote') then
+			-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
+			-- allSettings.emoteColor = T{r/255,g/255,b/255,a/255};
+			-- done = bit.bor(0x00F00000, done)
+		-- end
+		-- if bit.band(0x0F000000, done) == 0 and string.find(utils.modesDA[i][2],'combat_') then
+			-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
+			-- allSettings.combatColor = T{r/255,g/255,b/255,a/255};
+			-- done = bit.bor(0x0F000000, done)
+		-- end
+		-- if bit.band(0xF0000000, done) == 0 and string.find(utils.modesDA[i][2], 'combatspell_') then
+			-- --print(tostring(i)..'.'..tostring(bit.tohex(utils.modesDA[i][3])))
+			-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(utils.modesDA[i][3])));
+			-- allSettings.combatspellColor = T{r/255,g/255,b/255,a/255};
+			-- done = bit.bor(0xF0000000, done)
+		-- end
+		-- i = i+1;
+	-- end
+		-- --a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(0xFFF7CF05)));
+		-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(0xFFFFFFFF)));
+		-- allSettings.dmgColor = T{r/255,g/255,b/255,a/255};
 		
-		a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(allSettings.ColorBlind[1] and 0xFF91FFF0 or 0xFF91FF47)));
-		allSettings.dmgDoneColor = T{r/255,g/255,b/255,a/255};
+		-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(allSettings.ColorBlind[1] and 0xFF91FFF0 or 0xFF91FF47)));
+		-- allSettings.dmgDoneColor = T{r/255,g/255,b/255,a/255};
 		
-		a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(allSettings.ColorBlind[1] and 0xFFFFA269 or 0xFFFA4343)));
-		allSettings.dmgGotColor = T{r/255,g/255,b/255,a/255};
+		-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(allSettings.ColorBlind[1] and 0xFFFFA269 or 0xFFFA4343)));
+		-- allSettings.dmgGotColor = T{r/255,g/255,b/255,a/255};
 		
-		a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(0xFFFF9C17)));
-		allSettings.spelldmgColor = T{r/255,g/255,b/255,a/255};
+		-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(0xFFF0FFF0)));
+		-- allSettings.spelldmgColor = T{r/255,g/255,b/255,a/255};
 		
-		a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(allSettings.ColorBlind[1] and 0xFF5EE0DE or 0xFFADFF33)));
-		allSettings.spelldmgDoneColor = T{r/255,g/255,b/255,a/255};
+		-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(allSettings.ColorBlind[1] and 0xFF5EE0DE or 0xFFADFF33)));
+		-- allSettings.spelldmgDoneColor = T{r/255,g/255,b/255,a/255};
 		
-		a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(allSettings.ColorBlind[1] and 0xFFE6874C or 0xFFFC2B43)));
-		allSettings.spelldmgGotColor = T{r/255,g/255,b/255,a/255};
+		-- a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(allSettings.ColorBlind[1] and 0xFFE6874C or 0xFFFC2B43)));
+		-- allSettings.spelldmgGotColor = T{r/255,g/255,b/255,a/255};
 	
-end
+-- end
 
 function PushColorStyles(styles)
 	for _, s in pairs(styles) do
@@ -4150,29 +4734,94 @@ function PopColorStyles(styles)
 	end
 end
 
+local combatCP = 
+{
+	RA 		= 	utf8.char(0x27B6),
+	COL		= 	utf8.char(0x589),
+	USE		= 	utf8.char(0x1F4A2),
+	PUM		= 	utf8.char(0x2316),
+	CRIT	= 	utf8.char(0x1F4A5),
+	ATK 	=	utf8.char(0x1F5E1),
+	LEFT	= 	utf8.char(0x25C0),
+	RIGHT	= 	utf8.char(0x25B6),
+	PARR	= 	utf8.char(0x2694),
+	CNTR	= 	utf8.char(0x2B8C),
+	KILL	= 	utf8.char(0x2717),
+	CAST	= 	utf8.char(0x1F300),
+	SPELL	= 	utf8.char(0x2727),
+	HEAL	= 	utf8.char(0x2728),
+	SUB 	= 	utf8.char(0x2514)..utf8.char(0x2500),
+}
+
 function CombatText(msg, chn)
 	
+	--	U+269F 
+	
+	--local ES = allSettings.extraspace[1] and ' ' or ''
 	local A = '';
 	local B = '';
 	local DMG = '';
 	local S = '';
+	local T = '';
+	local Ext = '';
 		
 	if msg:find('hit') then
 		A, B, DMG = msg:match("^(.*) hits? (.*) for (%d*) points? of damage%.$")
-		--Debug(tostring(A)..'-'..tostring(B)..'-'..tostring(DMG),1,true)
-		if A and B and DMG then
 		
-			if not A:find('^[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
-			if not B:find('^[Tt]he') then B = '['..B..']' else
-			B = B:gsub('[Tt]he ', '');
+		if A and B and DMG then
+			local ra = ''
+			if msg:find('ranged attack') then
+				A = A:gsub('\'s ranged attack','')
+				B = B:gsub('\'s ranged attack','')
+				--ra = ' [R.Atk]'
+				--ra = ' '..utf8.char(0x27B6)
+				ra = ' '..combatCP.RA
+			end
+			-- if not A:find('^[Tt]he') then par_actor1 = A else
+				-- A = A:gsub('[Tt]he ', ''); par_actor2 = A;
+			-- end
+			-- if not B:find('^[Tt]he') then
+				
+				-- if #par_actor1 == 0 then
+					-- par_actor1 = B
+				-- else
+					-- par_actor2 = B
+				-- end
+			-- else
+				-- B = B:gsub('[Tt]he ', '');
+				-- par_actor2 = B
+			-- end
+			--Debug(tostring(#par_party_names), 1, true)
+			
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '')--:gsub('ranged attack', 'RA');
+				par_actor2 = A;
+			end
+			------
+			if utils.StringFindTable(B, par_party_names) then
+				if #par_actor1 > 0 then
+					par_actorP = B;
+				else
+					par_actor1 = B;
+				end
+			else
+				B = B:gsub('[Tt]he ', '')--:gsub('ranged attack', 'RA');
+				if #par_actor2 > 0 then
+					par_actorE = B;
+				else
+					par_actor2 = B;
+				end
 			end
 			
-			msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG';
+			
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG'..ra;
+			msg = A..' '..(#ra > 0 and ra or combatCP.ATK)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG';
 			if (A:find(fcw[1].PlayerName)) then par_DamageDone = true; end;
 			if (B:find(fcw[1].PlayerName)) then par_DamageGot = true; end;
 			
-			msg = msg:gsub('ranged attack', 'RA');
+			
 			par_CombatCutIdx = utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
 			
 			return msg
@@ -4182,22 +4831,102 @@ function CombatText(msg, chn)
 	if msg:find('score') then
 		A, B, DMG = msg:match("^(.*) scores? a critical hit! (.*) takes? (%d*) points? of damage%.$")
 		if A and B and DMG then
-		
-			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
-			if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
-			if not A:find('^[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
-			if not B:find('^[Tt]he') then B = '['..B..']' else
-			B = B:gsub('[Tt]he ', '');
+			local ra = ''
+			if msg:find('ranged attack') then
+				A = A:gsub('\'s ranged attack','')
+				B = B:gsub('\'s ranged attack','')
+				--ra = ' [R.Atk]'
+				ra = combatCP.RA
+			end
+			if (A:find(fcw[1].PlayerName)) then par_DamageDone = true; end;
+			if (B:find(fcw[1].PlayerName)) then par_DamageGot = true; end;
+			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
+			-- A = A:gsub('[Tt]he ', ''); end
+			-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
+			-- B = B:gsub('[Tt]he ', '');
+			-- end
+			
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+			------
+			if utils.StringFindTable(B, par_party_names) then
+				if #par_actor1 > 0 then
+					par_actorP = B;
+				else
+					par_actor1 = B;
+				end
+			else
+				B = B:gsub('[Tt]he ', '');
+				if #par_actor2 > 0 then
+					par_actorE = B;
+				else
+					par_actor2 = B;
+				end
 			end
 
-			msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' crit DMG!';
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG '..ra..utf8.char(0x23eb);
+			msg = A..' '..(#ra > 0 and ra or combatCP.ATK)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG '..combatCP.CRIT;
 			
-			msg = msg:gsub('ranged attack', 'RA');
+			--msg = msg:gsub('ranged attack', 'RA');
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
 			return msg;
 		end
 	end
+	
+	if msg:find('ranged attack') then
+		A, Ext = msg:match('^(.*)(%\'s.*)$')
+		if Ext:find('miss') then
+			if (A == fcw[1].PlayerName) then par_DamageGot = true; end;
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+			msg = A..' '..utf8.char(allSettings.CombatSplitChar[2])..' Miss '..combatCP.RA--' Miss [R.Atk]';
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			return msg;
+		elseif Ext:find('pummeling') then
+			B, DMG = Ext:match('^.*pummeling (.*) for (.*) points of damage!$')
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '')--:gsub('ranged attack', 'RA');
+				par_actor2 = A;
+			end
+			------
+			if utils.StringFindTable(B, par_party_names) then
+				if #par_actor1 > 0 then
+					par_actorP = B;
+				else
+					par_actor1 = B;
+				end
+			else
+				B = B:gsub('[Tt]he ', '')--:gsub('ranged attack', 'RA');
+				if #par_actor2 > 0 then
+					par_actorE = B;
+				else
+					par_actor2 = B;
+				end
+			end
+			
+			
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG '..utf8.char(0x27B6)..utf8.char(0x2316);
+			msg = A..' '..combatCP.RA..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG '..combatCP.PUM;
+			if (A:find(fcw[1].PlayerName)) then par_DamageDone = true; end;
+			if (B:find(fcw[1].PlayerName)) then par_DamageGot = true; end;
+			
+			
+			par_CombatCutIdx = utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+		end
+	end	
+	--Debug(tostring(A)..'-'..tostring(B)..'-'..tostring(DMG),1,true)
+		--\Â§FFFFFFFFÃ§\[23:47]\Â§--------Ã§\ Snuggle's ranged attack strikes true, pummeling the Land Crab for 20 points of damage! 
+		--\Â§FFFFFFFFÃ§\[23:59]\Â§--------Ã§\ Snuggle's ranged attack misses. 
 	
 	if msg:find('use') then
 		A, S, B, DMG = msg:match("^(.*) uses? (.*)%.%s*(.*) takes? (%d*) points? of damage%.$")
@@ -4205,13 +4934,38 @@ function CombatText(msg, chn)
 		
 			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
 			if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
-			if not A:find('^[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
-			if not B:find('^[Tt]he') then B = '['..B..']' else
-			B = B:gsub('[Tt]he ', '');
-			end
+			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
+			-- A = A:gsub('[Tt]he ', ''); end
+			-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
+			-- B = B:gsub('[Tt]he ', '');
+			-- end
 			
-			msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']'..utf8.char(0x589)..' '..DMG..' DMG';
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+			------
+			if utils.StringFindTable(B, par_party_names) then
+				if #par_actor1 > 0 then
+					par_actorP = B;
+				else
+					par_actor1 = B;
+				end
+			else
+				B = B:gsub('[Tt]he ', '');
+				if #par_actor2 > 0 then
+					par_actorE = B;
+				else
+					par_actor2 = B;
+				end
+			end
+			S = '\\'..S..'/'
+			par_action1 = S;
+			
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']'..utf8.char(0x589)..' '..DMG..' DMG';
+			msg = A..' '..combatCP.USE..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..combatCP.COL..' '..DMG..' DMG';
 			
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
 			return msg;
@@ -4219,25 +4973,38 @@ function CombatText(msg, chn)
 
 
 		A, S, Ext = msg:match("^(.*) uses? ([^%.]*)%.%s*(.*)$")
-		if A and S and not msg:find('damage')then
-			
+		if A and S and not msg:find('damage', #A) and not msg:find('miss', #A)  and not msg:find('^You must') and not msg:find('lacks the') and not msg:find('^You are') and not msg:find('Unable to') and not msg:find('cannot') then
+			--Debug(A,1,true)
 			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
 			-- --if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
 			if Ext and Ext:trimex() ~= '' then
-
-				Ext = Ext:gsub('receives the effect of', utf8.char(0x25C0))
-				Ext = Ext:gsub('gains the effect of', utf8.char(0x25C0))
-				Ext = Ext:gsub('is afflicted with', utf8.char(0x25C0))
-				Ext = Ext:gsub('successfully (.)', function(c) return utf8.char(0x25B6)..' '..c:upper() end)
+				--Everoth uses Double-Up. The total for Chaos Roll increases to 7! Everoth receives the effect of Chaos Roll
+				Ext = Ext:gsub('receives the effect of', combatCP.LEFT)
+				Ext = Ext:gsub('gains the effect of', combatCP.LEFT)
+				Ext = Ext:gsub('is afflicted with', combatCP.LEFT)
+				Ext = Ext:gsub(' increases to', ':')
+				Ext = Ext:gsub('The total for ', '')
+				Ext = Ext:gsub('successfully (.)', function(c) return combatCP.RIGHT..' '..c:upper() end)
 				Ext = Ext..' '
 			else
 				Ext = ''
 			end
-			if not A:find('^[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
-			msg = Ext..A..' '..utf8.char(0x25B6)..' ['..S..']';
+			--Debug(Ext,1,true)
+			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
+			-- A = A:gsub('[Tt]he ', ''); end
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+			S = '\\'..S..'/'
+			par_action1 = S;
+			
+			--msg = Ext..A..' '..utf8.char(0x25B6)..' ['..S..']';
+			msg = Ext..A..' '..combatCP.RIGHT..' '..S..' ';
 					
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(0x25B6))+string.len(utf8.char(0x25B6))-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.RIGHT)+string.len(combatCP.RIGHT)-1;
 			return msg;
 		end
 	end
@@ -4245,11 +5012,21 @@ function CombatText(msg, chn)
 	if msg:find('Skillchain') then
 		S, A, DMG = msg:match("^(Skillchain: [^%.]*)%.%s(.*) takes? (%d*) points? of damage%.$")
 		if S and A and DMG then
+			-- A = '['..ES..A..ES..']'
+			-- A = A:gsub('[Tt]he ', '');
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+			S = '\\'..S:gsub('Skillchain:','SC')..'/'
+			par_action1 = S;
+			--msg = A..' '..utf8.char(0x25C0)..' ['..S:gsub('Skillchain:','SC')..']'..utf8.char(0x589)..' '..DMG..' DMG';
+			--msg = A..' '..utf8.char(0x25C0)..' '..S..' '..utf8.char(0x589)..' '..DMG..' DMG';
+			msg = A..' '..combatCP.LEFT..' '..S..combatCP.COL..' '..DMG..' DMG';
 			
-			A = A:gsub('[Tt]he ', '');
-			msg = A..' '..utf8.char(0x25C0)..' ['..S:gsub('Skillchain:','SC -')..']'..utf8.char(0x589)..' '..DMG..' DMG';
-			
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(0x25C0))+string.len(utf8.char(0x25C0))-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.LEFT)+string.len(combatCP.LEFT)-1;
 			return msg;
 		end
 	end
@@ -4258,20 +5035,36 @@ function CombatText(msg, chn)
 	--[00:31:31] yYou do not meet the requirements to obtain the monk's testimony. Monk's testimony lost.â¯121
 	
 	if msg:find('take') then
-		A, DMG = msg:match("^([^%p]*) takes? (%d*) points? of damage%.$")
+		A, DMG = msg:match("^([^%.]*) takes? (%d*) points? of damage%.$")
 		if A and DMG then
-			if A:find('^[Tt]he ') then A = A:gsub('[Tt]he ',' ') else A = '['..A..']' end
-			msg = utf8.char(0x2514)..utf8.char(0x2500)..A..' '..utf8.char(0x25C0)..' '..DMG..' DMG';
+			--if A:find('^[Tt]he ') then A = A:gsub('[Tt]he ',' ') else A = '['..ES..A..ES..']' end
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+			msg = combatCP.SUB..A..' '..combatCP.LEFT..' '..DMG..' DMG';
 			if (A == fcw[1].PlayerName) then par_DamageGot = true; end;
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(0x25C0))+string.len(utf8.char(0x25C0))-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.LEFT)+string.len(combatCP.LEFT)-1;
 			return msg;
 		end
 	end
 
 	if msg:find('Additional') then
-		S = msg:match("^Additional effect: (.*)$")
+		S = msg:match("^Additional effect: (.*)%..*$")
 		if S then
-			msg = '[Add.Eff.] '..utf8.char(allSettings.CombatSplitChar[2])..' '..S:gsub('points of damage.','DMG')..' ';
+		--\Â§FFFFFFFFÃ§\[11:05]\Â§--------Ã§\ â””â”€ Add.E. >\Â§FFF0FEFFÃ§\ \Â§FFF3A6FFÃ§\[TH effectiveness against the Strolling Sapling : 2.]\Â§FFF0FEFFÃ§\\Â§--------Ã§\ 
+			S = S:gsub('additional ','')
+			S = S:gsub('drained from .*','drained')
+			S = S:gsub('Treasure Hunter effectiveness against','TH on')
+			S = S:gsub(' increases to', combatCP.COL)
+			S = S:gsub('[Tt]he ','')
+			S = S:gsub('%.','')
+			S = S:gsub('points? of damage','DMG')
+			S = '\\'..S..'/'
+			par_action1 = S;
+			msg = combatCP.SUB..'Add.E. '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..' ';
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
 			return msg;
 		end
@@ -4280,9 +5073,18 @@ function CombatText(msg, chn)
 	if msg:find('read') then
 		A, S = msg:match("^(.*) read[%a]* (.*)%.$")
 		if A and S then
-			if not A:find('^[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
-			msg = A..' '..utf8.char(allSettings.CombatSplitChar[2])..' readies...'..'['..S..']';
+			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
+			-- A = A:gsub('[Tt]he ', ''); end
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+			S = '\\'..S..'/'
+			par_action1 = S;
+			--msg = A..' '..utf8.char(allSettings.CombatSplitChar[2])..' readies...'..'['..S..']';
+			msg = A..' '..utf8.char(allSettings.CombatSplitChar[2])..' readies...'..S..' ';
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
 			return msg;
 		end
@@ -4290,23 +5092,87 @@ function CombatText(msg, chn)
 	
 	if msg:find('parr') then
 		--[18:25] Eleanor parries the Drachenlizard's attack with her weapon. 
-		A, B = msg:match("^(.*) parr[%a]* ([^%p]*)%p?s?.*%.$")
+		A, B = msg:match("^(.*) parr[%a]* (.-)%p?s? attack.*%.$")
 		if A and B then
 			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
 			if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
-			if not A:find('[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
-			if not B:find('[Tt]he') then B = '['..B..']' else
-			B = B:gsub('[Tt]he ', '');
+			-- if not A:find('[Tt]he') then A = '['..ES..A..ES..']' else
+			-- A = A:gsub('[Tt]he ', ''); end
+			-- if not B:find('[Tt]he') then B = '['..ES..B..ES..']' else
+			-- B = B:gsub('[Tt]he ', '');
+			-- end
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
 			end
-			msg = A..' '..utf8.char(0x25C0)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' Parry';
+			------
+			if utils.StringFindTable(B, par_party_names) then
+				if #par_actor1 > 0 then
+					par_actorP = B;
+				else
+					par_actor1 = B;
+				end
+			else
+				B = B:gsub('[Tt]he ', '');
+				if #par_actor2 > 0 then
+					par_actorE = B;
+				else
+					par_actor2 = B;
+				end
+			end
+			--msg = B..' '..utf8.char(0x2694)..' '..A..' '..utf8.char(allSettings.CombatSplitChar[2])..' Parry ';
+			msg = A..' '..combatCP.PARR..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' Parry ';
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
 			return msg;
 		end
 	end
 
+	--Volker's attack is countered by the Sylvestre. Volker takes 17 points of damage.
+	if msg:find(' attack is countered ') then
+	
+		B, A, DMG = msg:match("^(.-)'s%s.-by%s(.-)%..-takes%s(.-)%spoint.*$")
+		if A and B and DMG then
+			
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '')
+				par_actor2 = A;
+			end
+			------
+			if utils.StringFindTable(B, par_party_names) then
+				if #par_actor1 > 0 then
+					par_actorP = B;
+				else
+					par_actor1 = B;
+				end
+			else
+				B = B:gsub('[Tt]he ', '')
+				if #par_actor2 > 0 then
+					par_actorE = B;
+				else
+					par_actor2 = B;
+				end
+			end
+			
+			
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG '..utf8.char(0x2B8C);
+			msg = A..' '..combatCP.CNTR..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG ';
+			if (A:find(fcw[1].PlayerName)) then par_DamageDone = true; end;
+			if (B:find(fcw[1].PlayerName)) then par_DamageGot = true; end;
+			
+			
+			par_CombatCutIdx = utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			
+			return msg
+		end
+	end
+	
 	if msg:find('miss') then
 		--Tenzen uses Amatsu: Tsukioboro, but misses the Drachenlizard.
+		--The Colibri uses Snatch Morsel, but misses Halver.
 		--Tenzen misses the Drachenlizard...' '..B..' '
 		A, B = msg:match("^(.*) miss[%a]* (.*)%.$")
 		if A and B then
@@ -4315,43 +5181,118 @@ function CombatText(msg, chn)
 			if F then Ext = A:sub(F,#A); A = A:sub(1,F-1); end
 			if (B == fcw[1].PlayerName) then par_DamageDone = true; end;
 			if (A == fcw[1].PlayerName) then par_DamageGot = true; end;
-			if not A:find('[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
-			if not B:find('[Tt]he') then B = '['..B..']' else
-			B = B:gsub('[Tt]he ', '');
-			end--utf8.char(0x25B6)' ['..c2..']. '
-			--Ext = Ext:gsub('^( uses? )([^,]*)(.*)$', function(c1,c2,c3) return ' '..utf8.char(0x25B6)..' '..B end) 
-			Ext = Ext:gsub('^( uses? )([^,]*)(.*)$', function(c1,c2,c3) return '['..c2..']'..utf8.char(0x589) end) 
-			msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..Ext..' Miss';
+			-- if not A:find('[Tt]he') then A = '['..ES..A..ES..']' else
+			-- A = A:gsub('[Tt]he ', ''); end
+			-- if not B:find('[Tt]he') then B = '['..ES..B..ES..']' else
+			-- B = B:gsub('[Tt]he ', '');
+			-- end
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+			------
+			if utils.StringFindTable(B, par_party_names) then
+				if #par_actor1 > 0 then
+					par_actorP = B;
+				else
+					par_actor1 = B;
+				end
+			else
+				B = B:gsub('[Tt]he ', '');
+				if #par_actor2 > 0 then
+					par_actorE = B;
+				else
+					par_actor2 = B;
+				end
+			end
+			--utf8.char(0x25B6)' ['..c2..']. '
+			--Ext = Ext:gsub('^( uses? )([^,]*)(.*)$', function(c1,c2,c3) return ' '..utf8.char(0x25B6)..' '..B end)
+			Ext = Ext:gsub('^( uses? )([^,]*)(.*)$', function(c1,c2,c3) return c2 end) 
+			if F then
+				Ext = '\\'..Ext..'/'
+				par_action1 = Ext;
+				Ext = ' '..Ext..combatCP.COL
+			end
+			msg = A..' '..combatCP.ATK..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..Ext..' Miss';
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
 			return msg;
 		end
 	end	
-		--[16:27] Halver defeats the Drachenlizard. 
-	
+		--Halver defeats the Drachenlizard. 
+	    --Eleanor was defeated by the Goblin Tinkerer.
 	if msg:find('defeat') then
 		A, B = msg:match("^(.*) defeats? (.*)%.$")
 		if A and B then
 			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
-			if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
-			if not A:find('^[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
-			if not B:find('^[Tt]he') then B = '['..B..']' else
-			B = B:gsub('[Tt]he ', '');
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
 			end
-			msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' Defeat';
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			------
+			if utils.StringFindTable(B, par_party_names) then
+				if #par_actor1 > 0 then
+					par_actorP = B;
+				else
+					par_actor1 = B;
+				end
+			else
+				B = B:gsub('[Tt]he ', '');
+				if #par_actor2 > 0 then
+					par_actorE = B;
+				else
+					par_actor2 = B;
+				end
+			end
+			
+			local defeat = 'defeats'..combatCP.KILL
+			msg = A..' '..defeat..' '..B
+			par_CombatCutIdx =  msg:find(defeat,1,true)-1;
+			return msg;
+		end
+		
+		B, A = msg:match("^(.*) was defeated by (.*)%.$")
+		if A and B then
+			if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+			------
+			if utils.StringFindTable(B, par_party_names) then
+				if #par_actor1 > 0 then
+					par_actorP = B;
+				else
+					par_actor1 = B;
+				end
+			else
+				B = B:gsub('[Tt]he ', '');
+				if #par_actor2 > 0 then
+					par_actorE = B;
+				else
+					par_actor2 = B;
+				end
+			end
+			
+			local defeat = 'defeats'..combatCP.KILL
+			msg = A..' '..defeat..' '..B
+			par_CombatCutIdx =  msg:find(defeat,1,true)-1;
 			return msg;
 		end
 	end
 	
 	local c = 0
-	msg, c = msg:gsub('(receives the effect of )([^%.]*)(%.)', function(c1, c2, c3) return utf8.char(0x25C0)..' ['..c2..']' end)
+	msg, c = msg:gsub('(receives the effect of )([^%.]*)(%.)', function(c1, c2, c3) return combatCP.LEFT..' ['..c2..']' end)
 	if c < 1 then
-		msg, c = msg:gsub('(gains the effect of )([^%.]*)(%.)', function(c1, c2, c3) return utf8.char(0x25C0)..' ['..c2..']' end)
+		msg, c = msg:gsub('(gains the effect of )([^%.]*)(%.)', function(c1, c2, c3) return combatCP.LEFT..' ['..c2..']' end)
 	end
 	if c < 1 then
-		msg, c = msg:gsub('(is afflicted with )([^%.]*)(%.)', function(c1, c2, c3) return utf8.char(0x25C0)..' ['..c2..']' end)
+		msg, c = msg:gsub('(is afflicted with )([^%.]*)(%.)', function(c1, c2, c3) return combatCP.LEFT..' ['..c2..']' end)
 	end
 
 	if c > 0 then
@@ -4367,11 +5308,13 @@ end
 
 function CombatSpellText(msg, chn)
 
+	--local ES = allSettings.extraspace[1] and ' ' or ''
 	local A = '';
 	local B = '';
 	local DMG = '';
 	local S = '';
 	local T = '';
+	local Ext = '';
 	
 	if msg:find('start') then
 		A, S = msg:match("^(.*) starts? casting (.*)%.$")
@@ -4384,18 +5327,42 @@ function CombatSpellText(msg, chn)
 			else
 				B = '?';
 			end
-
-			if not A:find('^[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
 			
+			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
+			-- A = A:gsub('[Tt]he ', ''); end
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+			S = '\\'..S..'/'
+			par_action1 = S;
 			if B ~= '?' then
-				if not B:find('^[Tt]he') then B = '['..B..']' else
-				B = B:gsub('[Tt]he ', '');
+				-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
+				-- B = B:gsub('[Tt]he ', '');
+				-- end
+				------
+				if utils.StringFindTable(B, par_party_names) then
+					if #par_actor1 > 0 then
+						par_actorP = B;
+					else
+						par_actor1 = B;
+					end
+				else
+					B = B:gsub('[Tt]he ', '');
+					if #par_actor2 > 0 then
+						par_actorE = B;
+					else
+						par_actor2 = B;
+					end
 				end
-				msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' casting...['..S..']';
+				--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' casting...['..S..']';
+				msg = A..' '..combatCP.CAST..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' casting...'..S..' ';
 				
 			else
-				msg = A..' '..utf8.char(allSettings.CombatSplitChar[2])..' casting...['..S..']';
+				--msg = A..' '..utf8.char(allSettings.CombatSplitChar[2])..' casting...['..S..']';
+				msg = A..' '..utf8.char(allSettings.CombatSplitChar[2])..' casting...'..S..' ';
 			end
 			
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
@@ -4404,19 +5371,43 @@ function CombatSpellText(msg, chn)
 	end
 
 	if msg:find('cast') then
-		A, S, B, DMG = msg:match("^(.*) casts? ([^%.]*)%. (.*) takes? (%d*) points? of damage%.$")
+		A, S, B, DMG = msg:match("^(.*) casts? (.*)%. (.*) takes? (%d*) points? of damage%.$")
 		--Debug(tostring(A)..'-'..tostring(S)..'-'..tostring(B)..'-'..tostring(DMG),1,true)
 		if A and S and B and DMG then
 		
 
 			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
 			if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
-			if not A:find('^[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
-			if not B:find('^[Tt]he') then B = '['..B..']' else
-			B = B:gsub('[Tt]he ', '');
+			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
+			-- A = A:gsub('[Tt]he ', ''); end
+			-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
+			-- B = B:gsub('[Tt]he ', '');
+			-- end
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
 			end
-			msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']'..utf8.char(0x589)..' '..DMG..' DMG';
+			------
+			if utils.StringFindTable(B, par_party_names) then
+				if #par_actor1 > 0 then
+					par_actorP = B;
+				else
+					par_actor1 = B;
+				end
+			else
+				B = B:gsub('[Tt]he ', '');
+				if #par_actor2 > 0 then
+					par_actorE = B;
+				else
+					par_actor2 = B;
+				end
+			end
+			S = '\\'..S..'/'
+			par_action1 = S;
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']'..utf8.char(0x589)..' '..DMG..' DMG';
+			msg = A..' '..combatCP.SPELL..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..combatCP.COL..' '..DMG..' DMG';
 			
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
 			return msg;
@@ -4432,12 +5423,36 @@ function CombatSpellText(msg, chn)
 			
 			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
 			if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
-			if not A:find('^[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
-			if not B:find('^[Tt]he') then B = '['..B..']' else
-			B = B:gsub('[Tt]he ', '');
+			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
+			-- A = A:gsub('[Tt]he ', ''); end
+			-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
+			-- B = B:gsub('[Tt]he ', '');
+			-- end
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
 			end
-			msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']'..utf8.char(0x589)..' '..DMG..' '..T..' drained';
+			------
+			if utils.StringFindTable(B, par_party_names) then
+				if #par_actor1 > 0 then
+					par_actorP = B;
+				else
+					par_actor1 = B;
+				end
+			else
+				B = B:gsub('[Tt]he ', '');
+				if #par_actor2 > 0 then
+					par_actorE = B;
+				else
+					par_actor2 = B;
+				end
+			end
+			S = '\\'..S..'/'
+			par_action1 = S;
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']'..utf8.char(0x589)..' '..DMG..' '..T..' drained';
+			msg = A..' '..combatCP.SPELL..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..combatCP.COL..' '..DMG..' '..T..' drained';
 			
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
 			return msg;
@@ -4451,12 +5466,36 @@ function CombatSpellText(msg, chn)
 		if A and S and B and DMG and T then
 		
 			if A == fcw[1].PlayerName or B == fcw[1].PlayerName then par_DamageDone = true; end;
-			if not A:find('^[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
-			if not B:find('^[Tt]he') then B = '['..B..']' else
-			B = B:gsub('[Tt]he ', '');
+			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
+			-- A = A:gsub('[Tt]he ', ''); end
+			-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
+			-- B = B:gsub('[Tt]he ', '');
+			-- end
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
 			end
-			msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']'..utf8.char(0x589)..' +'..DMG..' '..T;
+			------
+			if utils.StringFindTable(B, par_party_names) then
+				if #par_actor1 > 0 then
+					par_actorP = B;
+				else
+					par_actor1 = B;
+				end
+			else
+				B = B:gsub('[Tt]he ', '');
+				if #par_actor2 > 0 then
+					par_actorE = B;
+				else
+					par_actor2 = B;
+				end
+			end
+			S = '\\'..S..'/'
+			par_action1 = S;
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']'..utf8.char(0x589)..' +'..DMG..' '..T;
+			msg = A..' '..combatCP.HEAL..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..combatCP.COL..' +'..DMG..' '..T;
 
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
 			return msg;
@@ -4464,65 +5503,168 @@ function CombatSpellText(msg, chn)
 		
 		--[15:41] Joachim casts Poisona. Joachim successfully removes Halver's poison. 
 		--Eleanor casts Monomi: Ichi. Eleanor gains the effect of Sneak.
+		--		--Rosabelle casts Raise on Zeratia.122
+		if msg:find(' casts? ') and msg:find(' on ') then 
+			A, S, B = msg:match('^(.*) casts? ([^%.]*) on (.*)%.%s?$')
+			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
+			-- A = A:gsub('[Tt]he ', ''); end
+			-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
+			-- B = B:gsub('[Tt]he ', ''); end
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+			------
+			if utils.StringFindTable(B, par_party_names) then
+				if #par_actor1 > 0 then
+					par_actorP = B;
+				else
+					par_actor1 = B;
+				end
+			else
+				B = B:gsub('[Tt]he ', '');
+				if #par_actor2 > 0 then
+					par_actorE = B;
+				else
+					par_actor2 = B;
+				end
+			end
+			S = '\\'..S..'/'
+			par_action1 = S;
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']';
+			msg = A..' '..combatCP.CAST..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..' ';
+					
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			return msg;
+		end
+		
 		A, S, Ext = msg:match("^(.*) casts? ([^%.]*)%.%s*(.*)$")
-		if A and S and not msg:find('damage') then
+		if A and S and
+			not msg:find('^.- cannot ' ) and
+			not msg:find('^.- damage') and
+			not msg:find('^.- evade') and
+			not msg:find('^.- is una') and
+			not msg:find('^.- does not') and
+			not msg:find('^.- lacks the') and
+			not msg:find('^Unable to')
+		then
 			
 			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
 			-- --if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
 			if Ext and Ext:trimex() ~= '' then
 				--Ext = Ext:gsub(A..' ', '')..' '
 				--Ext = Ext:gsub('^.', string.upper(Ext:sub(1,1)))
-				Ext = Ext:gsub('receives the effect of', utf8.char(0x25C0))
-				Ext = Ext:gsub('gains the effect of', utf8.char(0x25C0))
-				Ext = Ext:gsub('is afflicted with', utf8.char(0x25C0))
-				Ext = Ext:gsub('successfully (.)', function(c) return utf8.char(0x25B6)..' '..c:upper() end)
+				Ext = Ext:gsub('receives the effect of', combatCP.LEFT)
+				Ext = Ext:gsub('gains the effect of', combatCP.LEFT)
+				Ext = Ext:gsub('is afflicted with', combatCP.LEFT)
+				Ext = Ext:gsub('successfully (.)', function(c) return combatCP.RIGHT..' '..c:upper() end)
 				Ext = Ext..' '
 			else
 				Ext = ''
 			end
-			if not A:find('^[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
-			msg = Ext..A..' '..utf8.char(0x25B6)..' ['..S..']';
+			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
+			-- A = A:gsub('[Tt]he ', ''); end
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+			S = '\\'..S..'/'
+			par_action1 = S;
+			--msg = Ext..A..' '..utf8.char(0x25B6)..' ['..S..']';
+			msg = Ext..A..' '..combatCP.CAST..' '..S..' ';
 					
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(0x25B6))+string.len(utf8.char(0x25B6))-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.CAST)+string.len(combatCP.CAST)-1;
+			
 			return msg;
 		end
 	end
+	--msg:find('^'..fcw[1].PlayerName) and
+	if  msg:find(' uses? ') and msg:find(' on ') then 
+		A, S, B = msg:match('^(.*) uses? ([^%.]*) on (.*)%.%s?$')
+		if not A or not B or not S then return msg end
+		-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
+		-- A = A:gsub('[Tt]he ', ''); end
+		-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
+		-- B = B:gsub('[Tt]he ', ''); end
+		if utils.StringFindTable(A, par_party_names) then
+			par_actor1 = A;
+		else
+			A = A:gsub('[Tt]he ', '');
+			par_actor2 = A;
+		end
+		------
+		if utils.StringFindTable(B, par_party_names) then
+			if #par_actor1 > 0 then
+				par_actorP = B;
+			else
+				par_actor1 = B;
+			end
+		else
+			B = B:gsub('[Tt]he ', '');
+			if #par_actor2 > 0 then
+				par_actorE = B;
+			else
+				par_actor2 = B;
+			end
+		end
+		S = '\\'..S..'/'
+		par_action1 = S;
+		--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']';
+		msg = A..' '..combatCP.CAST..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..' ';
+				
+		par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+		return msg;
+	end
 	
 	if msg:find('use') then
+		--Rosabelle uses Animated Flourish on the Tchakka.65
+
 		A, S, Ext = msg:match("^(.*) uses? ([^%.]*)%.%s*(.*)$")
-		if A and S and not msg:find('damage') then
+		if A and S and not msg:find('damage') and not msg:find('^You are') and not msg:find('cannot') then
 			
 			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
 			-- --if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
 			if Ext and Ext:trimex() ~= '' then
 				--Ext = Ext:gsub(A..' ', '')..' '
 				--Ext = Ext:gsub('^.', string.upper(Ext:sub(1,1)))
-				Ext = Ext:gsub('receives the effect of', utf8.char(0x25C0))
-				Ext = Ext:gsub('gains the effect of', utf8.char(0x25C0))
-				Ext = Ext:gsub('is afflicted with', utf8.char(0x25C0))
-				Ext = Ext:gsub('successfully (.)', function(c) return utf8.char(0x25B6)..' '..c:upper() end)
+				Ext = Ext:gsub('receives the effect of', combatCP.LEFT)
+				Ext = Ext:gsub('gains the effect of', combatCP.LEFT)
+				Ext = Ext:gsub('is afflicted with', combatCP.LEFT)
+				Ext = Ext:gsub('successfully (.)', function(c) return combatCP.RIGHT..' '..c:upper() end)
 				Ext = Ext..' '
 			else
 				Ext = ''
 			end
-			if not A:find('^[Tt]he') then A = '['..A..']' else
-			A = A:gsub('[Tt]he ', ''); end
-			msg = Ext..A..' '..utf8.char(0x25B6)..' ['..S..']';
+			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
+			-- A = A:gsub('[Tt]he ', ''); end
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+			S = '\\'..S..'/'
+			par_action1 = S;
+			--msg = Ext..A..' '..utf8.char(0x25B6)..' ['..S..']';
+			msg = Ext..A..' '..combatCP.RIGHT..' '..S..' ';
 					
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(0x25B6))+string.len(utf8.char(0x25B6))-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.RIGHT)+string.len(combatCP.RIGHT)-1;
 			return msg;
 		end
 	end	
 		
 	
 	local c = 0
-	msg, c = msg:gsub('(receives the effect of )([^%.]*)(%.)', function(c1, c2, c3) return utf8.char(0x25C0)..' ['..c2..']' end)
+	msg, c = msg:gsub('(receives the effect of )([^%.]*)(%.)', function(c1, c2, c3) return combatCP.LEFT..' ['..c2..']' end)
 	if c < 1 then
-		msg, c = msg:gsub('(gains the effect of )([^%.]*)(%.)', function(c1, c2, c3) return utf8.char(0x25C0)..' ['..c2..']' end)
+		msg, c = msg:gsub('(gains the effect of )([^%.]*)(%.)', function(c1, c2, c3) return combatCP.LEFT..' ['..c2..']' end)
 	end
 	if c < 1 then
-		msg, c = msg:gsub('(is afflicted with )([^%.]*)(%.)', function(c1, c2, c3) return utf8.char(0x25C0)..' ['..c2..']' end)
+		msg, c = msg:gsub('(is afflicted with )([^%.]*)(%.)', function(c1, c2, c3) return combatCP.LEFT..' ['..c2..']' end)
 	end
 
 	if c > 0 then
@@ -4542,8 +5684,8 @@ function AddTooltip(message, offset, critical)
 	imgui.SameLine() --imgui.Dummy({1,0}) imgui.SameLine() 
 	local cursorPosY = imgui.GetCursorPosY()
 	imgui.SetCursorPosY(cursorPosY+offset)
-	if not critical then imgui.Image(fcw[1].TextureIDInfo,{15,15})
-	else imgui.Image(fcw[1].TextureIDInfo,{15,15},{0,0},{1,1},{0.937, 0.349, 0.290 ,1}) end
+	if not critical then imguiWrap.Image(fcw[1].TextureIDInfo,{15,15})
+	else imguiWrap.Image(fcw[1].TextureIDInfo,{15,15},{0,0},{1,1},{0.937, 0.349, 0.290 ,1}) end
 	if (imgui.IsItemHovered(0)) then
 		imgui.BeginTooltip()
 		message = utils.breakLine(message, imgui.GetWindowWidth()*2.5)
@@ -4553,10 +5695,13 @@ function AddTooltip(message, offset, critical)
 	end
 end
 
-function AddWarning(message)
+function AddWarning(message, y, flag, x, title)
 	if check == false then return end
 	local wx = 300
 	local wy = 300
+	if y then wy = y end
+	if x then wx = x end
+	if not title then title = 'Warning' end
 	local dsize = imgui.GetIO().DisplaySize;
 	imgui.SetNextWindowSize({wx,wy});
 	imgui.SetNextWindowPos({(dsize.x/2)-(wx/2),(dsize.y/2)-(wy/2)})
@@ -4565,7 +5710,7 @@ function AddWarning(message)
 	imgui.PushStyleColor(ImGuiCol_WindowBg, {0.1,0.1,0.1,1.0});
 	imgui.PushStyleColor(ImGuiCol_TitleBg, {0.1,0.1,0.1,1.0});
 	imgui.PushStyleColor(ImGuiCol_TitleBgActive, {0.1,0.1,0.1,1.0});
-	if imgui.Begin('Warning##'+fcw[1].PlayerName, set_Popup, wFlags) then
+	if imgui.Begin(title..'##'+fcw[1].PlayerName, set_Popup, wFlags) then
 		local winwidth = imgui.GetWindowWidth();
 		local textwidth, textheight = imgui.CalcTextSize(message);
 		local textindentation = (winwidth - textwidth) * 0.5;
@@ -4576,10 +5721,15 @@ function AddWarning(message)
 		imgui.SameLine(textindentation);
 		imgui.PushTextWrapPos(winwidth - textindentation);
 		imgui.TextWrapped(message);
-		imgui.Dummy({(imgui.CalcItemWidth())*0.5,0}) imgui.SameLine()
+		--imgui.Dummy({(imgui.CalcItemWidth())*0.5,0}) imgui.SameLine()
 		imgui.SetCursorPosY(wy-40)
+		imgui.SetCursorPosX(wx/2-35)
 		if imgui.Button('OK##Warning',{70,0}) then
 			set_Popup[1] = false;
+			if flag then
+				flag[1] = true
+				SaveSettings()
+			end
 		end
 		imgui.PopTextWrapPos();
 		--imgui.Text(message)
@@ -4587,26 +5737,28 @@ function AddWarning(message)
 	end
 	imgui.PopStyleColor(3)
 	imgui.PopStyleVar();
+
 end
 
-function AddSetColor(buttonname,colortable)
-	imgui.ColorButton(buttonname, colortable,ImGuiColorEditFlags_NoAlpha,{49,49})			
+function AddSetColor(buttonname,colorhex)
+	local a, r, g, b = utils.hexToRGBA(tostring(bit.tohex(colorhex[1])));
+	local colortable = T{r/255,g/255,b/255,a/255};
+	--utils.rgbaToHexNum
+	imgui.ColorButton(buttonname, colortable,ImGuiColorEditFlags_NoAlpha,{24,24})			
 	imgui.SameLine();
-	imgui.Text(buttonname);
-	imgui.SameLine();
-	cposX = imgui.GetCursorPosX();
-	cposY = imgui.GetCursorPosY();
-	imgui.SetCursorPosX(cposX-imgui.CalcTextSize(buttonname)-8);
-	imgui.SetCursorPosY(cposY+25);
 	if imgui.ArrowButton('Set'..buttonname, ImGuiDir_Left) then
 		colortable[1] = set_PickedColor[1]
 		colortable[2] = set_PickedColor[2]
 		colortable[3] = set_PickedColor[3]
 		colortable[4] = 1
+		colorhex[1] = utils.rgbaToHexNum(colortable)
 		SaveSettings()
 	end
-	cposY = imgui.GetCursorPosY();
-	imgui.SetCursorPosY(cposY-20);
+	imgui.SameLine();
+	imgui.Text(colorDesc[buttonname][1]);
+
+	AddTooltip(colorDesc[buttonname][2], 4);
+
 end
 
 function PushWindowStyle()
@@ -4638,6 +5790,12 @@ parseThis = function(e, e_message)
 	local msg = e_message;
 	--Debug(tostring(e.message:endswith(string.char(0x7F,0x34,0x01))), 1, true);
 	par_CombatCutIdx = 0;
+	par_actor1 = '';
+	par_actor2 = '';
+	par_actorP = '';
+	par_actorE = '';
+	par_action1 = '';
+	par_handled_actors = false;
 	par_DamageDone = false;
 	par_DamageGot = false;
 	local original_msg = '';
@@ -4677,59 +5835,25 @@ parseThis = function(e, e_message)
 		if (not par_IsInConv) then fo_Fwd[1]:set_visible(false); if allSettings.SecondChat[1] then fo_Fwd[2]:set_visible(false); end end
 	end
 	
-	local colstring = utils.RGBAToHex(allSettings.defaultColor);
-	local col = bit.tobit(colstring);
-	
-	-- for i = 1, utils.GetTableLen(utils.modes) do
-		-- if utils.modes[i][1] == par_MessageMode then
-			-- par_LastMode = utils.modes[i][2];
-			-- col = utils.modes[i][3];
-			
-			-- col = (function()
-				-- if (utils.modes[i][2]=='combat') then return bit.tobit(utils.RGBAToHex(allSettings.combatColor));
-				-- end
-				-- if (utils.modes[i][2]=='combatspell') then return bit.tobit(utils.RGBAToHex(allSettings.combatspellColor));end
-				-- if (utils.modes[i][2]=='linkshell1') then return bit.tobit(utils.RGBAToHex(allSettings.linkshellColor)); end
-				-- if (utils.modes[i][2]=='linkshell2') then return bit.tobit(utils.RGBAToHex(allSettings.linkshell2Color)); end
-				-- if (string.find(utils.modes[i][2],'party')) then return bit.tobit(utils.RGBAToHex(allSettings.partyColor)); end
-				-- if (string.find(utils.modes[i][2],'tell')) then return bit.tobit(utils.RGBAToHex(allSettings.tellColor)); end
-				-- if (string.find(utils.modes[i][2],'shout')) then return bit.tobit(utils.RGBAToHex(allSettings.shoutColor)); end
-				-- if (string.find(utils.modes[i][2],'emote')) then return bit.tobit(utils.RGBAToHex(allSettings.emoteColor)); end
-				-- return col;
-			-- end)();
-		-- end
-	-- end
-	
-	
+	local colstring = defaultColor;
+	local col = colstring;
+
 	par_LastMode = utils.modesDA[par_MessageMode+1][2];
 	col = utils.modesDA[par_MessageMode+1][3];
-	
-	-- col = (function()
-		-- if string.find(par_LastMode, 'combat_') then return bit.tobit(utils.RGBAToHex(allSettings.combatColor));
-		-- end
-		-- if string.find(par_LastMode, 'combatspell_') then return bit.tobit(utils.RGBAToHex(allSettings.combatspellColor));end
-		-- if (par_LastMode=='linkshell1') then return bit.tobit(utils.RGBAToHex(allSettings.linkshellColor)); end
-		-- if (par_LastMode=='linkshell2') then return bit.tobit(utils.RGBAToHex(allSettings.linkshell2Color)); end
-		-- if (string.find(par_LastMode,'party')) then return bit.tobit(utils.RGBAToHex(allSettings.partyColor)); end
-		-- if (string.find(par_LastMode,'tell')) then return bit.tobit(utils.RGBAToHex(allSettings.tellColor)); end
-		-- if (string.find(par_LastMode,'shout')) then return bit.tobit(utils.RGBAToHex(allSettings.shoutColor)); end
-		-- if (string.find(par_LastMode,'emote')) then return bit.tobit(utils.RGBAToHex(allSettings.emoteColor)); end
-		-- return col;
-	-- end)();
-	
-	
-	if string.find(par_LastMode, 'combat_') then col = bit.tobit(utils.RGBAToHex(allSettings.combatColor));
-	elseif string.find(par_LastMode, 'combatspell_') then col =  bit.tobit(utils.RGBAToHex(allSettings.combatspellColor));
-	elseif (par_LastMode=='linkshell1') then col =  bit.tobit(utils.RGBAToHex(allSettings.linkshellColor)); 
-	elseif (par_LastMode=='linkshell2') then col =  bit.tobit(utils.RGBAToHex(allSettings.linkshell2Color)); 
-	elseif (string.find(par_LastMode,'party')) then col =  bit.tobit(utils.RGBAToHex(allSettings.partyColor)); 
-	elseif (string.find(par_LastMode,'tell')) then col =  bit.tobit(utils.RGBAToHex(allSettings.tellColor)); 
-	elseif (string.find(par_LastMode,'shout')) then col =  bit.tobit(utils.RGBAToHex(allSettings.shoutColor)); 
-	elseif (string.find(par_LastMode,'emote')) then col =  bit.tobit(utils.RGBAToHex(allSettings.emoteColor));
+
+	if string.find(par_LastMode, '^combat_') then col = allSettings.colors.combat[1]
+	elseif string.find(par_LastMode, '^combatspell_') then col =  allSettings.colors.combatspell[1];
+	elseif par_LastMode:find('^linkshell1') then col =  allSettings.colors.linkshell1[1]; 
+	elseif par_LastMode:find('^linkshell2') then col =  allSettings.colors.linkshell2[1]; 
+	elseif string.find(par_LastMode,'^party') then col =  allSettings.colors.party[1]; 
+	elseif string.find(par_LastMode,'^tell') then col =  allSettings.colors.tell[1]; 
+	elseif string.find(par_LastMode,'^shout') then col =  allSettings.colors.shout[1]; 
+	elseif string.find(par_LastMode,'^emote') then col = allSettings.colors.emote[1]; 
 	end
 	
+	if allSettings.tellNotification[1] and par_LastMode == 'tell_in' then ashita.misc.play_sound(string.format('%s\\notifications\\%s%s.wav', addon.path, allSettings.selectedNotification,allSettings.boostNotification[1] and 'B' or '')); end;
+
 	
-	if par_LastMode == 'tell_in' and allSettings.tellNotification[1] then ashita.misc.play_sound(string.format('%s\\notifications\\%s%s.wav', addon.path, allSettings.selectedNotification,allSettings.boostNotification[1] and 'B' or '')); end;
 	--not fwdmsg and 
 	if not fcw[1].HideChat and not uiw.LegacyChatOpen then
 		if (par_MessageMode ~= 151 and par_MessageMode ~= 150) then
@@ -4773,90 +5897,6 @@ parseThis = function(e, e_message)
 	end
 	
 	
-
-	
-	--if ( allSettings.hideAlliance[1] and string.find(par_LastMode, '_a') ) then
-	--	par_LastMode = 'filtered'; return;
-	--end;
-	
-	--[[
-	local isParty = true;
-	local isYou = true;
-	local isYourPet = true;
-	if allSettings.hideNonParty[1]  then
-		isParty = false;
-		if allSettings.hideNonYou[1] then 
-			isYou = false;
-			isYourPet = false;
-		end
-		local party = AshitaCore:GetMemoryManager():GetParty();
-		local entity = AshitaCore:GetMemoryManager():GetEntity();
-		local bt = targets.get_bt();
-		local bt_name;
-		local t = targets.get_t();
-		local t_name;
-		local player_index = party:GetMemberTargetIndex(0);
-		if entity ~= nil and party ~= nil then
-			if t ~= nil and player_index ~= nil and entity:GetStatus(player_index) == 1 then
-				t_name = t.Name;
-			end
-		end
-		if bt~= nil then
-			bt_name = bt.Name;
-		end
-		
-		if party:GetMemberIsActive(0) ~= 0 then
-			local pet = targets.get_pet();
-			local pet_name;
-			if pet ~= nil then
-				pet_name = pet.Name;
-				if string.find(msg, pet_name) then
-					isParty = true;
-					isYourPet = true;
-				end
-			end
-			if  string.find(msg, party:GetMemberName(0)) ~= nil then
-				isParty = true;
-				isYou = true;
-			end
-		end
-		if (t_name ~= nil and string.find(msg, t_name)) then
-				isParty = true;
-			if par_MessageMode ~= 40 then 
-				isYou = true;
-			end
-		else
-			if (bt_name ~= nil and string.find(msg, bt_name)) then
-				isParty = true;
-				if par_MessageMode ~= 40 then 
-					isYou = true;
-				end
-			end
-		end
-		--if isParty then isYou = true; end
-		if not isParty or allSettings.hideNonYou[1] then
-			for P_i = 1, 5 do
-				if party:GetMemberIsActive(P_i) ~= 0 then
-					if  string.find(msg, party:GetMemberName(P_i)) ~= nil then
-						isParty = true;
-						isYou = false;	
-						
-					end;
-				end
-			end
-		end
-	end
-	]]--
-	--Debug(tostring(isParty), 1, false)
-	--Debug(tostring(isYou), 2, false)
-
-	--[[
-	if ( not isParty or not (isYou or isYourPet)) and (par_LastMode == 'combat' or par_LastMode == 'combatspell') then
-		--Debug(tostring('hello'), 2, false)
-		par_LastMode = 'filtered'; return;
-	end;
-	]]--
-	
 	if
 		--par_MessageMode == 152 
 		--or 
@@ -4868,74 +5908,34 @@ parseThis = function(e, e_message)
 		return;
 	end
 	
-	--par_promptEnd = {};
+	
 	
 	local newText = CleanText(msg, par_LastMode);
-	
-			
-	
 	if newText:match('^%s*\n?$') then par_LastMode = 'empty' return end
 	
-	--if #par_promptEnd > 0 then AshitaCore:GetChatManager():AddChatMessage(1, false, '\\'..tostring(par_promptEnd[1])..'\\'..tostring(par_promptEnd[2])); end
-	
-	
-	--e.blocked = false;
-	
-	--local openedUI = false;
-	--local openedMenu = false;
-	
-	
-   -- if ashita.memory.read_uint8(ashita.memory.read_uint32(uiw.UIVisiblePtr + 10)+ 0xB4) == 1 then openedUI = true; end
-	
-  --  local ptr = ashita.memory.read_uint32(uiw.UIVisiblePtr + 10)
---	openedUI = ashita.memory.read_uint8(ptr + 0xB4) == 1
-	
-	--local MenuName = '';
-	--local MenuPtr = ashita.memory.read_uint32(uiw.MenuPtr)
-	--local MenuID = ashita.memory.read_uint32(MenuPtr)
-   -- if MenuID ~= 0 then
-	--	MenuName = ashita.memory.read_string(ashita.memory.read_uint32(MenuID + 4) + 0x46, 16);
-	--	MenuName = string.gsub(MenuName, '\x00', ''):trimex()
-	--	if ( )) then openedMenu = true; end
-	--end
-	
-	--local menu_pointer = ashita.memory.read_uint32(pGameMenu)
-	--local menu_val = ashita.memory.read_uint32(menu_pointer)
-	--if menu_val == 0 then
-	 --   return ''
-	--end
-	--local menu_header = ashita.memory.read_uint32(menu_val + 4)
-	--local menu_name = ashita.memory.read_string(menu_header + 0x46, 16)
-	--return string.gsub(menu_name, '\x00', ''):trimex()
---end
-	
---	Debug(tostring(eventSystem), 1, true);
---	Debug(tostring(string.byte(string.sub(original_msg,#original_msg,#original_msg))), 1, true);
---	Debug(tostring(MenuName), 1, true);
---	Debug(tostring(openedMenu), 1, true);
-
-	
-	--Debug(tostring(ashita.memory.read_uint8(ashita.memory.read_uint32(uiw.UIVisiblePtr + 10)+ 0xB4)), 1, true);
-	--Debug(tostring(MenuName), 1, true);
-	
-	--if (not openedUI and not openedDialog and not par_IsInConv and not fcw[1].HideChat and not LegacyChatOpen) then
-
-	
-	--newText = ts..newText;
-	local urlText = ''
-	if not par_LastMode:find('combat') then urlText =  utils.ParseUrlLink(newText); end
-	--Debug('>'..tostring(urlText), 1, true);
+	if allSettings.Alert[1] and (
+		(allSettings.alertOptions[1] and par_LastMode == 'local') or
+		(allSettings.alertOptions[2] and par_LastMode == 'shout') or
+		(allSettings.alertOptions[3] and par_LastMode == 'party_in') or
+		(allSettings.alertOptions[4] and par_LastMode:find('^linkshell%d$')) or
+		(allSettings.alertOptions[5] and par_LastMode == 'unity')
+		)
+	then
+		for al_i = 1, #set_alertList do
+			if set_alertList[al_i] and set_alertList[al_i] ~= '' and string.lower(newText):find(string.lower(set_alertList[al_i]),1,true) then
+				ashita.misc.play_sound(string.format('%s\\notifications\\%s%s.wav', addon.path, allSettings.selectedAlert,allSettings.boostAlert[1] and 'B' or ''));
+			end
+		end
+	end
 		
 	if (par_MessageMode == 123 and string.find(newText, '{')~= nil) then
 		newText = string.sub(newText,1,string.find(newText, '{')-1)..string.sub(newText,string.find(newText, '{')+1,string.len(newText));
-	end
-	
-
-	
-	if par_MessageMode == 129 then
-		if utils.FindInStringTable(newText, utils.crafts, 0) then
+	elseif par_MessageMode == 129 then
+		if utils.FindInStringTable(newText, utils.crafts, 0) or newText:find('learns') then
 			par_MessageMode = 121; par_LastMode = 'craft'; col = utils.modesDA[par_MessageMode+1][3];
 		end
+	elseif par_MessageMode == 121 and string.find(newText, ' lot for ') then
+		newText = newText:gsub('(: )(%d)',' [%2'):gsub(' points%.',']')
 	end
 	
 	
@@ -4945,30 +5945,15 @@ parseThis = function(e, e_message)
 	local bt = targets.get_bt();
 	local bt_name = '@';
 	if bt~= nil then
-		bt_name = bt.Name;
+		bt_name = bt.Name:gsub('^\171','')
 	end
-	-- local t = targets.get_t();
-	-- local t_name = '@';
-	-- local player_index = party:GetMemberTargetIndex(0);
-	-- if entity ~= nil and party ~= nil then
-		-- if t ~= nil and player_index ~= nil and entity:GetStatus(player_index) == 1 then
-			-- t_name = t.Name;
-		-- else
-			-- local targetIndex;
-			-- if (playerTarget ~= nil) then
-				-- local targetIndex = playerTarget:GetTargetIndex(0);
-				-- local entity = GetEntity(targetIndex);
-				-- t_name = entity.Name
-			-- end
-		-- end
-	-- end
 	local t_name = '@';
 	local targetIndex;
 	if (playerTarget ~= nil) then
 		local targetIndex = playerTarget:GetTargetIndex(0);
 		local targetEntity = GetEntity(targetIndex);
 		if targetEntity then
-			t_name = targetEntity.Name
+			t_name = targetEntity.Name:gsub('^\171','')
 		end
 	end
 	local pet;
@@ -4979,17 +5964,17 @@ parseThis = function(e, e_message)
 			pet_name = pet.Name;
 		end
 	end
-	
+--	Debug(string.byte(t_name[1]),1,false)
 	local isTarget = string.find(newText, t_name) or string.find(newText, bt_name)
 	
 	local player_name = fcw[1].PlayerName;
-	local party_names = T{};
+	par_party_names = T{};
 	for P_i = 1, 5 do
 		if party:GetMemberIsActive(P_i) ~= 0 then
-			table.insert(party_names, party:GetMemberName(P_i))
+			table.insert(par_party_names, party:GetMemberName(P_i))
 		end
 	end
-
+	if pet then table.insert(par_party_names, pet_name) end
 	
 	local debugclors = dw_ChannelColorMode[1];
 	--DEBUG
@@ -5007,29 +5992,45 @@ parseThis = function(e, e_message)
 	if string.find(par_LastMode, 'combat') then
 		if string.find(par_LastMode,'_y',1,true) then isYou = true; col = col_y;
 		elseif string.find(par_LastMode,'_p',1,true) then isParty = true; col = col_p;
-		elseif string.find(par_LastMode,'_n',1,true) then isOthers = true; col = col_n;
+		elseif string.find(par_LastMode,'_n',1,true) then
+			if not string.find(newText, pet_name) then
+				isOthers = true; col = col_n;
+			else
+				isYou = true;  col = col_t;
+			end
 		elseif string.find(par_LastMode,'_t',1,true) then isYou = true;  col = col_t;
 		elseif string.find(par_LastMode,'_e',1,true) then isYou = true; col = col_e;
 		elseif string.find(par_LastMode,'_a',1,true) then isAlliance = true;  col = col_a;
+		elseif string.find(par_LastMode,'_u',1,true) then
+			if string.find(newText, player_name) or utils.StringFindTable(newText, utils.disambYou, 1) then
+				isYou = true; col = col_y; 
+			elseif utils.StringFindTable(newText, par_party_names) then
+				isParty = true; col = col_p;
+			elseif isTarget and string.find(newText, ' falls ') then
+				isYou = true; col = col_y; 
+			else
+				isOthers = true
+			end
 		elseif string.find(par_LastMode,'_x',1,true) then --isParty = true;  col = col_p;
 			--Debug(tostring(string.find(newText, pet_name))..'-'..tostring(par_MessageMode),1,true)
 			if string.find(newText, pet_name) and isTarget then isYou = true; col = col_t;
 			--Debug('pet',1,true)
-			elseif string.find(newText, player_name) or utils.StringFindTable(newText, utils.disambYou) then isYou = true; col = col_y; 
-			elseif utils.StringFindTable(newText, party_names) then isParty = true; col = col_p;
-			elseif (isTarget and not utils.StringFindTable(newText, utils.disambEnemy)) then isYou = true;  col = col_e;
+			elseif string.find(newText, player_name) or utils.StringFindTable(newText, utils.disambYou, 1) then isYou = true; col = col_y; if par_MessageMode == 191 and newText[#newText] == ':' then par_allowed = {191, 6} end
+			elseif utils.StringFindTable(newText, par_party_names) then isParty = true; col = col_p;
+			elseif (isTarget and not utils.StringFindTable(newText, utils.disambEnemy, 1)) then isYou = true;  col = col_e;
 			else isOthers = true; col = col_n;
+				 
 				--Debug(e.message..' - '..tostring(isTarget), 1, true)
 			end
 		else
-			if (isTarget and not utils.StringFindTable(newText, utils.disambEnemy)) then
+			if (isTarget and not utils.StringFindTable(newText, utils.disambEnemy, 1)) then
 				isOthers = true; col = col_n
-			elseif (isTarget and utils.StringFindTable(newText, utils.disambEnemy)) then
+			elseif (isTarget and utils.StringFindTable(newText, utils.disambEnemy, 1)) then
 				isYou = true; col = col_e
 			end
 		end
+		if par_MessageMode == par_allowed[1] and par_allowed[2] > 0 then par_allowed[2] = par_allowed[2] - 1; isYou = true; isOthers = false; isAlliance = false end
 	end
-	
 	if 	(allSettings.hideAlliance[1] and isAlliance) or
 		(allSettings.hideNonParty[1] and isOthers) or
 		(allSettings.hideNonYou[1] and not isYou)
@@ -5038,9 +6039,13 @@ parseThis = function(e, e_message)
 	end
 	local scope = '_z'
 	if isYou then scope = '_y' elseif isYou or isParty then scope = '_p' end
+	--  elseif isTarget then scope = '_t' and newText:find(fcw[1].PlayerName) 
 	
-	if par_LastMode:find('combat',1,true) and utils.FindInStringTableFilters(newText, par_customFilters, scope) then par_LastMode = 'filtered' return end
+	if allSettings.CustomFilters[1] then
+		if par_LastMode:find('combat',1,true) and utils.FindInStringTableFilters(newText, par_customFilters, scope) then par_LastMode = 'filtered' return end
+	end
 	
+	table.insert(par_party_names, player_name)
 	--if (par_LastMode == 'combat') then Debug(tostring(isParty), 2, false); end
 --	Debug(tostring(par_LastMode), 2, true);
 	
@@ -5049,7 +6054,7 @@ parseThis = function(e, e_message)
 	if allSettings.CompactCombat[1] then
 		
 		if (iscombatspell) then
-			newText = CombatSpellText(newText, par_MessageMode); col = bit.tobit(utils.RGBAToHex(allSettings.combatspellColor));
+			newText = CombatSpellText(newText, par_MessageMode); col = allSettings.colors.combatspell[1];
 			par_LastMode:gsub('combat_', 'combatspell_');
 		end
 		
@@ -5070,13 +6075,16 @@ parseThis = function(e, e_message)
 	local checkMsgOrDate = string.sub(newText,1+offset,string.len(newText)) ~= par_LastMessage
 	--and not utils.StringsDifferByOneChar(string.sub(newText,1+offset,string.len(newText)), par_LastMessage)
 	or par_LastTS ~= os.date(par_FormatTS[1], os.time())..' '
-	or par_MessageMode == 121;
+	or par_MessageMode == 121
+	or par_MessageMode == 127
+	or par_MessageMode == 131
+	or par_MessageMode == 142;
 		
 	--local dupedCS = not string.find(par_LastMode,'combat_') and string.find( par_LastMessage,  string.sub(newText,1+offset+(string.len(newText)-offset/5),string.len(newText)-offset-(string.len(newText)/5))) ~= nil;
 	
 	--if dupedCS then dw_TestMessage = 'Duplicate CS message removed >'..tostring(dupedCS); end
 	
-	if ( checkMsgOrDate and not dupedCS) then
+	if ( checkMsgOrDate ) then
 	
 		b_msgID = b_msgID + 1;
 		par_LastMsgLength = #newText
@@ -5091,32 +6099,54 @@ parseThis = function(e, e_message)
 			-- if (string.find(par_LastMode, 'party')) then return 5; end
 			-- if (string.find(par_LastMode, 'tell')) then return 6; end
 			-- if (string.find(par_LastMode, 'shout')) then return 7; end
-			-- if (string.find(par_LastMode, 'NPC')) then return 8; end
+			-- if (string.find(par_LastMode, 'Custom')) then return 8; end
 			-- return -1;
 		-- end)();
 		
 			--if (string.find(par_LastMode, 'combat') == nil) then return 2; end
+		local isCombatMsg = false
 		local tabmode;
-		if (string.find(par_LastMode, 'combat')) then tabmode = 3; 
-		elseif (string.find(par_LastMode, 'linkshell')) then tabmode = 4;
-		elseif (string.find(par_LastMode, 'party')) then tabmode = 5; 
-		elseif (string.find(par_LastMode, 'tell')) then tabmode = 6; 
-		elseif (string.find(par_LastMode, 'shout')) then tabmode = 7; 
-		elseif (string.find(par_LastMode, 'NPC')) then tabmode = 8; 
+		if (string.find(par_LastMode, '^combat')) then tabmode = 3; isCombatMsg = true;
+		elseif (string.find(par_LastMode, '^linkshell')) then tabmode = 4;
+		elseif (string.find(par_LastMode, '^party')) then tabmode = 5; 
+		elseif (string.find(par_LastMode, '^tell')) then tabmode = 6; 
+		elseif (string.find(par_LastMode, '^shout')) then tabmode = 7; 
 		else tabmode = -1;
 		end
+		
+		--npc, ls, party, tell, shout
+		par_isCustom = false
+		--Debug(tostring(par_LastMode),1,true)
+		for cmode = 1, #allSettings.CustomTabModes do
+			
+			if allSettings.CustomTabModes[cmode] then
+				if cmode == 1 and string.find(par_LastMode, 'NPC$') or
+				tabmode == cmode+2				
+				then
+					par_isCustom = true
+					break
+				end
+			end
+		end
+		
+		--if (string.find(par_LastMode, '^custom')) then tabmode = 8; 
 		
 		local n_lines = math.floor((string.len(newText))/allSettings.chatLineMaxL);
 		if math.fmod(string.len(newText), allSettings.chatLineMaxL) ~= 0 then  n_lines = n_lines+1; end
 		local check_again = false;
 		local check_again_text = ''
+		local carry_over = false;
 		local carry_over_color = nil;
 		
 		local textLeft = string.len(newText);
 		local L_i = 1;
 		--for L_i = 1, n_lines do
+		local urlText = ''
+		if not isCombatMsg then urlText =  utils.ParseUrlLink(newText); end
 		local auxURL_text = '';
 		local skipped = 0;
+		local HELMfound = FindHELM(newText, par_MessageMode);
+		--Debug(tostring(HELMfound), 1, true)
 		while L_i <= n_lines do
 			--if L_i > 1 then newText = newText:trimex(); end
 			newText = newText:trimex()
@@ -5141,6 +6171,10 @@ parseThis = function(e, e_message)
 			--local cutIdx = math.min(allSettings.chatLineMaxL+savedBytesLine,textLeft);
 			local bytesLine = utils.CountExtraBytesT(newText)
 			local cutIdx =  math.min(allSettings.chatLineMaxL+bytesLine[math.min(allSettings.chatLineMaxL,#bytesLine)],textLeft);
+			--local cutIdx = utils.compute_cut_byte_index(newText, allSettings.chatLineMaxL, textLeft)
+			-- local clusters = utils.grapheme_cluster_positions(newText)
+			-- local cutIdx = utils.cut_byte_index_from_clusters(clusters, allSettings.chatLineMaxL, textLeft)
+			
 			--local cutIdx = allSettings.chatLineMaxL+bytesLine[math.min(allSettings.chatLineMaxL,#bytesLine)];
 			--Debug(tostring(allSettings.chatLineMaxL+utils.CountExtraBytes(newText))..'-'..tostring(textLeft),1,true)
 			--
@@ -5164,14 +6198,44 @@ parseThis = function(e, e_message)
 					cutIdx = utils.utf8split(newText, cutIdx);
 					--if #newLinesIdx > 0 then lineBreak = ''else lineBreak = '-'; end
 					--urlText ~= '' and 
-					if urlText == '' and newText[cutIdx] ~= ' ' and cutIdx < #newText and newText[cutIdx+1] ~= ' ' then lineBreak = '-';else cutIdx = cutIdx +1 end
-					--Debug(tostring(cutIdx)..'-'..tostring(newText[cutIdx])..'-'..tostring(urlText)..'LB:'..lineBreak..'<',1,true)
+					if not isCombatMsg and urlText == '' and newText[cutIdx] ~= ' ' and cutIdx < #newText and newText[cutIdx+1] ~= ' ' then lineBreak = '-';else cutIdx = cutIdx +1 end
+					--Debug(tostring(cutIdx)..'-'..tostring(newText[cutIdx])..'-'..tostring(urlText)..'LB:'..lineBreak..'<',1,true)F7CF05
 					if (textLeft > cutIdx and newText[cutIdx] ~= ' ' and newText[cutIdx+1] ~= ' ') then
 						local last_space = utils.FindLastOf(string.sub(newText,1,cutIdx),' ');
 						if (last_space ~= nil) then
 							if (cutIdx-last_space)<12 then cutIdx = last_space-1; lineBreak = '' end
 						end
 					end
+			end
+			if (allSettings.CompactCombat[1]) then
+				if isCombatMsg and (par_CombatCutIdx > allSettings.chatLineMaxL)  then
+					if #par_actor1 > 0 then
+						local a = newText:find(par_actor1, 1, true)
+						if a and cutIdx >= a and cutIdx - a < #par_actor1 and a-1 > 1 then cutIdx = a-1; end
+						a = utils.FindLastOfString(newText, par_actor1);
+						if a and cutIdx >= a and cutIdx - a < #par_actor1 and a-1 > 1 then cutIdx = a-1; end
+					end if #par_actor2 > 0 then
+						local a = newText:find(par_actor2, 1, true)
+						if a and cutIdx >= a and cutIdx - a < #par_actor2 and a-1 > 1 then cutIdx = a-1; end
+					end if #par_actorP > 0 then
+						local a = newText:find(par_actorP, 1, true)
+						if a and cutIdx >= a and cutIdx - a < #par_actorP and a-1 > 1 then cutIdx = a-1; end
+					end if #par_actorE > 0 then
+						local a = newText:find(par_actorE, 1, true)
+						if a and cutIdx >= a and cutIdx - a < #par_actorE and a-1 > 1 then cutIdx = a-1; end
+					end
+				end
+				
+				if isCombatMsg and (#par_action1 > 1)  then
+					
+					if #par_action1 > 0 then
+						--par_action1 = par_action1:gsub('%-','%%-');
+						--The Lesser Colibri uses Feather Tickle. Forgivnessssssss's TP is reduced to 0.
+						local a = newText:find(par_action1, 1, true)
+						if a and cutIdx >= a and cutIdx - a < #par_action1 and a-1 > 1 then cutIdx = a-1; end
+						--newText:gsub('%-','%%-');
+					end
+				end
 			end
 			
 			--if (textLeft > allSettings.chatLineMaxL) then
@@ -5188,12 +6252,13 @@ parseThis = function(e, e_message)
 				--cutIdx = utils.utf8split(newText, cutIdx);
 				if newText[cutIdx] ~= ' ' and cutIdx < textLeft then 
 					cutIdx = utils.utf8split(newText, cutIdx);
-					if urlText == '' and newText[cutIdx] ~= ' ' and cutIdx < #newText and newText[cutIdx+1] ~= ' ' then lineBreak = '-';else cutIdx = cutIdx +1 end
+					if not isCombatMsg and urlText == '' and newText[cutIdx] ~= ' ' and cutIdx < #newText and newText[cutIdx+1] ~= ' ' then lineBreak = '-';else cutIdx = cutIdx +1 end
 					local last_space = utils.FindLastOf(string.sub(newText,1,cutIdx),' ');
 					if (last_space ~= nil) then
 						if (cutIdx-last_space)<12 then cutIdx = last_space-1; lineBreak = '' end
 					end
 					-- Debug(tostring(L_i), 1, true)
+					
 					n_lines = n_lines +1;
 					
 				end
@@ -5231,6 +6296,15 @@ parseThis = function(e, e_message)
 			-- end
 			
 			--------------------------------------------------------------------------
+			--Debug(tostring(carry_over),1,true)
+			-- if carry_over == 'lot' then
+				-- newText = newText:gsub(': ',' ['):gsub('points%.',']');
+				-- --Debug(newText,1,true)
+				-- carry_over = false
+			-- end
+			
+			
+			
 			if
 				par_MessageMode == 9 or
 				par_MessageMode == 142 or
@@ -5239,171 +6313,250 @@ parseThis = function(e, e_message)
 				par_MessageMode == 131 or
 				par_MessageMode == 127
 			then
-				special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color = CheckSpecial(special_idx, special_offset, special_type, special_color, tabmode, L_i, check_again, check_again_text, n_lines, carry_over_color, cutIdx, newText)
+				special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color = CheckSpecial(special_idx, special_offset, special_type, special_color, tabmode, L_i, check_again, check_again_text, n_lines, carry_over, carry_over_color, cutIdx, newText)
 			end
-			--Debug(tostring(tabmode),1,false);
+			
+			local MCList = {}
+			
+			if L_i == 1 and allSettings.timeStamp[1] then
+				local e = newText:find(']')
+				if e then
+					table.insert(MCList, {0, e, 0xFFFFFFFF})
+				end
+			end
+			-- local ATchar_1 = newText:find(utf8.char(0x276e), 1, true)
+			-- local ATchar_2 = newText:find(utf8.char(0x276f), 1, true)
+			-- if ATchar_1 then table.insert(MCList, {ATchar_1-1, ATchar_1+2, 0xFF0D9441}) end
+			-- if ATchar_2 then table.insert(MCList, {ATchar_2-1, ATchar_2+2, 0xFFAB1F28}) end
+			local ATstart = 1
+			while true do
+				local s, e = string.find(newText, utf8.char(0x276e), ATstart, true)
+				if not s then break end
+				if s-2 > 1 and string.find(newText:sub(s-2,s-1), '|', 1, true) then 
+					newText = newText:gsub('|','/')
+				end
+				table.insert(MCList, {s-1, s+2, 0xFF0D9441})
+				ATstart = e + 1
+			end
+			ATstart = 1
+			while true do
+				local s, e = string.find(newText, utf8.char(0x276f), ATstart, true)
+				if not s then break end
+				table.insert(MCList, {s-1, s+2, 0xFFBB2F38})
+				ATstart = e + 1
+				
+			end
 			if ( special_idx ~= nil) then
-				if special_color == 0xFFFFFFFF then special_color = 0xFFA1FF3D; end
+				if special_color == 0xFFFFFFFF then special_color = allSettings.colors.obtained[1]; end
 				col = 0xFFFFFFFF;
 				if special_type == 'prevspecial' then
 					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
 					special_text = string.sub(newText,special_idx+special_offset+1,cutIdx);
-				else
-				--CE exclusive!--
-					if special_type == 'SOTS' then
-						table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
-						special_text = string.sub(newText,special_idx+special_offset+1,cutIdx)..lineBreak;
-					else
-						if special_type == 'obtain' then 
-							table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
-							special_text = string.sub(newText,special_idx+special_offset+1,cutIdx)..lineBreak;
-						else
-							if special_type == 'synth' then
-								table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
-								special_text = string.sub(newText,special_idx+special_offset+1,cutIdx)..lineBreak;
-							else
-								if special_type == 'lot' then
-									table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
-									special_text = string.sub(newText,special_idx+special_offset+1,cutIdx)..lineBreak;
-								else
-									if special_type == 'find' then
-										local F_start = special_idx+9;
-										
-										special_idx = string.find(newText, ' on ');
-										if special_idx == nil then special_idx = string.find(newText, ' in '); end
-										
-										local findText = ''
-										--print(newText)
-										if special_idx then
-											local F_end = special_idx-1;
-											local F = string.sub(string.sub(newText,1,#newText),F_start,F_end);
-											local B_start = special_idx+4;
-											local B_end = #string.sub(newText,1,#newText)-1;
-											local B = string.sub(string.sub(newText,1,#newText),B_start,B_end);
-											--local findText = ts..'Found on '..B;
-											findText = ts..'Found on '..B..':';
-											--special_text = '> '..F..'.';
-											special_text = F..'.';
-											newText = findText..special_text;
-											textLeft = string.len(newText);
-											if n_lines > 1 then --carry_over_color = 0xFFA1FF3D;
-												-- there are more lines allocated for this messages --
-												if (string.len(findText..special_text)+1 < allSettings.chatLineMaxL) then
-													-- modified line fits in 1 line --
-													table.insert(b_ChatBuffer[1][2].text, findText);
-													n_lines = 1;
-												else
-													-- modified line doesn't fit in 1 line --
-													if string.len(findText) < allSettings.chatLineMaxL then
-														-- the findText fits
-														carry_over_color = 0xFFA1FF3D;
-														table.insert(b_ChatBuffer[1][2].text, findText);
-														cutIdx = string.len(newText)-(string.len(newText)-allSettings.chatLineMaxL);
-														local ls = utils.FindLastOf(string.sub(newText,1,cutIdx),' ');
-														if (ls ~= nil) then if (cutIdx-ls)<4 then cutIdx = ls; end end
-														special_text = string.sub(special_text,1, string.len(special_text)-(string.len(newText)-cutIdx));
-														--dw_TestMessage = findText..'\n-'..special_text;
-														--special_text = string.sub(special_text,1, string.len(findText..special_text) - allSettings.chatLineMaxL);
-														--cutIdx = string.len('5'..findText..special_text);
-													else
-														-- the findText doesn't fit
-														cutIdx = #findText-(#findText-allSettings.chatLineMaxL)
-														table.insert(b_ChatBuffer[1][2].text, findText:sub(1,cutIdx));
-														special_text = ''
-														check_again_text = findText:sub(cutIdx+1,#findText)
-														check_again = true
-														--cutIdx = 
-													end
-												end
-											else
-												-- there is 1 line allocated for this message --
-												if (string.len(findText..special_text)+1 < allSettings.chatLineMaxL) then
-													-- modified line fits in 1 line --
-													table.insert(b_ChatBuffer[1][2].text, findText);
-												else
-													-- modified line doesn't fits in 1 line anymore --
-													if string.len(findText) < allSettings.chatLineMaxL then
-														-- the findText fits math.min(allSettings.chatLineMaxL,textLeft);
-														carry_over_color = 0xFFA1FF3D;
-														table.insert(b_ChatBuffer[1][2].text, findText);
-														cutIdx = string.len(newText)-(string.len(newText)-allSettings.chatLineMaxL);
-														local ls = utils.FindLastOf(string.sub(newText,1,cutIdx),' ');
-														if (ls ~= nil) then if (cutIdx-ls)<4 then cutIdx = ls; end end
-														special_text = string.sub(special_text,1, string.len(special_text)-(string.len(newText)-cutIdx));
-														n_lines = n_lines+1;
-													else
-														-- the findText doesn't fit
-														table.insert(b_ChatBuffer[1][2].text, '[Error] Unexpected long string');
-													end
-												end
-											end
-										else
-											table.insert(b_ChatBuffer[1][2].text, newText);
-										end
-										--table.insert(b_ChatBuffer[1][2].text, ts..'You found on '..B);
-									else
-										table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,cutIdx)..lineBreak);
-										special_text = '';
-									end
-								
-								end
-							end
-						end
-					end
-				end
-			else
-				if (par_CombatCutIdx ~= 0) then
-					if (par_CombatCutIdx <= cutIdx) then
-						if (par_CombatCutIdx > 0) then
-							table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,par_CombatCutIdx));
-							special_text = string.sub(newText,par_CombatCutIdx+1,cutIdx)..lineBreak;
-							if string.find(par_LastMode, 'combat_') then
-								special_color = bit.tobit(utils.RGBAToHex(allSettings.dmgColor));
-								if par_DamageDone then
-									special_color = bit.tobit(utils.RGBAToHex(allSettings.dmgDoneColor));
-								end
-								if par_DamageGot then
-									special_color = bit.tobit(utils.RGBAToHex(allSettings.dmgGotColor));
-								end
-							else
-								if string.find(par_LastMode,'combatspell_') then
-									special_color = bit.tobit(utils.RGBAToHex(allSettings.spelldmgColor));
-									if par_DamageDone then
-										special_color = bit.tobit(utils.RGBAToHex(allSettings.spelldmgDoneColor));
-									end
-									if par_DamageGot then
-									special_color = bit.tobit(utils.RGBAToHex(allSettings.spelldmgGotColor));
-									end
-								end
-							end
-							
-							par_CombatCutIdx = par_CombatCutIdx - cutIdx;
-							if par_CombatCutIdx == 0 then par_CombatCutIdx = -1; end
-						else
-							table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,cutIdx)..lineBreak);
-							if string.find(par_LastMode, 'combat_') then
-								col = bit.tobit(utils.RGBAToHex(allSettings.dmgColor));
-								if par_DamageDone then col = bit.tobit(utils.RGBAToHex(allSettings.dmgDoneColor)); end
-								if par_DamageGot then col = bit.tobit(utils.RGBAToHex(allSettings.dmgGotColor)); end
-							else
-								if string.find(par_LastMode, 'combatspell_') then
-									col = bit.tobit(utils.RGBAToHex(allSettings.spelldmgColor));
-									if par_DamageDone then special_color = bit.tobit(utils.RGBAToHex(allSettings.spelldmgDoneColor)); end
-									if par_DamageGot then special_color = bit.tobit(utils.RGBAToHex(allSettings.spelldmgGotColor)); end
-								end
-							end
-							special_text = '';	
-						end
-					else
-						table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,cutIdx)..lineBreak);
-						par_CombatCutIdx = par_CombatCutIdx - cutIdx;
-						special_text = '';
-					end
-				else
+				elseif special_type == 'CE' then
+					--CE exclusive!--
+					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
+					special_text = string.sub(newText,special_idx+special_offset+1,cutIdx)..lineBreak;
+				elseif special_type == 'obtain' then 
+					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
+					special_text = string.sub(newText,special_idx+special_offset+1,cutIdx):gsub('the temporary item:%s*(.-)([!%p])$', '%1%2 [temp. item]')..lineBreak;
+				elseif special_type == 'synth' then
+					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
+					special_text = string.sub(newText,special_idx+special_offset+1,cutIdx)..lineBreak;
+				elseif special_type == 'learn' then
+					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
+					special_text = string.sub(newText,special_idx+special_offset+1,cutIdx)..lineBreak;
+				elseif special_type == 'lot' then
+					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
+					special_text = string.sub(newText,special_idx+special_offset+1,cutIdx)..lineBreak;
+				elseif special_type == 'find' then
+					local F_start = special_idx+9;
 					
+					special_idx = string.find(newText, ' on ');
+					if special_idx == nil then special_idx = string.find(newText, ' in '); end
+					
+					local findText = ''
+					if special_idx then
+						local F_end = special_idx-1;
+						local F = '['..string.sub(string.sub(newText,1,#newText),F_start,F_end):gsub('^an? ','')..']';
+						local B_start = special_idx+4;
+						local B_end = #string.sub(newText,1,#newText)-1;
+						local B = string.sub(string.sub(newText,1,#newText),B_start,B_end);
+						--local findText = ts..'Found on '..B;
+						findText = ts..'Found on '..B..':';
+						--special_text = '> '..F..'.';
+						special_text = F;
+						newText = findText..special_text;
+						textLeft = string.len(newText);
+						if n_lines > 1 then --carry_over_color = 0xFFA1FF3D;
+							-- there are more lines allocated for this messages --
+							if (string.len(findText..special_text)+1 < allSettings.chatLineMaxL) then
+								-- modified line fits in 1 line --
+								table.insert(b_ChatBuffer[1][2].text, findText);
+								n_lines = 1;
+							else
+								-- modified line doesn't fit in 1 line --
+								if string.len(findText) < allSettings.chatLineMaxL then
+									-- the findText fits
+									carry_over_color = 0xFFE5FF3D;
+									table.insert(b_ChatBuffer[1][2].text, findText);
+									cutIdx = string.len(newText)-(string.len(newText)-allSettings.chatLineMaxL);
+									local ls = utils.FindLastOf(string.sub(newText,1,cutIdx),' ');
+									if (ls ~= nil) then if (cutIdx-ls)<4 then cutIdx = ls; end end
+									special_text = string.sub(special_text,1, string.len(special_text)-(string.len(newText)-cutIdx));
+									--dw_TestMessage = findText..'\n-'..special_text;
+									--special_text = string.sub(special_text,1, string.len(findText..special_text) - allSettings.chatLineMaxL);
+									--cutIdx = string.len('5'..findText..special_text);
+								else
+									-- the findText doesn't fit
+									cutIdx = #findText-(#findText-allSettings.chatLineMaxL)
+									table.insert(b_ChatBuffer[1][2].text, findText:sub(1,cutIdx));
+									special_text = ''
+									check_again_text = findText:sub(cutIdx+1,#findText)
+									check_again = true
+									--cutIdx = 
+								end
+							end
+						else
+							-- there is 1 line allocated for this message --
+							if (string.len(findText..special_text)+1 < allSettings.chatLineMaxL) then
+								-- modified line fits in 1 line --
+								table.insert(b_ChatBuffer[1][2].text, findText);
+							else
+								-- modified line doesn't fits in 1 line anymore --
+								if string.len(findText) < allSettings.chatLineMaxL then
+									-- the findText fits math.min(allSettings.chatLineMaxL,textLeft);
+									carry_over_color = 0xFFE5FF3D;
+									table.insert(b_ChatBuffer[1][2].text, findText);
+									cutIdx = string.len(newText)-(string.len(newText)-allSettings.chatLineMaxL);
+									local ls = utils.FindLastOf(string.sub(newText,1,cutIdx),' ');
+									if (ls ~= nil) then if (cutIdx-ls)<4 then cutIdx = ls; end end
+									special_text = string.sub(special_text,1, string.len(special_text)-(string.len(newText)-cutIdx));
+									n_lines = n_lines+1;
+								else
+									-- the findText doesn't fit
+									table.insert(b_ChatBuffer[1][2].text, '[Error] Unexpected long string');
+								end
+							end
+						end
+					else
+						table.insert(b_ChatBuffer[1][2].text, newText);
+					end
+					--table.insert(b_ChatBuffer[1][2].text, ts..'You found on '..B);
+				else
 					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,cutIdx)..lineBreak);
 					special_text = '';
 				end
+			--elseif (par_CombatCutIdx ~= 0 and par_CombatCutIdx < allSettings.chatLineMaxL) then
+			elseif (par_CombatCutIdx ~= 0 ) then
+				
+				
+				if (par_CombatCutIdx <= cutIdx) then
+					
+					if (par_CombatCutIdx > 0) then
+						
+						--nexText = HandleActors(MCList, newText)
+						--Debug(tostring(#MCList),1,true)
+						table.insert(b_ChatBuffer[1][2].text,  string.sub(newText,1,cutIdx)..lineBreak);
+						
+						--special_text = string.sub(newText,par_CombatCutIdx+1,cutIdx)..lineBreak;
+						if string.find(par_LastMode, 'combat_') then
+							special_color = allSettings.colors.damage[1];
+							local cb = allSettings.ColorBlind[1] and 2 or 1;
+							if par_DamageDone then
+								special_color = allSettings.colors.dmgdone[cb];
+							end
+							if par_DamageGot then
+								special_color = allSettings.colors.dmggot[cb];;
+							end
+							table.insert(MCList, {par_CombatCutIdx, #newText, special_color})
+						else
+							if string.find(par_LastMode,'combatspell_') then
+								special_color = allSettings.colors.spelldamage[1];
+								local cb = allSettings.ColorBlind[1] and 2 or 1;
+								if par_DamageDone then
+									special_color = allSettings.colors.spelldmgdone[cb];
+								end
+								if par_DamageGot then
+								special_color = allSettings.colors.spelldmggot[cb];
+								end
+							end
+							table.insert(MCList, {par_CombatCutIdx, #newText, special_color})
+						end
+						
+						par_CombatCutIdx = par_CombatCutIdx - cutIdx;
+						if par_CombatCutIdx == 0 then par_CombatCutIdx = -1; end
+					else
+						table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,cutIdx)..lineBreak);
+						if string.find(par_LastMode, 'combat_') then
+							col = allSettings.colors.damage[1];
+							local cb = allSettings.ColorBlind[1] and 2 or 1;
+							if par_DamageDone then
+								col = allSettings.colors.dmgdone[cb];
+							end
+							if par_DamageGot then
+								col = allSettings.colors.dmggot[cb];;
+							end
+							--table.insert(MCList, {par_CombatCutIdx, #newText, col})
+						else
+							if string.find(par_LastMode,'combatspell_') then
+								col = allSettings.colors.spelldamage[1];
+								local cb = allSettings.ColorBlind[1] and 2 or 1;
+								if par_DamageDone then
+									col = allSettings.colors.spelldmgdone[cb];
+								end
+								if par_DamageGot then
+								col = allSettings.colors.spelldmggot[cb];
+								end
+							end
+							--table.insert(MCList, {par_CombatCutIdx, #newText, col})
+						end
+						--Debug(tostring(par_action1), 1, true)
+						special_text = '';	
+					end
+				else
+					--MCList = HandleActors(MCList, newText)
+					
+					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,cutIdx)..lineBreak);
+					par_CombatCutIdx = par_CombatCutIdx - cutIdx;
+					special_text = '';
+				end
+			else
+				
+				table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,cutIdx)..lineBreak);
+				special_text = '';
+			
+			end
+			
+				--call to HELMtext
+			
+			if HELMfound then
+				local HEMLtable = HELMtext(HELMfound, string.sub(newText,1,cutIdx))
+				if HEMLtable then
+					fo_Fwd[1]:set_visible(false)
+					fo_Fwd[2]:set_visible(false)
+					table.insert(MCList,HEMLtable)
+				end
+			end
+			
+			if #MCList > 0 or par_handled_actors then
+				local mctext = b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text]
+				
+				table.sort(MCList, function(a, b)
+					return a[1] < b[1]
+				end)
+				
+				for i = 1, #MCList do
+					local mcoff = 28 * (i-1)
+					mctext = string.sub(mctext,1,MCList[i][1]+mcoff)..MC(MCList[i][3])..string.sub(mctext,MCList[i][1]+1+mcoff,MCList[i][2]+mcoff)..MC('reset')..string.sub(mctext, MCList[i][2]+1+mcoff,#mctext)
+				end
+				
+				if allSettings.CompactCombat[1] then
+					mctext = HandleActors(mctext, special_color)
+				end
+				--if MCCheck(mctext) then 
+				b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text] = MCCheck(mctext)
+					--Debug(b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text], 1, true)
+				--end
 			end
 			
 			if not b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text] then
@@ -5417,9 +6570,15 @@ parseThis = function(e, e_message)
 				if (L_i < n_lines) then 
 					newText = string.sub(newText,cutIdx+1,string.len(newText));
 				end 
+				if par_isCustom then par_LastMode = par_LastMode..'C' end
 				table.insert(b_ChatBuffer[1][2].mode, tostring(par_MessageMode)..'|'..par_LastMode);
-				table.insert(b_ChatBuffer[1][2].color, col);
-				if (special_idx ~= nil or par_CombatCutIdx < 0)	then
+				if type(col) == 'number' then 
+					table.insert(b_ChatBuffer[1][2].color, col);
+				else
+					table.insert(b_ChatBuffer[1][2].color, 0xFFFFFFFF);
+				end
+				--if (special_idx ~= nil or par_CombatCutIdx < 0)	then
+				if (special_idx ~= nil)	then
 					table.insert(b_ChatBuffer[1][2].auxText, dw_ShowMessageMode[1] and (special_text..' >'..tostring(par_MessageMode)..(e.injected and '[i]' or '')) or special_text);
 					table.insert(b_ChatBuffer[1][2].auxColor, special_color);
 					table.insert(b_ChatBuffer[1][2].url, b_msgID)
@@ -5435,116 +6594,122 @@ parseThis = function(e, e_message)
 					table.insert(b_ChatBuffer[1][2].auxColor, 0xFF44CCFF);
 				end
 				
-				if tabmode and tabmode ~= 3 then
+				if tabmode and (tabmode ~= 3 and not par_isCustom) then
 					--Debug(tostring(tabmode), 1, true);
 					table.insert(b_ChatBuffer[2][2].text,b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text]);
-					table.insert(b_ChatBuffer[2][2].mode,b_ChatBuffer[1][2].mode[#b_ChatBuffer[1][2].mode]);
+					--table.insert(b_ChatBuffer[2][2].mode,b_ChatBuffer[1][2].mode[#b_ChatBuffer[1][2].mode]);
 					table.insert(b_ChatBuffer[2][2].color,b_ChatBuffer[1][2].color[#b_ChatBuffer[1][2].color]);
 					table.insert(b_ChatBuffer[2][2].auxText,b_ChatBuffer[1][2].auxText[#b_ChatBuffer[1][2].auxText]);
 					table.insert(b_ChatBuffer[2][2].auxColor,b_ChatBuffer[1][2].auxColor[#b_ChatBuffer[1][2].auxColor]);
 					table.insert(b_ChatBuffer[2][2].url,b_ChatBuffer[1][2].url[#b_ChatBuffer[1][2].url]);
 				end
-				if (utils.GetTableLen(b_ChatBuffer[1][2].text) > b_ChatBufferMaxSize) then
-					-- local removeCount = math.min(b_CleanupThresh, #b_ChatBuffer[1][2].text)
-					-- local tabremove = ''
-					-- local mode1 = b_ChatBuffer[1][2].mode[1]
-					-- if string.find(mode1, 'combat') then
-						-- tabremove = 3
-					-- elseif string.find(mode1, 'linkshell') then
-						-- tabremove = 4
-					-- elseif string.find(mode1, 'party') then
-						-- tabremove = 5
-					-- elseif string.find(mode1, 'tell') then
-						-- tabremove = 6
-					-- elseif string.find(mode1, 'shout') then
-						-- tabremove = 7
-					-- elseif string.find(mode1, 'NPC') then
-						-- tabremove = 8
-					-- end
-
-					-- if tabremove ~= '' then
-						-- BulkRemove(b_ChatBuffer[tabremove][2], removeCount)
-					-- end
-					-- BulkRemove(b_ChatBuffer[1][2], removeCount)
-					-- if tabremove ~= 3 then
-						-- BulkRemove(b_ChatBuffer[2][2], removeCount)
-					-- end
-					local cleanupRanges = {b_CleanupThresh, 0, 0, 0, 0, 0, 0, 0}
-					for tr = 1, b_CleanupThresh do
-						local tabremove = 0;
-						if (string.find(b_ChatBuffer[1][2].mode[tr], 'combat') ~= nil) then tabremove = 3; 
-						elseif (string.find(b_ChatBuffer[1][2].mode[tr], 'linkshell') ~= nil) then tabremove = 4; 
-						elseif (string.find(b_ChatBuffer[1][2].mode[tr], 'party') ~= nil) then tabremove = 5; 
-						elseif (string.find(b_ChatBuffer[1][2].mode[tr], 'tell') ~= nil) then tabremove = 6; 
-						elseif (string.find(b_ChatBuffer[1][2].mode[tr], 'shout') ~= nil) then tabremove = 7; 
-						elseif (string.find(b_ChatBuffer[1][2].mode[tr], 'NPC') ~= nil) then tabremove = 8; 
-						else tabremove = 0;
-						end
-						if tabremove > 0 then
-							cleanupRanges[tabremove] = cleanupRanges[tabremove] + 1
-						end
-						if (tabremove ~= 3) then
-							cleanupRanges[2] = cleanupRanges[2] + 1
-						end
-					end
-					--Debug(tostring(table.concat(cleanupRanges,',')),1,true)
-					for ci = 1, #cleanupRanges do
-						BulkRemove(b_ChatBuffer[ci][2], cleanupRanges[ci])
-					end
-						-- if (tabremove ~= '') then
-							-- table.remove(b_ChatBuffer[tabremove][2].text, 1);
-							-- table.remove(b_ChatBuffer[tabremove][2].mode, 1);
-							-- table.remove(b_ChatBuffer[tabremove][2].color, 1);
-							-- table.remove(b_ChatBuffer[tabremove][2].auxText, 1);
-							-- table.remove(b_ChatBuffer[tabremove][2].auxColor, 1);
-							-- table.remove(b_ChatBuffer[tabremove][2].url, 1);
-						-- end
-						-- table.remove(b_ChatBuffer[1][2].text, 1);
-						-- table.remove(b_ChatBuffer[1][2].mode, 1);
-						-- table.remove(b_ChatBuffer[1][2].color, 1);
-						-- table.remove(b_ChatBuffer[1][2].auxText, 1);
-						-- table.remove(b_ChatBuffer[1][2].auxColor, 1);
-						-- table.remove(b_ChatBuffer[1][2].url, 1);
-						-- if (tabremove ~= 3) then
-							-- table.remove(b_ChatBuffer[2][2].text, 1);
-							-- table.remove(b_ChatBuffer[2][2].mode, 1);
-							-- table.remove(b_ChatBuffer[2][2].color, 1);
-							-- table.remove(b_ChatBuffer[2][2].auxText, 1);
-							-- table.remove(b_ChatBuffer[2][2].auxColor, 1);
-							-- table.remove(b_ChatBuffer[2][2].url, 1);
-						-- end
-					
-				end
-				---
-				
 				if (tabmode and tabmode > 2) then	
 					
 					table.insert(b_ChatBuffer[tabmode][2].text,b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text]);
-					table.insert(b_ChatBuffer[tabmode][2].mode,b_ChatBuffer[1][2].mode[#b_ChatBuffer[1][2].mode]);
+					--table.insert(b_ChatBuffer[tabmode][2].mode,b_ChatBuffer[1][2].mode[#b_ChatBuffer[1][2].mode]);
 					table.insert(b_ChatBuffer[tabmode][2].color,b_ChatBuffer[1][2].color[#b_ChatBuffer[1][2].color]);
 					table.insert(b_ChatBuffer[tabmode][2].auxText,b_ChatBuffer[1][2].auxText[#b_ChatBuffer[1][2].auxText]);
 					table.insert(b_ChatBuffer[tabmode][2].auxColor,b_ChatBuffer[1][2].auxColor[#b_ChatBuffer[1][2].auxColor]);
 					table.insert(b_ChatBuffer[tabmode][2].url,b_ChatBuffer[1][2].url[#b_ChatBuffer[1][2].url]);
 				end
+				if (par_isCustom) then	
+					
+					table.insert(b_ChatBuffer[8][2].text,b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text]);
+					--table.insert(b_ChatBuffer[tabmode][2].mode,b_ChatBuffer[1][2].mode[#b_ChatBuffer[1][2].mode]);
+					table.insert(b_ChatBuffer[8][2].color,b_ChatBuffer[1][2].color[#b_ChatBuffer[1][2].color]);
+					table.insert(b_ChatBuffer[8][2].auxText,b_ChatBuffer[1][2].auxText[#b_ChatBuffer[1][2].auxText]);
+					table.insert(b_ChatBuffer[8][2].auxColor,b_ChatBuffer[1][2].auxColor[#b_ChatBuffer[1][2].auxColor]);
+					table.insert(b_ChatBuffer[8][2].url,b_ChatBuffer[1][2].url[#b_ChatBuffer[1][2].url]);
+				end
+				if (#b_ChatBuffer[1][2].text > b_ChatBufferMaxSize ) then
+					
+					local cleanupRanges = {b_CleanupThresh, 0, 0, 0, 0, 0, 0, 0}
+					for tr = 1, b_CleanupThresh do
+						local tabremove = 0;
+						local cremove = 0;
+						if (string.find(b_ChatBuffer[1][2].mode[tr], 'C$') ~= nil) then cremove = 8; end
+						if (string.find(b_ChatBuffer[1][2].mode[tr], '^combat') ~= nil) then tabremove = 3; 
+						elseif (string.find(b_ChatBuffer[1][2].mode[tr], '^linkshell') ~= nil) then tabremove = 4; 
+						elseif (string.find(b_ChatBuffer[1][2].mode[tr], '^party') ~= nil) then tabremove = 5; 
+						elseif (string.find(b_ChatBuffer[1][2].mode[tr], '^tell') ~= nil) then tabremove = 6; 
+						elseif (string.find(b_ChatBuffer[1][2].mode[tr], '^shout') ~= nil) then tabremove = 7; 
+						else tabremove = 0;
+						end
+						if tabremove > 0 then
+							if (tabremove ~= 3) then
+								cleanupRanges[2] = cleanupRanges[2] + 1
+							end
+							cleanupRanges[tabremove] = cleanupRanges[tabremove] + 1
+						end
+						if cremove > 0 then
+							cleanupRanges[cremove] = cleanupRanges[cremove] + 1
+						end
+						
+					end
+					--Debug(tostring(table.concat(cleanupRanges,',')),1,true)
+					for ci = 1, #cleanupRanges do
+						BulkRemove(b_ChatBuffer[ci][2], cleanupRanges[ci])
+					end
+					--b_CombatBufferMaxSize
+				elseif (#b_ChatBuffer[3][2].text > b_CombatBufferMaxSize ) then
+					local line = {}
+					--local cleanupRanges = {b_CleanupThresh}
+					local tr = 1
+					while #line < b_CleanupThresh and tr < #b_ChatBuffer[1][2].text do
+					--for tr = 1, b_CleanupThresh do
+						--local tabremove = 0;
+						if string.find(b_ChatBuffer[1][2].mode[tr], 'combat') then
+							--cleanupRanges[2] = cleanupRanges[2] + 1
+							table.insert(line, tr)
+							
+						end
+						tr = tr + 1
+					end
+					--Debug(tostring(table.concat(cleanupRanges,',')),1,true)
+					
+					BulkRemove(b_ChatBuffer[3][2], b_CleanupThresh)
+					BulkRemoveCombat(b_ChatBuffer[1][2], line)
+					
+					
+				end
+				---or #b_ChatBuffer[3][2].text > b_CombatBufferMaxSize
+				
+				
 				---
 			end	
 			L_i = L_i +1;
 		end
 		n_lines = n_lines-skipped;
 		b_ChatBufferN_All  = b_ChatBufferN_All+n_lines;
-		if (tabmode ~= 3) then b_ChatBufferN_AllAlt = b_ChatBufferN_AllAlt + n_lines; end
-		if (string.find(par_LastMode, 'combat')) then b_ChatBufferN_Combat = b_ChatBufferN_Combat + n_lines; end
-		if (string.find(par_LastMode, 'linkshell')) then b_ChatBufferN_Linkshell = b_ChatBufferN_Linkshell + n_lines;  end
-		if (string.find(par_LastMode, 'party')) then b_ChatBufferN_Party = b_ChatBufferN_Party + n_lines; end
-		if (string.find(par_LastMode, 'tell')) then b_ChatBufferN_Tell = b_ChatBufferN_Tell + n_lines; end
-		if (string.find(par_LastMode, 'shout')) then b_ChatBufferN_Shout = b_ChatBufferN_Shout + n_lines; end
-		if (string.find(par_LastMode, 'NPC')) then b_ChatBufferN_NPC = b_ChatBufferN_NPC + n_lines; end
+		if (tabmode ~= 3 and not par_isCustom) then b_ChatBufferN_AllAlt = b_ChatBufferN_AllAlt + n_lines; end
+		if allSettings.SelectedTab:find('^All') or allSettings.SelectedTab2:find('^All') then fcw[1].autoHideTime = os.time() end
+		
+		if (string.find(par_LastMode, '^combat')) then
+			b_ChatBufferN_Combat = b_ChatBufferN_Combat + n_lines;
+			if allSettings.SelectedTab == 'Combat' or allSettings.SelectedTab2 == 'Combat' then fcw[1].autoHideTime = os.time() end
+		elseif (string.find(par_LastMode, '^linkshell')) then
+			b_ChatBufferN_Linkshell = b_ChatBufferN_Linkshell + n_lines;
+			if allSettings.SelectedTab == 'Linkshell' or allSettings.SelectedTab2 == 'Linkshell' then fcw[1].autoHideTime = os.time() end
+		elseif (string.find(par_LastMode, '^party')) then
+			b_ChatBufferN_Party = b_ChatBufferN_Party + n_lines;
+			if allSettings.SelectedTab == 'Party' or allSettings.SelectedTab2 == 'Party' then fcw[1].autoHideTime = os.time() end
+		elseif (string.find(par_LastMode, '^tell')) then
+			b_ChatBufferN_Tell = b_ChatBufferN_Tell + n_lines;
+			if allSettings.SelectedTab == 'Tell' or allSettings.SelectedTab2 == 'Tell' then fcw[1].autoHideTime = os.time() end
+		elseif (string.find(par_LastMode, '^shout')) then
+			b_ChatBufferN_Shout = b_ChatBufferN_Shout + n_lines;
+			if allSettings.SelectedTab == 'Shout' or allSettings.SelectedTab2 == 'Shout' then fcw[1].autoHideTime = os.time() end
+		end
+		if (string.find(par_LastMode, 'C$')) then
+			b_ChatBufferN_Custom = b_ChatBufferN_Custom + n_lines;
+			if allSettings.SelectedTab == 'Custom' or allSettings.SelectedTab2 == 'Custom' then fcw[1].autoHideTime = os.time() end
+		end
 
 	end
 	par_LastMessageMode = par_MessageMode;
 end
 	
-function CheckSpecial (special_idx, special_offset, special_type, special_color, tabmode, L_i, check_again, check_again_text, n_lines, carry_over_color, cutIdx, newText)
+function CheckSpecial (special_idx, special_offset, special_type, special_color, tabmode, L_i, check_again, check_again_text, n_lines, carry_over, carry_over_color, cutIdx, newText)
 	if (L_i == 1 or check_again) then
 		check_again = false;
 		
@@ -5552,36 +6717,44 @@ function CheckSpecial (special_idx, special_offset, special_type, special_color,
 		check_mode = par_MessageMode == 9;
 		if check_mode then
 		
-		special_idx, idx_end = string.find(newText, 'Now accumulating linkshell points for ');
-		if (special_idx ~= nil) then special_offset = string.find(newText, '%(')-1-special_idx; special_type = 'SOTS';
-		special_color = 0xFF00FFB3;
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFF00FFB3; end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text,carry_over_color; end
+			special_idx, idx_end = string.find(newText, 'Now accumulating linkshell points for ');
+			if (special_idx ~= nil) then special_offset = string.find(newText, '%(')-1-special_idx; special_type = 'CE';
+			special_color = allSettings.colors.cexi[1];
+			if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.cexi[1]; end end
+			return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text,carry_over, carry_over_color; end
+			
+			special_idx, idx_end = string.find(newText, 'Activity Points:');
+			if (special_idx ~= nil) then special_offset = 15 special_type = 'CE';
+			special_color = allSettings.colors.cexi[1];
+			if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.cexi[1]; end end
+			return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
+			
+			special_idx, idx_end = string.find(newText, 'Summit Objective:');
+			if (special_idx ~= nil) then special_offset = 16; special_type = 'CE';
+			special_color = allSettings.colors.cexi[1];
+			if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.cexi[1]; end end
+			return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
+			
+			special_idx, idx_end = string.find(newText, ' activity points%.');
+			if (special_idx ~= nil) then special_idx, idx_end = string.find(newText, 'gains'); special_offset = 4; special_type = 'CE'; if not special_idx then return end
+			special_color = allSettings.colors.cexi[1];
+			if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.cexi[1]; end end
+			return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
+			
+			special_idx, idx_end = string.find(newText, 'Point Accumulation:');
+			if (special_idx ~= nil) then special_offset = 19; special_type = 'CE';
+			special_color = allSettings.colors.cexi[2];
+			if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.cexi[2]; end end
+			return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
 		
-		special_idx, idx_end = string.find(newText, 'Activity Points:');
-		if (special_idx ~= nil) then special_offset = 15 special_type = 'SOTS';
-		special_color = 0xFF00FFB3;
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFF00FFB3; end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color; end
+		end
 		
-		special_idx, idx_end = string.find(newText, 'Summit Objective:');
-		if (special_idx ~= nil) then special_offset = 16; special_type = 'SOTS';
-		special_color = 0xFF00FFB3;
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFF00FFB3; end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color; end
-		
-		special_idx, idx_end = string.find(newText, ' activity points.');
-		if (special_idx ~= nil) then special_idx, idx_end = string.find(newText, 'gains'); special_offset = 4; special_type = 'SOTS';
-		special_color = 0xFF00FFB3;
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFF00FFB3; end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color; end
-		
-		special_idx, idx_end = string.find(newText, 'Point Accumulation:');
-		if (special_idx ~= nil) then special_offset = 19; special_type = 'SOTS';
-		special_color = 0xFFFF0055;
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFFFF0055; end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color; end
-		
+		check_mode = par_MessageMode == 121;
+		if check_mode then
+		special_idx = string.find(newText, 'Defeat Mobs');
+		if special_idx ~= nil then	special_offset = 11; special_type = 'CE'; special_color = allSettings.colors.cexi[1];
+		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.cexi[1]; end end
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
 		end
 		-----------------
 		
@@ -5589,104 +6762,124 @@ function CheckSpecial (special_idx, special_offset, special_type, special_color,
 		if check_mode then
 		special_idx = string.find(newText, 'You obtain');
 		if (special_idx ~= nil) then special_offset = 9; special_type = 'obtain';
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFFA1FF3D; end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color; end
+		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.obtained[1]; end end
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
 		end
 		
 		check_mode = par_MessageMode == 142 or par_MessageMode == 151;
 		if check_mode then
 		special_idx = string.find(newText, 'Obtained:');
 		if (special_idx ~= nil) then special_offset = 8; special_type = 'obtain';
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFFA1FF3D; end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color; end
+		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.obtained[1]; end end
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
+		end
+		
+		check_mode = par_MessageMode == 142 or par_MessageMode == 151;
+		if check_mode then
+		special_idx = string.find(newText, fcw[1].PlayerName..' caught');
+		if (special_idx ~= nil) then special_offset = 6 + #fcw[1].PlayerName; special_type = 'obtain';
+		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.obtained[1]; end end
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
 		end
 		
 		check_mode = par_MessageMode == 121 or par_MessageMode == 142 or par_MessageMode == 131 or par_MessageMode == 127;
 		if check_mode then
 		special_idx = string.find(newText, ' obtains ');
 		if (special_idx ~= nil) then	special_offset = 8	;	special_type = 'obtain';
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFFA1FF3D; end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color; end
+		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.obtained[1]; end end
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
 		end
 		
 		check_mode = par_MessageMode == 142 or par_MessageMode == 151;
 		if check_mode then
 		special_idx = string.find(newText, 'Obtained key item: ');
 		if (special_idx ~= nil) then	special_offset = 18	;	special_type = 'obtain';
-		special_color = 0xFFC797FF;
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFFC797FF;  end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color; end
+		special_color = allSettings.colors.keyitem[1];
+		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.keyitem[1];  end end
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
 		end
 		
 		check_mode = par_MessageMode == 121;
 		if check_mode then
 		special_idx = string.find(newText, ' synthesized ');
 		if (special_idx ~= nil and string.find(newText, 'You ')) then	special_offset = 12; special_type = 'synth';
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFFA1FF3D; end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color; end
+		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.obtained[1]; end end
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
 		end
-		
+				
 		check_mode = par_MessageMode == 121;
 		if check_mode then
 		special_idx = string.find(newText, ' caught ');
 		if (special_idx ~= nil and string.find(newText, fcw[1].PlayerName)) then	special_offset = 7; special_type = 'synth';
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFFA1FF3D; end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color; end
+		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.obtained[1]; end end
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
+		end
+		
+		check_mode = par_MessageMode == 121;
+		if check_mode then
+		special_idx = string.find(newText, ' learns ');
+		if (special_idx ~= nil and string.find(newText, fcw[1].PlayerName)) then	special_offset = 7; special_type = 'learn'; special_color = allSettings.colors.learn[1];
+		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.learn[1]; end end
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
 		end
 		
 		check_mode =  par_MessageMode == 131 or par_MessageMode == 121;
 		if check_mode then
 		special_idx = string.find(newText, ' gains ');
 		if (special_idx ~= nil and (string.find(newText, 'experience') or string.find(newText, 'limit')))  then special_offset = 6; special_type = 'obtain'; tabmode = 3; par_LastMode = 'combat';
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFFA1FF3D; end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color; end
+		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.obtained[1]; end end
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
 		end
 		
 		check_mode = par_MessageMode == 121;
 		if check_mode then
 		special_idx = string.find(newText, 'You find ');
-		if (special_idx ~= nil) then	special_offset = 8;	special_type = 'find';
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFFA1FF3D; end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color;
+		if (special_idx ~= nil) then	special_offset = 8;	special_type = 'find'; special_color = allSettings.colors.found[1];
+		--if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFFA1FF3D; end end
+		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.found[1]; end end
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color;
 		elseif check_again_text ~= '' then
 		special_idx = string.find(newText, check_again_text);
 		if special_idx then special_offset = check_again_text:find(':')-special_idx;	special_type = 'prevspecial'; end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color;	
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color;	
 		end
 		end
 		
 		check_mode = par_MessageMode == 121;
 		if check_mode then
 		special_idx = string.find(newText, ' lot for ');
-		if (special_idx ~= nil) then	special_offset = 8;	special_type = 'lot';  tabmode = -1; par_LastMode = 'lot';
-		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFFA1FF3D; end end
-		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color; end
+		if (special_idx ~= nil) then	special_offset = 8;	special_type = 'lot'; special_color = allSettings.colors.lot[1]; tabmode = -1; par_LastMode = 'lot';
+		--if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = 0xFFA1FF3D; end end
+		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.lot[1]; end end
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
 		end
 		
 	end
-	return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over_color;
+	return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over,carry_over_color;
 end
 
 SetBufferN = function(tab)
-	if (tab == 'All' and not allSettings.HideCombatFromAll[1]) 
-							then return b_ChatBufferN_All; 			end
-	if (tab == 'All' and allSettings.HideCombatFromAll[1]) 
-							then return b_ChatBufferN_AllAlt; 		end
+	if (tab == 'All')		then return b_ChatBufferN_All; 			end
+	if (tab == 'AllAlt') 	then return b_ChatBufferN_AllAlt; 		end
 	if (tab == 'Combat') 	then return b_ChatBufferN_Combat; 		end
 	if (tab == 'Linkshell') then return b_ChatBufferN_Linkshell; 	end
 	if (tab == 'Party') 	then return b_ChatBufferN_Party; 		end
 	if (tab == 'Tell') 		then return b_ChatBufferN_Tell; 		end
 	if (tab == 'Shout') 	then return b_ChatBufferN_Shout; 		end
-	if (tab == 'NPC') 		then return b_ChatBufferN_NPC; 			end
+	if (tab == 'Custom') 	then return b_ChatBufferN_Custom; 		end
 	return chatBufferN_All;
 end
 
-SetTargetPosX = function(x,y)
+SetTargetPosX = function(x,y,positionStartX)
 	if mvc_Menu1 or uiw.DialogShown then mvc_targetposY = (y/uiw.UISizeY*uiw.UISizeY) -((y*128)/uiw.UISizeY);	return fcw[1].MoveChatPos1; end
 	if mvc_Menu2 then mvc_targetposY = (y/uiw.UISizeY*uiw.UISizeY)-((y*250)/uiw.UISizeY); return fcw[1].MoveChatPos2; end
 	if mvc_Menu3 then mvc_targetposY = (y/uiw.UISizeY*uiw.UISizeY)-(y*250)/uiw.UISizeY; return fcw[1].MoveChatPos3; end
 	if mvc_Menu4 then mvc_targetposY = (y/uiw.UISizeY*uiw.UISizeY)-(y*250)/uiw.UISizeY; return fcw[1].MoveChatPos4; end
 	if mvc_Menu5 then mvc_targetposY = (y/uiw.UISizeY*uiw.UISizeY)-(y*160)/uiw.UISizeY; return fcw[1].MoveChatPos1; end
+	if mvc_Menu6 then mvc_targetposY = (y/uiw.UISizeY*uiw.UISizeY)-(y*180)/uiw.UISizeY; 
+		--print(mvc_targetposY..'-'..fcw[1].Anchor_Y)
+		return positionStartX;
+	end
 	return 0;
 end
 
@@ -5698,34 +6891,35 @@ end
 	-- --gdi:render()
 -- end
 
-function DumpChat(mode)
+function DumpChat(closingline)
+--function DumpChat(mode)
 	par_dumping = true
-	if mode == 2 then
-		local i = 1
-		while i <= #b_ChatBuffer[1][2].text do
-			local j = 1
-			local nextLine = b_ChatBuffer[1][2].text[i]..' '..b_ChatBuffer[1][2].auxText[i]
-			local ID =  b_ChatBuffer[1][2].url[i]
-			while b_ChatBuffer[1][2].url[i+j] == ID and j < 1000 do
-				nextLine = nextLine..' '..b_ChatBuffer[1][2].text[i+j]..' '..b_ChatBuffer[1][2].auxText[i+j]
-				j = j + 1
-			end
-			for i = 1, #utils.ShiftJITback do
-				local char = utf8.char(utils.ShiftJITback[i][1])
-				local bytes = {char:byte(1, #char)}
-				local chars = ''
-				for b = 1, #bytes do
-					chars = chars..string.char(bytes[b])
-				end
-				--Debug(tostring(string.find(nextLine, chars)),1,true)
+	-- if mode == 2 then
+		-- local i = 1
+		-- while i <= #b_ChatBuffer[1][2].text do
+			-- local j = 1
+			-- local nextLine = b_ChatBuffer[1][2].text[i]..' '..b_ChatBuffer[1][2].auxText[i]
+			-- local ID =  b_ChatBuffer[1][2].url[i]
+			-- while b_ChatBuffer[1][2].url[i+j] == ID and j < 1000 do
+				-- nextLine = nextLine..' '..b_ChatBuffer[1][2].text[i+j]..' '..b_ChatBuffer[1][2].auxText[i+j]
+				-- j = j + 1
+			-- end
+			-- for i = 1, #utils.ShiftJISback do
+				-- local char = utf8.char(utils.ShiftJISback[i][1])
+				-- local bytes = {char:byte(1, #char)}
+				-- local chars = ''
+				-- for b = 1, #bytes do
+					-- chars = chars..string.char(bytes[b])
+				-- end
+				-- --Debug(tostring(string.find(nextLine, chars)),1,true)
 				
-				nextLine = nextLine:gsub(chars,utils.ShiftJITback[i][2])
-			end
-			AshitaCore:GetChatManager():AddChatMessage(tonumber(b_ChatBuffer[1][2].mode[i]:sub(1,b_ChatBuffer[1][2].mode[i]:find('|')-1)), false, nextLine)
-			coroutine.sleep(1/#b_ChatBuffer[1][2].text)
-			i = i + j
-		end
-	elseif mode == 1 then
+				-- nextLine = nextLine:gsub(chars,utils.ShiftJISback[i][2])
+			-- end
+			-- AshitaCore:GetChatManager():AddChatMessage(tonumber(b_ChatBuffer[1][2].mode[i]:sub(1,b_ChatBuffer[1][2].mode[i]:find('|')-1)), false, cleanMC(nextLine))
+			-- coroutine.sleep(1/#b_ChatBuffer[1][2].text)
+			-- i = i + j
+		-- end
+	-- elseif mode == 1 then
 		--local start = math.max(1,  #b_OriginalBuffer - 299) 
 
 		for i = 1, #b_OriginalBuffer do
@@ -5740,12 +6934,15 @@ function DumpChat(mode)
 			AshitaCore:GetChatManager():AddChatMessage(tonumber(b_OriginalBuffer[i]:sub(1,b_OriginalBuffer[i]:find('|')-1)), false, msg)
 			--coroutine.sleep(1/(#b_OriginalBuffer))
 		end
-		print('-------------- Chat restored --------------')
-	end
+		if closingline then	
+			print(closingline)
+		end
+	--end
 	par_dumping = false
 end
 
 function BulkRemove(buffer, count)
+	local hasMode = buffer.mode ~= nil
 	local size = #buffer.text
 	if count >= size then
 		buffer.text = {}
@@ -5758,17 +6955,398 @@ function BulkRemove(buffer, count)
 		local newText, newMode, newColor, newAuxText, newAuxColor, newUrl = {}, {}, {}, {}, {}, {}
 		for i = count + 1, size do
 			newText[#newText + 1] = buffer.text[i]
-			newMode[#newMode + 1] = buffer.mode[i]
+			if hasMode then
+				newMode[#newMode + 1] = buffer.mode[i]
+			end
 			newColor[#newColor + 1] = buffer.color[i]
 			newAuxText[#newAuxText + 1] = buffer.auxText[i]
 			newAuxColor[#newAuxColor + 1] = buffer.auxColor[i]
 			newUrl[#newUrl + 1] = buffer.url[i]
 		end
 		buffer.text = newText
-		buffer.mode = newMode
+		if hasMode then
+			buffer.mode = newMode
+		end
 		buffer.color = newColor
 		buffer.auxText = newAuxText
 		buffer.auxColor = newAuxColor
 		buffer.url = newUrl
 	end
+end
+
+function BulkRemoveCombat(buffer, line)
+	local hasMode = buffer.mode ~= nil
+	local size = #buffer.text
+	
+	local newText, newMode, newColor, newAuxText, newAuxColor, newUrl = {}, {}, {}, {}, {}, {}
+	local L_i = 1;
+	for i = 1, size do
+		if L_i > #line or i ~= line[L_i] then
+			newText[#newText + 1] = buffer.text[i]
+			if hasMode then
+				newMode[#newMode + 1] = buffer.mode[i]
+			end
+			newColor[#newColor + 1] = buffer.color[i]
+			newAuxText[#newAuxText + 1] = buffer.auxText[i]
+			newAuxColor[#newAuxColor + 1] = buffer.auxColor[i]
+			newUrl[#newUrl + 1] = buffer.url[i]
+		else
+			L_i = L_i + 1
+		end
+	end
+	buffer.text = newText
+	if hasMode then
+		buffer.mode = newMode
+	end
+	buffer.color = newColor
+	buffer.auxText = newAuxText
+	buffer.auxColor = newAuxColor
+	buffer.url = newUrl
+	
+end
+
+function MC(color)
+
+	if color == 'reset' then
+	return '\\§--------ç\\'; end
+	--return '\\a--------b\\'; end
+	colortext = string.format("%08X", tonumber(color))
+	
+	return '\\§'..colortext..'ç\\';
+	--return '\\a'..colortext..'b\\';
+end--\aFFFFFFFFb\[17:25]\a--------b\ [Eleanor] > Bumblebee >\aFF47FF91b\ 104 DMG\a--------b\ 
+--\aFFFFFFFFb\[12:54]\a--------b\ (Snuggle) <H\aFF0D9441b\ell\a--------b\o!> <H\aFFBB2F38b\ell\a--------b\o!>\aFF0D9441b\ â\a--------b\®Hello!>\aFFBB2F38b\\a--------b\\aFF0D9441b\\a--------b\\aFFBB2F38b\\a--------b\ 
+function MCCheck(text)
+
+	--text = text:gsub("(\\§........ç\\)%s+(\\§........ç\\)", "%1%2 ")
+	--text = text:gsub("(\\\\§........ç\\\\)(%1)", "%1")
+	text = text:gsub('(ç\\(%s+)\\§........ç\\)', string.gsub('%1','%s*','')..'%2')
+	local idx = 1
+	while true do
+		local f1 = string.find(text, '\\§', idx, true)
+		if f1 then
+			--Debug('bad string'..text:sub(f1+11,f1+13), 1, true)
+			--Debug('bad string'..text:sub(f1,f1+2), 1, true)
+			if not string.find(text:sub(f1+11,f1+13 ), 'ç\\', 1, true) then
+				return 'Bad MC format'
+			else
+				idx = f1+4
+			end
+		else
+			break;
+		end
+		
+	end
+	--Debug('good string', 1, true)
+	return text
+end
+
+function cleanMC(text)
+	return text:gsub("\\§........ç\\", "")
+end
+
+
+
+function HandleActors(text, scol)
+	--text = text:gsub("%-", "%-")
+	if scol == 0xFFFFFFFF then scol = 'reset' end
+	
+	if #par_actor1 > 0 then
+		par_handled_actors = true	
+		text = text:replace(par_actor1,MC(allSettings.colors.actor1[1])..par_actor1..MC('reset'))	
+	end
+	
+	if #par_actorP > 0 and #par_actorP ~= #par_actor1 then
+		par_handled_actors = true
+		text = text:replace(par_actorP, MC(allSettings.colors.actor1[1])..par_actorP..MC('reset'))	
+	end
+	
+	if #par_actor2 > 0 then
+		par_handled_actors = true
+		text = text:replace(par_actor2, MC(allSettings.colors.actor2[1])..par_actor2..MC('reset'))
+		
+	end
+	
+	if #par_actorE > 0 and #par_actorE ~= #par_actor2 then
+		par_handled_actors = true
+		text = text:replace(par_actorE, MC(allSettings.colors.actor2[1])..par_actorE..MC('reset'))
+	end
+
+	if #par_action1 > 0 then
+		par_handled_actors = true
+		text = text:replace(par_action1, MC(allSettings.colors.ability[1])..par_action1:gsub('\\','['):gsub('/',']')..MC(scol))
+	end
+	
+	return text
+end
+
+function HELMtext(t, text)
+	local s = 0
+	local e = 0
+	local c = allSettings.colors.helm[1]
+	if t[1] == 'harvest'
+	or t[1] == 'dig up'
+	or t[1] == 'cut off'
+	then
+		
+		s = text:find(t[1],1, true)
+		if s then
+			s = s + #t[1]
+			e = text:find(t[2], s, true)
+			if not e then e = #text end
+			if e then e = e - 1 end
+			return {s, e, c}
+		else
+			s = 0
+			e = text:find(t[2], s, true)
+			if e then
+				e = e - 1
+				return {s, e, c}
+			end
+		end
+		
+	end
+	return false
+end 
+
+function FindHELM(text, mode)
+	
+	if mode ~= 9 and mode ~= 151 then return false end
+	if text:find(':', #par_LastTS, true) then return false end
+	
+	local f = text:find(' harvest ')
+	if f then
+		local opening = 'harvest'
+		local closing = text:find('!', f, true) and '!' or nil
+		if not closing then
+			closing = text:find(',', f, true) and ',' or nil
+		end
+		if closing then return {opening, closing} end
+	end
+	
+	f = text:find(' dig up ')
+	if f then
+		local opening = 'dig up'
+		local closing = text:find('!', f, true) and '!' or nil
+		if not closing then
+			closing = text:find(',', f, true) and ',' or nil
+		end
+		if closing then return {opening, closing} end
+	end
+	
+	f = text:find(' cut off ')
+	if f then
+		local opening = 'cut off'
+		local closing = text:find('!', f, true) and '!' or nil
+		if not closing then
+			closing = text:find(',', f, true) and ',' or nil
+		end
+		if closing then return {opening, closing} end
+	end
+	
+	return false
+end
+
+function DrawInfoWin(idx, name, text, icon)
+	
+	local font = imgui.GetFont();
+	local fontSize = font.FontSize or font.LegacySize;
+	local W = fcw[1].BG_W/4;
+	--local H = (fontSize*16)/((allSettings.chatLineMaxL*allSettings.fontSettings.font_height)/1800);
+	local H = 32 + (3500 * fontSize / W);
+	
+	imgui.SetNextWindowPos({ro_RectBG[1].settings.position_x+(W*(idx-1)),ro_RectBG[1].settings.position_y-H});
+	imgui.SetNextWindowSize({ W, H });
+	imgui.SetNextWindowSizeConstraints({ W, H }, { FLT_MAX, FLT_MAX, });
+	local wFlags =bit.bor(ImGuiWindowFlags_NoDecoration, ImGuiWindowFlags_NoResize, ImGuiWindowFlags_NoBringToFrontOnFocus, ImGuiWindowFlags_NoFocusOnAppearing,ImGuiWindowFlags_NoMove,ImGuiWindowFlags_NoSavedSettings)
+
+	PushWindowStyle()
+					
+	if imgui.Begin('##Info'..tostring(idx), true, wFlags) then
+		
+		
+		
+		--imguiWrap.BeginChild('##InfoChild'..tostring(idx), {imgui.GetWindowWidth()-16,fontSize+fontSize*math.floor(imgui.CalcTextSize(text)/(imgui.GetWindowWidth()-math.min(imgui.CalcTextSize(help.GetLongestWord(text)),(imgui.GetWindowWidth()-100)/2)))+16}, true);
+		imguiWrap.BeginChild('##InfoChild'..tostring(idx), {imgui.GetWindowWidth()-16,imgui.GetWindowHeight()-16},true,ImGuiWindowFlags_NoScrollbar);
+		local cx = imgui.GetCursorPosX()
+		if icon then
+			imguiWrap.Image(icon, { 32, 32 }); imgui.SameLine();
+			imgui.SetCursorPosY(imgui.GetCursorPosY())
+		end
+		imgui.PushTextWrapPos(imgui.GetWindowWidth()-16)
+		imgui.TextWrapped(name)
+		imgui.SetCursorPosX(cx)
+		if not icon then imgui.Dummy({0,5}) end
+		imgui.TextWrapped(text)
+		imgui.PopTextWrapPos()
+		imgui.EndChild()
+		imgui.End();
+	end
+	PopWindowStyle();
+
+end
+
+function DrawInfo(text)
+
+	
+	info = {}
+	
+	local ATstart = 1
+	while ATstart < #text do
+		local s, e = string.find(text, utf8.char(0x276e), ATstart, true)
+		if s and e then
+			local s2, e2 = string.find(text, utf8.char(0x276f), e+1, true)
+			if s2 and e2 then
+				table.insert(info, text:sub(e+1,s2-1))
+				ATstart = e2 + 1
+			end
+			ATstart = e + 1
+		else
+			ATstart = ATstart + 1
+		end
+	end
+	
+	
+
+	local idx = 0
+	for i = 1, #info do
+		if idx > 4 then break end
+		if info[i] then
+			--manage item
+			--info[i] = 'Desert Belt'
+			local item
+			local ability
+			local spell
+			local RM = AshitaCore:GetResourceManager()
+			--item = RM:GetItemByName(info[i], 0);
+			if fcw[1].itemIcons[idx+1] and fcw[1].itemIcons[idx+1][3] and info[i] == fcw[1].itemIcons[idx+1][3] then
+				if fcw[1].itemIcons[idx+1][5] == 1 then
+					item = fcw[1].itemIcons[idx+1][4]
+				elseif fcw[1].itemIcons[idx+1][5] == 2 then
+					ability = fcw[1].itemIcons[idx+1][4]
+				elseif fcw[1].itemIcons[idx+1][5] == 3 then
+					spell = fcw[1].itemIcons[idx+1][4]
+				end
+			else
+				if not item then
+					item = RM:GetItemByName(info[i], 0);
+					--print('updated item')
+				end
+				if not item then
+					ability = RM:GetAbilityByName(info[i], 0);
+				end
+				if not ability then
+					spell = RM:GetSpellByName(info[i], 0);
+				end
+			end
+			if (item ~= nil and (item.Type == 1 or item.Type == 4 or item.Type == 5 or item.Type == 7)) then
+				idx = idx + 1
+				if item.Id ~= fcw[1].itemIcons[idx][1] then 
+				--if not fcw[1].itemTexture[idx] then
+					fcw[1].itemIcons[idx][1] = item.Id
+					fcw[1].itemIcons[idx][3] = info[i]
+					fcw[1].itemIcons[idx][4] = item
+					fcw[1].itemIcons[idx][5] = 1
+					--fcw[1].itemTexture[idx] = utils.ItemIcon(item.Bitmap, item.ImageSize)
+					fcw[1].itemTexture[idx][1] = utils.ItemIcon(item.Bitmap, item.ImageSize)
+					fcw[1].itemTexture[idx][2] = tonumber(ffi.cast('uint32_t', fcw[1].itemTexture[idx][1]))
+					--Debug(tostring('loadingtex'),1,true)
+					--print('updated icons')
+					--end
+					
+					
+					--local iconID = tonumber(ffi.cast('uint32_t', fcw[1].itemTexture[idx]))
+					
+					local inf = ''
+
+					local flags = ''
+					flags = flags..(bit.band(0x8000,item.Flags)~= 0 and '[Rare]' or '' )
+					flags = flags..(bit.band(0x6040,item.Flags)~= 0 and '[Ex]' or '' )
+					if flags ~= '' then
+						inf = inf..flags..'\n'--..string.rep('-',#flags)..'\n'
+					end
+					--inf = inf..item.Id..'\n'
+					--inf = inf..item.Type..'\n'
+					-- misc= 1, weapon= 4, armor = 5, consumable = 7
+
+					local desc = item.Description[1]
+					if desc then
+						desc = desc:replace('\x81\x60', '~'):replace('\xEF\x1F', 'Fire'):replace('\xEF\x20', 'Ice'):replace('\xEF\x21', 'Wind'):replace('\xEF\x22', 'Earth'):replace('\xEF\x23', 'Lgtn'):replace('\xEF\x24', 'Water'):replace('\xEF\x25', 'Light'):replace('\xEF\x26', 'Dark'):replace('%', '%%'):replace('\n',' ')
+					end
+					
+				
+					if item.Type == 1 or item.Type == 7 then
+						inf = inf..desc
+					elseif item.Type == 4 or item.Type == 5 then
+						--slot,race,desc,lvl,job
+						inf = inf..'['..utils.equipSlots[item.Slots]..']'..utils.equipRaces[item.Races]..'\n'
+						inf = inf..desc..'\n'
+						inf = inf..'Lv: '..item.Level..' '..utils.GetEquipJobs(item.Jobs)
+					end
+					fcw[1].itemIcons[idx][2] = inf
+					--print('updated info')
+				end
+				DrawInfoWin(idx,info[i],fcw[1].itemIcons[idx][2], fcw[1].itemTexture[idx][2])
+			
+				
+				
+			elseif ability then
+				idx = idx + 1
+				fcw[1].itemIcons[idx][1] = nil
+				if fcw[1].itemTexture[idx] then
+					fcw[1].itemTexture[idx][2] = nil
+					utils.ItemIconRelease(fcw[1].itemTexture[idx][1])
+				end
+				utils.ItemIconRelease(fcw[1].itemTexture[idx][1])
+				fcw[1].itemIcons[idx][3] = info[i]
+				fcw[1].itemIcons[idx][4] = ability
+				fcw[1].itemIcons[idx][5] = 2
+				local inf = ''
+				if ability.Type == 1 then inf = '[Job Ability]\n'
+				elseif ability.Type == 2 then inf = '[Pet Command]\n'
+				elseif ability.Type == 3 then inf = '[Weaponskill]\n'
+				elseif ability.Type == 4 then inf = '[Job Trait]\n' end
+				local desc = ability.Description[1]
+				if desc then
+					if ability.TPCost > 0 then inf = inf..'TP: '..ability.TPCost..'\n' end
+					if ability.ManaCost > 0 then inf = inf..'MP: '..ability.ManaCost..'\n' end
+					inf = inf..desc
+					DrawInfoWin(idx,info[i],inf)
+					--idx = idx + 1
+				end
+			elseif spell then
+				idx = idx + 1
+				
+				fcw[1].itemIcons[idx][1] = nil
+				if fcw[1].itemTexture[idx] then
+					fcw[1].itemTexture[idx][2] = nil
+					utils.ItemIconRelease(fcw[1].itemTexture[idx][1])
+				end
+				fcw[1].itemIcons[idx][3] = info[i]
+				fcw[1].itemIcons[idx][4] = ability
+				fcw[1].itemIcons[idx][5] = 3
+				local inf = '[Spell]\n'
+				local desc = spell.Description[1]
+				if desc then
+					--if spell.TPCost > 0 then inf = inf..'TP: '..spell.TPCost..'\n' end
+					if spell.ManaCost > 0 then inf = inf..'MP: '..spell.ManaCost..'\n' end
+					inf = inf..desc
+					DrawInfoWin(idx,info[i],inf)
+					--idx = idx + 1
+				end
+			end
+		else
+			break
+		end
+	end
+	for del_i = idx+1, 4 do
+		fcw[1].itemIcons[del_i][1] = nil
+		if fcw[1].itemTexture[del_i] then
+			fcw[1].itemTexture[del_i][2] = nil
+			utils.ItemIconRelease(fcw[1].itemTexture[del_i][1])
+		end
+
+	end
+	--Debug(tostring(fcw[1].itemTexture[idx]),1,true)
+
 end

@@ -54,7 +54,9 @@ ffi.cdef[[
     uint32_t* CreateFontManager(IDirect3DDevice8* pDevice);
     void DestroyFontManager(uint32_t* pManager);
     GdiFontReturn_t CreateTexture(uint32_t* pManager, GdiFontData_t* data);
+    GdiFontReturn_t CreateTextureColor(uint32_t* pManager, GdiFontData_t* data);
     GdiFontReturn_t CreateRectTexture(uint32_t* pManager, GdiRectData_t* data);
+	GdiFontReturn_t CreateRectTexture(uint32_t* pManager, GdiRectData_t* data);
     bool GetFontAvailable(const char* font);
     void EnableTextureDump(uint32_t* pManager, const char* folder);
     void DisableTextureDump(uint32_t* pManager);

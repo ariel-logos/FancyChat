@@ -1,5 +1,6 @@
 require('common');
 local imgui = require('imgui');
+local imguiWrap = require('imguiWrap')
 
 help = {
 		opened = T{false},
@@ -23,25 +24,25 @@ help.overviewText = {
 help.loremText=		{
 						{
 							'Disclaimer',
-							'This project is the result of a hobby, a hobby in which I ended up throwing dozens of hundred of hours. While it was my goal to get close as perfection as I could I had in the end to decide which state was good enough. If you are reading this, this is such state.',
+							'This project is the result of a hobby, a hobby in which I ended up throwing dozens of hundred of hours. While it was my goal to get close as perfection as I could, in the end, I had to decide a development state that was good enough. If you are reading this, this is such state.',
 							'While I\'ll do my best to maintain this addon to fix bugs, here\'s a list of the things you should not expect:',
-							'- Compatibility with other addons, what works works.\nI can\'t keep running after every developers injecting the weirdest crap in their addon\'s messages.',
-							'- Compatibility with handheld devices and unusual screen sizes and ratios.\nI tried my best to take into account these factors and adjusted my code to \'predict\' its behaviour on screen\\window sizes too different from the usual 16:9 ratio and 1080p/1440p/2160p sizes. Sadly, I don\'t have a bank account to invest in all possible device nor the time to invest into making this add-on omni-compatible. Sorry if it doesn\'t work on your device. :(',
-							'- All the features marked as \'beta\' or \'experimental\' have no guarantees of ever being fixed, completed and or improved. This is not due to my lack of good will but because the reason why they are them with such labels is that their development ran into some limitations. These mainly refer to either Ashita and/or Ashita\'s plugins current version (although whitout them none of this would be even remotely possible) and my current limited knowledge in reverse engineering.',
+							'- Compatibility with other addons.\nWhat works works.\nI have no intention on reviewing over and over my text handling function to make every addon\'s type of message compatible.',
+							'- Compatibility with handheld devices and unusual screen sizes and ratios.\nI tried my best to take into account these factors and adjusted my code to \'predict\' its behaviour on screen\\window sizes too different from the usual 16:9 ratio and 1080p/1440p/2160p sizes. Sadly, I don\'t have a bank account big enough to invest in all possible device for testing nor the time to invest into making this add-on omni-compatible. Sorry if it doesn\'t work on your device. :(',
+							'- All the features marked as \'beta\' or \'experimental\' have no guarantees of ever being fixed, completed and/or improved. This is not due to my lack of good will but because the reason why they are marked with such labels is that their development ran into some technical limitations.',
 						}
 					};
 
 help.chatwindowOverview = {
 								'Overview',
-								'A general description of the window'
+								'On first load the FancyChat window will appear on the top left of the game window with its default configuration.\nThe window will display 8 lines of text, a series of tabs for the different types of chat and other buttons assigned to extra features. '
 						  }
 help.chatwindowPosition = {
 								'Positioning',
-								'A description of the positioning functionalities: dragging, locking, adjusting'
+								'It is possible to adjust a FancyChat window position by dragging it with the mouse. If upon doing so, the window doesn\'t react, it is likely due to it being locked (see the Settings section).'
 						  }
 help.chatwindowHistory = {
 								'Scrolling Chat History',
-								'A description of the commands to scroll and reset the chat history.'
+								'The FancyChat window allows the player to use the scroll wheel of the mouse to scroll up previous messages in the chat, effectively entering a \"Scrolling History" state. Each tick of the wheel scrolls one line, however, if the cursor is hovering the FancyChat window, it is possible to use the keyboard shortcut [Shift]+[L./R. Arrow] to scroll multiple lines at the time (see the Settings section).'
 						  }
 help.chatwindowTabs = 	{
 								'Chat Tabs',
@@ -114,7 +115,7 @@ help.AddSection = function(section, indent, parentsearch, parent, parentIdx)
 					if #help.GetLongestWord(section[s][i]) > #help.longestword then help.longestword = help.GetLongestWord(section[s][i]) end
 					textlines = textlines + math.floor(imgui.CalcTextSize(section[s][i]..(i==#section[s] and (indent and help.longestword..'___' or help.longestword..'_') or ''), nil, false)/imgui.GetWindowWidth())+2;
 				end
-				imgui.BeginChild(section[s][1].."Frame", { 0, (textlines)*(imgui.GetFont().FontSize)+((#section[s]-1)*5)+25 }, true );
+				imguiWrap.BeginChild(section[s][1].."Frame", { 0, (textlines)*(imgui.GetFont().FontSize or imgui.GetFont().LegacySize)+((#section[s]-1)*5)+25 }, true );
 				help.SetText(section[s]);
 				imgui.EndChild();
 			end
@@ -146,13 +147,13 @@ help.ShowManual = function(playerName)
 	imgui.SetNextWindowSizeConstraints({ dsize.x/5, dsize.y/3 }, { dsize.x, dsize.y });
 	if( imgui.Begin('FancyChat Manual##_'..playerName, help.opened, bit.bor(ImGuiWindowFlags_NoCollapse,ImGuiWindowFlags_NoNav))) then
 		
-		imgui.BeginChild("TitleFrame", { 0, 48 }, true);
+		imguiWrap.BeginChild("TitleFrame", { 0, 48 }, true);
 		imgui.Dummy({0,1})
 		imgui.Dummy({(imgui.GetWindowWidth()/2)-(imgui.CalcItemWidth()/10+75),0}); imgui.SameLine();
 		help.SetText({'','Welcome to FancyChat!'});
 		imgui.Dummy({0,5})
 		imgui.EndChild();
-		imgui.BeginChild("SearchFrame", { 0, 42 }, true);
+		imguiWrap.BeginChild("SearchFrame", { 0, 42 }, true);
 		imgui.PushItemWidth(imgui.GetWindowWidth()/3)
 		imgui.SetCursorPosY(imgui.GetCursorPosY()+4);
 		imgui.Text('Search');imgui.SameLine();
@@ -163,19 +164,35 @@ help.ShowManual = function(playerName)
 		if help.searchBuff[1] == '' then help.foundAnything = false; end
 		imgui.PopItemWidth()
 		imgui.SameLine();
-		imgui.SetCursorPosX(imgui.GetCursorPosX()-20);
+		if imguiWrap.isNewVer then
+			imgui.SetCursorPosX(imgui.GetCursorPosX()-20);
+			imgui.SetCursorPosY(imgui.GetCursorPosY()-3);
+		else
+			imgui.SetCursorPosX(imgui.GetCursorPosX()-20);
+		end
 		if imgui.Button('x', {25,0}) then
 			help.searchBuff[1] = '';
 			help.foundParent = {};
 			help.foundAnything = false;
 		end
-		imgui.SameLine();imgui.Dummy({5,0});imgui.SameLine();
+		imgui.SameLine();
+		imgui.Dummy({5,0});
+		imgui.SameLine();
+		if imguiWrap.isNewVer then
+			imgui.SetCursorPosY(imgui.GetCursorPosY()-3);
+		end
 		if imgui.ArrowButton('##Collapse all', ImGuiDir_Up) then
 			if help.searchBuff[1] == '' then help.collapseAll = true; end
 		end
-		imgui.SameLine();imgui.SetCursorPosX(imgui.GetCursorPosX()-5);imgui.Text('Fold All');imgui.SameLine();
+		imgui.SameLine();
+		imgui.SetCursorPosX(imgui.GetCursorPosX()-5);
+		if imguiWrap.isNewVer then
+			imgui.SetCursorPosY(imgui.GetCursorPosY()-3);
+		end
+		imgui.Text('Fold All');
+		imgui.SameLine();
 		imgui.EndChild();
-		imgui.BeginChild("MainFrame", { 0, imgui.GetWindowHeight()-142 }, true);
+		imguiWrap.BeginChild("MainFrame", { 0, imgui.GetWindowHeight()-142 }, true);
 		help.AddSection(help.overviewText,false, false, nil, 0);
 		help.AddSection(help.loremText,false, false, nil, 0);
 		help.AddSubSections('The FancyChat Window', help.chatwindowSections);

@@ -6,6 +6,7 @@ local C         = ffi.C;
 local d3d8dev   = d3d.get_device();
 local user32 = ffi.load("user32");
 local kernel32 = ffi.load("kernel32");
+local gfxDevice = d3d.get_device()
 
 
 ffi.cdef[[
@@ -36,150 +37,33 @@ ffi.cdef[[
 
 local utils = 
 {
-	-- modes = T{
-				-- {0,			'zone'		, 0xFFFFFFFF},
-				-- {1,			'local'		, 0xFFFFFFFF},
-				-- {20,		'combat'	, 0xFFDCF1FC}, --"You" hit "Enemy"
-				-- {214,		'linkshell2', 0xFF00FF80},
-				-- {213,   	'linkshell2', 0xFF00FF80},
-				-- {6,			'linkshell1', 0xFF50FFD0},
-				-- {14,		'linkshell1', 0xFF50FFD0},
-				-- {4,			'tell_out'	, 0xFFCF56FF},
-				-- {5,			'party_out' , 0xFF7BD3FF},
-				-- {7,			'emote1'	, 0xFFC797FF},
-				-- {9,			'system5_NPC', 0xFFFFFFFF},
-				-- {11,		'shout'		, 0xFFFF5E5E},
-				-- {12,		'tell_in'	, 0xFFCF56FF},
-				-- {13,		'party_in'	, 0xFF7BD3FF},
-				-- {15,		'emote2'	, 0xFFC797FF},
-				-- {21,		'combat'	, 0xFFDCF1FC}, --"You" miss "Enemy"
-				-- {22,		'combat'	, 0xFFDCF1FC}, --"Enemy" uses "aoe"
-				-- {24,		'combat'	, 0xFFDCF1FC}, --"Friend" hit "Enemy"
-				-- {25,		'combat'	, 0xFFDCF1FC}, --"Friend" hit "Enemy"
-				-- {26,		'combat'	, 0xFFDCF1FC}, --"Friend" miss "Enemy"
-				-- {27,		'combat'	, 0xFFDCF1FC}, --"Friend" hit by "aoe"
-				-- {28,		'combat'	, 0xFFDCF1FC}, --"Enemy" hits "You"
-				-- {29,		'combat'	, 0xFFDCF1FC}, --"Enemy" miss "You"
-				-- {31,		'combatspell',0xFFDDC9FF}, --"Friend" cast "You"
-				-- {32,		'combat'	, 0xFFDCF1FC}, --"Enemy" hit "Friend"
-				-- {33,		'combat'	, 0xFFDCF1FC}, --"Enemy" miss "Friend"
-				-- {35,		'combatspell'	, 0xFFDDC9FF}, --"Enemy" miss "Friend"
-				-- {36,		'combat'	, 0xFFFFFFFF}, 
-				-- {37,		'combat'	, 0xFFDCF1FC}, --"Friend" defeats "Enemy"
-				-- {39,		'combat'	, 0xFFDCF1FC}, --"Enemy" defeats "Friend"
-				-- {50,		'combatspell',0xFFDDC9FF},
-				-- {40,		'combat'	, 0xFFDCF1FC}, --"Pet"
-				-- {41,		'combat'	, 0xFFDCF1FC}, --"Enemy" misses "Others"
-				-- {42,		'combat'	, 0xFFDCF1FC}, --"Pet"
-				-- {43,		'combatspell',0xFFDDC9FF}, --spell? "Friend" casting "Friend"
-				-- {44,		'combat'	, 0xFFDCF1FC}, --"Pet" defeats
-				-- {51,		'combatspell',0xFFDDC9FF}, --spell? "Friend" casting "spell"
-				-- {52,		'combatspell',0xFFDDC9FF}, --spell?
-				-- {56,		'combatspell',0xFFDDC9FF}, --spell?
-				-- {57,		'combatspell',0xFFDDC9FF}, --spell?
-				-- {58,		'combatspell',0xFFDDC9FF}, --spell?
-				-- {59,		'combatspell',0xFFDDC9FF}, --spell?
-				-- {61,		'combatspell',0xFFDDC9FF}, --spell?
-				-- {63,		'combat'	 ,0xFFDCF1FC},
-				-- {64,		'combatspell',0xFFDDC9FF}, --"Friend" cast "Friend"
-				-- {65,		'combatspell',0xFFDDC9FF}, --"Friend" cast "Enemy"
-				-- {67,		'combatspell',0xFFDDC9FF}, --"Friend" cast "?"
-				-- {68,		'combatspell',0xFFDDC9FF}, --"Friend" cast "?"
-				-- {69,		'combatspell',0xFFDDC9FF}, --"Friend" resist "?"
-				-- {85,		'item?'		, 0xFFFAFFDB},
-				-- {90,		'item?'		, 0xFFFAFFDB},
-				-- {100,		'combat'	, 0xFFDCF1FC}, --"Enemy" readies "ability"
-				-- {101,		'combat'	, 0xFFDCF1FC}, --"You" uses "ability"
-				-- {102,		'combatspell',0xFFDDC9FF}, --spell?
-				-- {104,		'combat'	, 0xFFDCF1FC}, --"Enemy" misses "ability"
-				-- {105,		'combat'	, 0xFFDCF1FC}, --"Enemy" readies "ability"
-				-- {106,		'combat'	, 0xFFDCF1FC}, --"Friend" uses "ability"
-				-- {107,		'combatspell',0xFFDDC9FF}, --
-				-- {109,		'combat'	, 0xFFDCF1FC},
-				-- {110,		'combat'	, 0xFFDCF1FC}, --"You" readies "ability"
-				-- {111,		'combat'	, 0xFFDCF1FC}, --"You" readies "ability"
-				-- {112,		'combat'	, 0xFFDCF1FC}, --"You" readies "ability"
-				-- {114,		'combat'	, 0xFFDCF1FC}, --"You" miss "ability"
-				-- {121,		'craft'		, 0xFFFAFFDB},
-				-- {122,		'combat'	, 0xFFDCF1FC}, --too far away --enemy can't attack
-				-- {123,		'error'		, 0xFFFF0090},
-				-- {127,		'system8'	, 0xFFFFF3DA},
-				-- {190,		'system8'	, 0xFFFFF3DA}, -- Info
-				-- {129,		'combat'	, 0xFFDCF1FC}, -- skillup
-				-- {131,		'combat'	, 0xFFDCF1FC}, --exp
-				-- {135,		'system8'	, 0xFFFFF3DA}, --party invite
-				-- {136,		'system6'	, 0xFFFFED8E},
-				-- {141,		'mog'		, 0xFFFFFFFF},
-				-- {142,		'system7NPC' ,0xFFFFFFFF},
-				-- {146,		'system8'	, 0xFFFFF3DA}, 
-				-- {150,		'NPC'		, 0xFFFFFFFF},
-				-- {151,		'NPC'		, 0xFFFFFFFF},
-				-- {152,		'NPC'		, 0xFFFFFFFF},
-				-- --{191,		'combat'	, 0xFFDCF1FC},
-				-- {200,   	'servermsg' , 0xFF8E6AFF},
-				-- {202,   	'equipset'  , 0xFF8E6AFF},
-				-- {209,		'system8'	, 0xFFFFF3DA}, 
-				-- {210,		'party_NPC'	, 0xFF7BD3FF},
-				-- {212,		'unity'		, 0xFFFFD270},
-				-- {662,		'npc3'		, 0xFFFFFFFF},
-				-- {654,		'system1'	, 0xFFFFED8E},
-				-- {673,		'tlly'		, 0xFFA89DEB},
-				-- {889,		'system2'	, 0xFFFFED8E},
-				-- {205,   	'linkshell1', 0xFF50FFD0},
-				-- {217,   	'linkshell2', 0xFF00FF80},
-				-- {162,		'combatspellall', 0xFFDDC9FF}, -- ally casts heal
-				-- {163,		'combatall', 0xFFDCF1FC}, -- ally hit enemy
-				-- {164,		'combatall', 0xFFDCF1FC}, -- ally miss enemy
-				-- {165,		'all',		 0xFFDCF1FC}, -- alliance ???
-				-- {166,		'combatall', 0xFFDCF1FC}, -- ally defeat enemy
-				-- {167,		'combatall', 0xFFDCF1FC}, -- ally was defeated enemy
-				-- {168,		'combatspellall', 0xFFDDC9FF}, -- ally start casting/casts
-				-- {169,		'all',		 0xFFDCF1FC}, -- alliance ???
-				-- {170,		'all',		 0xFFDCF1FC}, -- alliance ???
-				-- {171,		'combatspellall', 0xFFFAFFDB}, -- ally use item
-				-- {174,		'combatall', 0xFFDCF1FC}, -- enemy pet use ability/effect
-				-- {175,		'combatall', 0xFFDCF1FC}, -- ally use ability
-				-- {177,		'combatall', 0xFFDCF1FC}, -- enemy pet
-				-- {178,		'all',		 0xFFDCF1FC}, -- alliance ???
-				-- {179,		'all',		 0xFFDCF1FC}, -- alliance ???
-				-- {180,		'all',		 0xFFDCF1FC}, -- alliance ???
-				-- {181,		'combatall', 0xFFDCF1FC}, -- enemy pet
-				-- {185,		'combatall', 0xFFDCF1FC}, -- enemy use ability
-				-- {186,		'combatall', 0xFFDCF1FC}, -- ally parry
-				-- {187,		'combatall', 0xFFDCF1FC}, -- additional effect
-				-- {188,		'all',		 0xFFDCF1FC}, -- alliance ???
-				-- {189,		'all',		 0xFFDCF1FC}, -- alliance ???
-				-- {191,		'combatall', 0xFFDCF1FC}, -- enemy effect wears of
-				
 
-		     -- },
-					--- fix you cannot perform that action, more unknown channels in debug log, keep hide alliance disabled, fix search not opening tabs when found word is in title in manual
 	modesDA = T{
 					{0,		'zone',			0xFFFFFFFF},
 					{1,		'local',		0xFFFFFFFF},
-					{2,		'_?',		0xFFFFFFFF},
-					{3,		'_?',		0xFFFFFFFF},
+					{2,		'shout',		0xFFFF5E5E},
+					{3,		'shout',		0xFFFF5E5E},
 					{4,		'tell_out',		0xFFD35AFF},
 					{5,		'party_out',	0xFF7BD3FF},
-					{6,		'linkshell1',	0xFF50FFD0},
+					{6,		'linkshell1out',0xFF50FFD0},
 					{7,		'emote1',		0xFFC797FF},
 					{8,		'_?',		0xFFFFFFFF},
-					{9,		'system5_NPC',	0xFFFFFFFF},
+					{9,		'local',	0xFFFFFFFF},
 					{10,	'shout',		0xFFFF5E5E},
 					{11,	'shout',		0xFFFF5E5E},
 					{12,	'tell_in',		0xFFD35AFF},
 					{13,	'party_in',		0xFF7BD3FF},
 					{14,	'linkshell1',	0xFF50FFD0},
 					{15,	'emote2',		0xFFC797FF},
-					{16,	'_?',		0xFFFFFFFF},
+					{16,	'cfh',		0xFFFF9763},
 					{17,	'_?',		0xFFFFFFFF},
 					{18,	'_?',		0xFFFFFFFF},
 					{19,	'_?',		0xFFFFFFFF},
 					{20,	'combat_y',		0xFFDCF1FC},	--"You" damage "Enemy"
 					{21,	'combat_y',		0xFFDCF1FC},	--"You" miss "Enemy"
 					{22,	'combat_y',		0xFFDCF1FC},	--"Enemy" uses "ability" "You"
-					{23,	'combatspell_y',0xFFDCF1FC},	--"You" cast/heal "Party" recover 
-					{24,	'combatspell_p',0xFFDCF1FC},	--"Party"cast/heal "Party/PC?" recover
+					{23,	'combatspell_y',0xFFDDC9FF},	--"You" cast/heal "Party" recover 
+					{24,	'combatspell_p',0xFFDDC9FF},	--"Party"cast/heal "Party/PC?" recover
 					{25,	'combat_p',		0xFFDCF1FC},	--"Party" Damage "Enemy"
 					{26,	'combat_p',		0xFFDCF1FC},	--"Party" miss "Enemy"
 					{27,	'combat_p',		0xFFDCF1FC},	--"Friend"hitby"aoe"
@@ -195,11 +79,14 @@ local utils =
 					{37,	'combat_p',		0xFFDCF1FC},	--"Party" defeats "Enemy"
 					{38,	'combat_y',		0xFFDCF1FC},	--"Enemy" defeats"You"
 					{39,	'combat_p',		0xFFDCF1FC},	--"Enemy"defeats"Party"
-					{40,	'combat_x',		0xFFDCF1FC},	--"PC" Damage "Enemy"/"Enemy" Damage "PC"
-					{41,	'combat_x',		0xFFDCF1FC},	--"Enemy" misses "PC"/"PC" misses "Enemy"
-					{42,	'combat_x',		0xFFDCF1FC},	--"PC" additional effect
+					--{40,	'combat_x',		0xFFDCF1FC},	--"PC" Damage "Enemy"/"Enemy" Damage "PC"
+					--{41,	'combat_x',		0xFFDCF1FC},	--"Enemy" misses "PC"/"PC" misses "Enemy"
+					--{42,	'combat_x',		0xFFDCF1FC},	--"PC" additional effect
+					{40,	'combat_n',		0xFFDCF1FC},	--"PC" Damage "Enemy"/"Enemy" Damage "PC"
+					{41,	'combat_n',		0xFFDCF1FC},	--"Enemy" misses "PC"/"PC" misses "Enemy"
+					{42,	'combat_n',		0xFFDCF1FC},	--"PC" additional effect
 					{43,	'combatspell_x',	0xFFDDC9FF},	-- "PC/Enemy" recovers
-					{44,	'combat_x',		0xFFDCF1FC},	--"Pet" defeats "Enemy" but also "Enemy" falls to the ground
+					{44,	'combat_u',		0xFFDCF1FC},	--"Pet" defeats "Enemy" but also "Enemy" falls to the ground
 					{45,	'_?',		0xFFFFFFFF},
 					{46,	'_?',		0xFFFFFFFF},
 					{47,	'_?',		0xFFFFFFFF},
@@ -219,8 +106,8 @@ local utils =
 					{61,	'combatspell_p',	0xFFDDC9FF},	--"Enemy" Cast spell/ability? status effect on "Party"
 					{62,	'_?',		0xFFFFFFFF},
 					{63,	'combatspell_p',	0xFFDCF1FC},	--"Party"resist/noeffect spell
-					{64,	'combatspell_x',	0xFFDDC9FF},	--"You/Party" Cast buff/gain buff effect
-					{65,	'combatspell_x',	0xFFDDC9FF},	--"You/Party" cast spell status effect on "Enemy"
+					{64,	'combatspell_u',	0xFFDDC9FF},	--"You/Party" Cast buff/gain buff effect
+					{65,	'combatspell_u',	0xFFDDC9FF},	--"You/Party" cast spell status effect on "Enemy"
 					{66,	'_?',		0xFFFFFFFF},
 					{67,	'combatspell_x',	0xFFDDC9FF},	--"You/Party" cast status effect "No effect" on "Enemy"
 					{68,	'combatspell_x',	0xFFDDC9FF},	--"Party" on "Party" no effect.
@@ -325,7 +212,7 @@ local utils =
 					{167,	'combat_a',		0xFFDCF1FC}, --"Enemy" defeats "Alliance"
 					{168,	'combatspell_a',0xFFDDC9FF},
 					{169,	'_a_?',			0xFFDCF1FC},
-					{170,	'_a',			0xFFDCF1FC}, --"Alliance" status no effect
+					{170,	'combatspell_a',			0xFFDCF1FC}, --"Alliance" status no effect
 					{171,	'combatspell_a',0xFFFAFFDB},
 					{172,	'_a_?',			0xFFFFFFFF},
 					{173,	'_a_?',			0xFFFFFFFF},
@@ -337,7 +224,7 @@ local utils =
 					{179,	'_a_?',			0xFFDCF1FC},
 					{180,	'_a_?',			0xFFDCF1FC},
 					{181,	'combat_a'	,	0xFFDCF1FC},
-					{182,	'_a',			0xFFFFFFFF}, --"Alliance" cast status on "Enemy"
+					{182,	'combatspell_a',			0xFFFFFFFF}, --"Alliance" cast status on "Enemy"
 					{183,	'combat_a',			0xFFFFFFFF}, --"Alliance" gain buff
 					{184,	'_a_?',			0xFFFFFFFF},
 					{185,	'combat_a',		0xFFDCF1FC},
@@ -345,7 +232,7 @@ local utils =
 					{187,	'combat_a',		0xFFDCF1FC},
 					{188,	'combatspell_a',0xFFDCF1FC}, -- "Alliance" cast cure on "Friend" recvery
 					{189,	'_a_?',			0xFFDCF1FC},
-					{190,	'system8',		0xFFFFF3DA},
+					{190,	'system8',		0xFF000000},--0xFFFFF3DA}, 
 					{191,	'combat_x',		0xFFDCF1FC},	--"All" effect wears off
 					{192,	'_?',		0xFFFFFFFF},
 					{193,	'_?',		0xFFFFFFFF},
@@ -366,9 +253,9 @@ local utils =
 					{208,	'examined',		0xFFC797FF},
 					{209,	'system8',		0xFFFFF3DA},	--Ability CD timer ends here
 					{210,	'party_NPC',	0xFF7BD3FF},
-					{211,	'_?',		0xFFFFFFFF},
+					{211,	'unity',		0xFFFFFFFF},
 					{212,	'unity',		0xFFFFD270},
-					{213,	'linkshell2',	0xFF00FF80},
+					{213,	'linkshell2out',0xFF00FF80},
 					{214,	'linkshell2',	0xFF00FF80},
 					{215,	'_?',		0xFFFFFFFF},
 					{216,	'_?',		0xFFFFFFFF},
@@ -416,8 +303,10 @@ local utils =
 	disambEnemy = T{	'on the', 
 				'but misses the',
 			  },
-	disambYou = T{	'Unable to',
-					'You '
+	disambYou = T{	'^Unable to',
+					'^You ',
+					'^Cannot ex',
+					'^Your mo',
 			  },
 	keycodes = T{
 					{'A', 30},
@@ -469,100 +358,7 @@ local utils =
 		string.char(0x7F,0x36),
 		string.char(0x7F,0x37),
 	},
-	badStringsPre = {
-						{{253, -1, -1, -1, -1, 253, 32},		{  }},
-					},
-					--127,|52,4|6,|
-	-- badStrings = {
-					-- {{2030,1001,1003},		{  }},
-					-- {{2030,1005,1008},		{  }},
-					-- {{2030,65},				{  }},
-					-- {{2030,1067,1069},		{  }},
-					-- {{2030,1071,1073},		{  }},
-					-- {{2030,1076,1083},		{  }},
-					-- {{2030,85},				{  }},
-					-- {{2030,1088,1090},		{  }},
-					-- {{2030,92},				{  }},
-					-- {{2030,96},				{  }},
-					-- {{2030,1005,106},			{  }},
-					-- {{127, 1049,1055, 1},	{  }},
-					-- {{127, 1049,1055, 2},	{  }},
-					-- {{127, 1049,1055, 3},	{  }},
-					-- {{127, 1049,1055, 4},	{  }},
-					-- {{127, 1049,1055, 5},	{  }},
-					-- {{127, 1049,1055, 6},	{  }},
-				-- --	{{127, -1	},			{ 32,32 }},
-				-- ---	{{127,52,1001,1006},	{  }},
-				-- --	{{127,54,1001,1006},	{  }},
-					-- {{127,49},				{  }},
-				-- --	{{30,-1},				{  }},
-				-- --	{{31,-1},				{  }},
-					-- {{30,110},				{  }},
-					-- {{31,146},				{  }},
-					-- {{31,80},				{  }},
-					-- {{31,1121,1141},		{  }},
-					-- ----{{31,127},				{  }},
-					-- ----{{31,121},				{  }},
-					-- ----{{31,136},				{  }},
-					-- ----{{31,138},				{  }},
-					-- ----{{31,141},				{  }},
-					-- --{{30,81,91,30,-1}, 		{91}},--<
-					-- --{{30,81,93,30,1}, 		{93}},--<
-					-- {{32,30,106},			{32}},
-					-- {{32,30,82},			{32}},
-					-- {{32,30,67},			{32}},
-					-- {{106, 76},	  			{76}},
-					-- --x{{30, 1, 30, -1},	 	{  }},--<
-					-- --x{{30, 68, 70},			{70}},
-					-- --x{{30, 106, 85},			{85}},
-					-- --x{{30, 106},				{  }},
-					-- --x{{30, 81},				{  }},
-					-- --x{{30, 1001, 1006},		{  }},
-					-- --{{30, 2},				{  }},
-					-- --{{30, 3},				{  }},
-					-- --{{30, 4},				{  }},
-					-- --{{30, 5},				{  }},
-					-- --{{30, 6},				{  }},
-					-- {{32, 30, -1},			{32}},
-					-- --{{127, 54, 1},			{  }},
-					-- --{{127, -1	},			{  }},
-					-- {{239, 40},				{-3}}, --Auto-translate
-					-- {{239, 39},				{-2}}, --Auto-translate
-					-- {{129, 158},			{-4}}, --CE custom content ◇
-					-- {{129, 159},			{-5}}, --CE custom content ◆
-					-- {{129, 154},			{-6}},  --CE custom content ★
-					-- {{129, 153},			{-7}},  -- empty star 0x2606
-					-- {{129, 244},			{-8}},  -- ♪
-					-- {{129, 64},				{32}},  -- 
-					-- {{129, 96},				{-9}},  -- ~
-					-- {{135, 178},			{-10}}, --  \"
-					-- {{135, 179},			{-11}}, -- \"
-					-- {{136, 105},			{-12}},  -- 'é'
-					-- {{133, 112},			{-13}}, -- ° 
-					-- {{129, 172},			{-14}}, -- ò
-					-- {{129, 168},			{-15}}, -- ->
-					-- {{131, 182},			{-16}}, -- ò
-					-- {{129, 166},			{-17}}, -- weird X
-					-- {{10},					{ }}, -- ò
-					-- --{{133, 191},			{-15}}, -- à
-					-- --{{133, 200},			{-16}}, -- é
-					-- --{{133, 199},			{-17}}, -- è
-					-- --{{133, 216},			{-18}}, -- ù
-					-- --{{133, 203},			{-19}}, -- ì
-					-- {{133, 1159, 1219},		{-1000}},
-					-- {{133, 99},				{-20}}, -- £
-					-- {{133, 64},				{-21}}, -- € 
-					-- {{239, 31},				{91,70,105,114,101,93}},  -- fire
-					-- {{239, 32},				{91,105,99,101,93}},  -- ice
-					-- {{239, 33},				{91,119,105,110,100,93}},  -- wind
-					-- {{239, 34},				{91,101,97,114,116,104,93}},  -- earth
-					-- {{239, 35},				{91,108,105,103,104,116,110,105,110,103,93}},  -- lightning
-					-- {{239, 36},				{91,119,97,116,101,114,93}},  -- water
-					-- {{239, 37},				{91,108,105,103,104,116,93}},  -- light
-					-- {{239, 38},				{91,100,97,114,107,93}},  -- dark
-					-- {{7},					{32}},
-				-- },
-				
+
 	badStrings = { p127 = {
 								{{127, 1049,1055, 1},	{  }},
 								{{127, 1049,1055, 2},	{  }},
@@ -588,31 +384,34 @@ local utils =
 								{{129, 168},			{-15}}, -- ->
 								{{131, 182},			{-16}}, -- ò
 								{{129, 166},			{-17}}, -- weird X
-								--{{133, 191},			{-15}}, -- à
-								--{{133, 200},			{-16}}, -- é
-								--{{133, 199},			{-17}}, -- è
-								--{{133, 216},			{-18}}, -- ù
-								--{{133, 203},			{-19}}, -- ì
+								{{129, 169},            {-18}},
+								{{129, 170},            {-19}},
+								{{129, 171},            {-20}},
+								{{129, 97},            	{-21}},
+								{{129, 99},            	{-22}},
+								{{129, 121},            {-23}},
+								{{129, 122},            {-24}},
+								{{129, 156},            {-25}}, -- O
+								{{129, 126},            {-26}}, -- X
 								{{133, 1159, 1219},		{-1000}},
-								{{133, 99},				{-20}}, -- £
-								{{133, 64},				{-21}}, -- € 
+								{{133, 99},				{-27}}, -- £
+								{{133, 64},				{-28}}, -- € 
 								
 							},
 					p239 = {
 								{{239, 40},				{-3}}, --Auto-translate
 								{{239, 39},				{-2}}, --Auto-translate
 								
-								{{239, 31},				{91,70,105,114,101,93}},  -- fire
-								{{239, 32},				{91,105,99,101,93}},  -- ice
-								{{239, 33},				{91,119,105,110,100,93}},  -- wind
-								{{239, 34},				{91,101,97,114,116,104,93}},  -- earth
-								{{239, 35},				{91,108,105,103,104,116,110,105,110,103,93}},  -- lightning
-								{{239, 36},				{91,119,97,116,101,114,93}},  -- water
-								{{239, 37},				{91,108,105,103,104,116,93}},  -- light
-								{{239, 38},				{91,100,97,114,107,93}},  -- dark
+								{{239, 31},				{91,70,105,114,101,93}}, 						 -- fire
+								{{239, 32},				{91,105,99,101,93}},  							-- ice
+								{{239, 33},				{91,119,105,110,100,93}},  						-- wind
+								{{239, 34},				{91,101,97,114,116,104,93}}, 					-- earth
+								{{239, 35},				{91,108,105,103,104,116,110,105,110,103,93}},   -- lightning
+								{{239, 36},				{91,119,97,116,101,114,93}}, 					 -- water
+								{{239, 37},				{91,108,105,103,104,116,93}},					  -- light
+								{{239, 38},				{91,100,97,114,107,93}},  	 						-- dark
 							},
 					pOther = {
-										
 								{{2030,1001,1003},		{  }},
 								{{2030,1005,1008},		{  }},
 								{{2030,65},				{  }},
@@ -624,115 +423,59 @@ local utils =
 								{{2030,92},				{  }},
 								{{2030,96},				{  }},
 								{{2030,1005,106},			{  }},
-								
-							--	{{127, -1	},			{ 32,32 }},
-							---	{{127,52,1001,1006},	{  }},
-							--	{{127,54,1001,1006},	{  }},
-								
-							--	{{30,-1},				{  }},
-							--	{{31,-1},				{  }},
 								{{30,110},				{  }},
 								{{31,146},				{  }},
 								{{31,80},				{  }},
 								{{31,1121,1141},		{  }},
-								----{{31,127},				{  }},
-								----{{31,121},				{  }},
-								----{{31,136},				{  }},
-								----{{31,138},				{  }},
-								----{{31,141},				{  }},
-								--{{30,81,91,30,-1}, 		{91}},--<
-								--{{30,81,93,30,1}, 		{93}},--<
 								{{32,30,106},			{32}},
 								{{32,30,82},			{32}},
 								{{32,30,67},			{32}},
 								{{106, 76},	  			{76}},
-								--x{{30, 1, 30, -1},	 	{  }},--<
-								--x{{30, 68, 70},			{70}},
-								--x{{30, 106, 85},			{85}},
-								--x{{30, 106},				{  }},
-								--x{{30, 81},				{  }},
-								--x{{30, 1001, 1006},		{  }},
-								--{{30, 2},				{  }},
-								--{{30, 3},				{  }},
-								--{{30, 4},				{  }},
-								--{{30, 5},				{  }},
-								--{{30, 6},				{  }},
 								{{32, 30, -1},			{32}},
-								--{{127, 54, 1},			{  }},
-								--{{127, -1	},			{  }},
 								{{10},					{ }}, -- ò
-								
 								{{7},					{32}},
 						},
 				},
-	--badStringsCyrillic = 
-	--				{
-	--				{{133, 1030, 1062},		{-1000}},
-	--				},
-	badStringsCombat = {
-				----	{{127, 1049,1055, 1},	{  }},
-				----	{{127, 1049,1055, 2},	{  }},
-				--	{{127, -1	},			{ 32,32 }},
-				----	{{127,54,1001,1006},	{  }},
-				----	{{127,49},				{  }},
-				----	{{30,110},				{  }},
-				----	{{31,1121,1141},		{  }},
-					----{{31,127},				{  }},
-					----{{31,121},				{  }},
-					----{{31,136},				{  }},
-					----{{31,138},				{  }},
-					----{{31,141},				{  }},
-					--{{30,81,91,30,-1}, 		{91}},--<
-					--{{30,81,93,30,1}, 		{93}},--<
-				----	{{32,30,106},			{32}},
-				----	{{32,30,82},			{32}},
-				----	{{32,30,67},			{32}},
-				----	{{106, 76},	  			{76}},
-				----	{{30, 1, 30, -1},	 	{  }},--<
-				----	{{30, 68, 70},			{70}},
-				----	{{30, 106, 85},			{85}},
-				----	{{30, 81},				{  }},
-				----	{{30, 1001, 1006},		{  }},
-					--{{30, 2},				{  }},
-					--{{30, 3},				{  }},
-					--{{30, 4},				{  }},
-					--{{30, 5},				{  }},
-					--{{30, 6},				{  }},
-				----	{{32, 30, -1},			{32}},
-					--{{127, 54, 1},			{  }},
-					--{{127, -1	},			{  }},
-					--{{239, 40},				{-3}}, --Auto-translate
-					--{{239, 39},				{-2}}, --Auto-translate
-				----	{{129, 158},			{-4}}, --CE custom content ◇
-				----	{{129, 159},			{-5}}, --CE custom content ◆
-				----	{{129, 154},			{-6}},  --CE custom content ★
-				----	{{129, 153},			{-7}},  -- empty star 0x2606
-				----	{{129, 244},			{-8}},  -- ♪
-				----	{{129, 64},				{32}},  -- 
-				----	{{129, 96},				{-9}},  -- ~
-				----	{{135, 178},			{-10}}, --  \"
-				----	{{135, 179},			{-11}}, -- \"
-				----	{{136, 105},			{-12}},  -- 'é'
-				----	{{133, 112},			{-13}}, -- ° 
-					--{{133, 209},			{-14}}, -- ò
-					--{{133, 191},			{-15}}, -- à
-					--{{133, 200},			{-16}}, -- é
-					--{{133, 199},			{-17}}, -- è
-					--{{133, 216},			{-18}}, -- ù
-					--{{133, 203},			{-19}}, -- ì
-					--{{133, 1159, 1219},		{-1000}},
-					--{{133, 99},				{-20}}, -- £
-					--{{133, 64},				{-21}}, -- € 
-					--{{239, 31},				{91,70,105,114,101,93}},  -- fire
-					--{{239, 32},				{91,105,99,101,93}},  -- ice
-					--{{239, 33},				{91,119,105,110,100,93}},  -- wind
-					--{{239, 34},				{91,101,97,114,116,104,93}},  -- earth
-					--{{239, 35},				{91,108,105,103,104,116,110,105,110,103,93}},  -- lightning
-					--{{239, 36},				{91,119,97,116,101,114,93}},  -- water
-					--{{239, 37},				{91,108,105,103,104,116,93}},  -- light
-					--{{239, 38},				{91,100,97,114,107,93}},  -- dark
+
+	ShiftJISReps = {
+		-- ['\239\39'	] =	utf8.char(0x276E), -- -2
+		-- ['\239\40'	] =	utf8.char(0x276F), -- -3
+		['\129\158'] =	utf8.char(0x25C7), -- -4
+		['\129\159'] =	utf8.char(0x25C6), -- -5
+		['\129\154'] =	utf8.char(0x2605), -- -6
+		['\129\153'] =	utf8.char(0x2606), -- -7
+		['\129\244'] =	utf8.char(0x266A), -- -8
+		['\129\96' ] =	utf8.char(0x007E), -- -9
+		['\135\178'] =	utf8.char(0x201C), -- -10
+		['\135\179'] =	utf8.char(0x201D), -- -11
+		['\136\105'] =	utf8.char(0x00E9), -- -12
+		['\133\112'] =	utf8.char(0x00B0), -- -13
+		['\129\172'] =	utf8.char(0x2014), -- -14
+		['\129\168'] =	utf8.char(0x2192), -- -15
+		['\131\182'] =	utf8.char(0x03A9), -- -16
+		['\129\166'] =	utf8.char(0x25D9), -- -17
+		['\129\169'] =  utf8.char(0x2190), -- 18
+		['\129\170'] =  utf8.char(0x2191), -- 19
+		['\129\171'] =  utf8.char(0x2193), -- 20
+		['\129\97'] =  	utf8.char(0x2551), -- 21
+		['\129\99'] = 	utf8.char(0x22EF), -- 22
+		['\129\121'] =  utf8.char(0x3010), -- 23
+		['\129\122'] =  utf8.char(0x3011), -- 24
+		['\129\126'] =  utf8.char(0x0A66), -- 25
+		['\129\156'] =  utf8.char(0x2715), -- 26
+		['\133\99'] =  	utf8.char(0x00A3), -- 27
+		['\133\64'] =  	utf8.char(0x20AC), -- 28
+		['\239\31' ] =  '[fire]',  		   -- fire
+		['\239\32' ] =  '[ice]', 		   -- ice
+		['\239\33' ] =  '[wind]', 	       -- wind
+		['\239\34' ] =  '[earth]', 		   -- earth
+		['\239\35' ] =  '[lightn.]',       -- lightning
+		['\239\36' ] =  '[water]',  	   -- water
+		['\239\37' ] =  '[light]',         -- light
+		['\239\38' ] =  '[dark]', 	   	   -- dark
 				},
-	ShiftJITback = {
+				
+	ShiftJISback = {
 		{0x276e, '\239\39', '<'},
 		{0x276f, '\239\40', '>'}, -- -3
 		{0x25C7, '\129\158', ''}, -- -4
@@ -746,16 +489,34 @@ local utils =
 		{0x00E9, '\136\105','é'},	-- -12
 		{0x00B0, '\133\112','°'}, -- -13
 		{0x2014, '\129\172','ò'}, -- -14
-		{0x25B6, '\129\168','->'}, -- -15
+		{0x2192, '\129\168','->'}, -- -15
 		{0x03A9, '\131\182','ò'}, -- -16
 		{0x25D9, '\129\166','x'}, -- -17
+		{0x2190, '\129\169','<-'}, -- -18
+		{0x2191, '\129\170','+'}, -- -19
+		{0x2193, '\129\171','-'}, -- -20	
+		{0x2551, '\129\97','|'}, -- -21	
+		{0x22EF, '\129\99','...'}, -- -22	
+		{0x3010, '\129\121','{'}, -- -23	
+		{0x3011, '\129\122','}'}, -- -24	
+		{0x0A66, '\129\156','O'}, -- -25	
+		{0x2715, '\129\126','X'}, -- -26	
+		{0x00A3, '\133\99','£'}, -- -27	
+		{0x20AC, '\133\64','€'}, -- -28	
+		{0x2764, '<3','<3'},
 		{0x25C0, '<','<'},
+		{0x25B6, '>','>'},
 		{0x0589, ':',':'},
 		{0x2022, '-','-'},
 		{0x2043, '-','-'},
-		{0x2764, '<3','<3'},
+			},
 
-				},
+	ShiftJISRanges = T{
+		{0x20,0x7E, -1, -1},
+		{0xA1,0xDF, -1, -1},
+		{0x81 ,0x9F, -1, -1},
+		
+	},
 	UTF8chars = {
 		
 		0x276e, -- -2
@@ -771,28 +532,108 @@ local utils =
 		0x00E9,	-- -12
 		0x00B0, -- -13
 		0x2014, -- -14
-		--0x279D, -- -15
-		0x25B6, -- -15
+		0x2192, -- -15
 		0x03A9, -- -16
 		0x25D9, -- -17
-
+		0x2190, -- -18
+		0x2191, -- -19
+		0x2193, -- -20
+		0x2551, -- -21
+		0x22EF, -- -22
+		0x3010, -- -23
+		0x3011, -- -24
+		0x0A66, -- -25
+		0x2715, -- -26
+		0x00A3, -- -27
+		0x20AC, -- -28
 	},
-	subChars = {
-				{{239, 40},				{-3}}, --Auto-translate
-				{{239, 39},				{-2}}, --Auto-translate
-				{{129, 158},			{-4}}, --CE custom content ◇
-				{{129, 159},			{-5}}, --CE custom content ◆
-				{{129, 154},			{-6}},  --CE custom content ★
-				{{129, 153},			{-7}},  -- empty star 0x2606
-				{{129, 244},			{-8}},  -- ♪
-				{{129, 96},				{-9}},  -- ~
-				{{135, 178},			{-10}}, --  \"
-				{{135, 179},			{-11}}, -- \"
-				{{136, 105},			{-12}},
-				},
+
 	crafts = {'cooking','alchemy','fishing','working','smithing','craft','synergy'},
+	equipSlots = {
+		[1] = 'Main',
+		[2] = 'Sub',
+		[3] = 'Weapon',
+		[4] = 'Range',
+		[8] = 'Ammo',
+		[16] = 'Head',
+		[32] = 'Body',
+		[64] = 'Hands',
+		[128] = 'Legs',
+		[256] = 'Feet',
+		[512] = 'Neck',
+		[1024] = 'Waist',
+		[2048] = 'L.Ear',
+		[4096] = 'R.Ear',
+		[6144] = 'Earring',
+		[8192] = 'L.Ring',
+		[16384] = 'R.Ring',
+		[24576] = 'Ring',
+		[32768] = 'Back',
+	},
+	equipJobs = {
+		[ 1] = 'WAR',
+		[ 2] = 'MNK',
+		[ 3] = 'WHM',
+		[ 4] = 'BLM',
+		[ 5] = 'RDM',
+		[ 6] = 'THF',
+		[ 7] = 'PLD',
+		[ 8] = 'DRK',
+		[ 9] = 'BST',
+		[10] = 'BRD',
+		[11] = 'RNG',
+		[12] = 'SAM',
+		[13] = 'NIN',
+		[14] = 'DRG',
+		[15] = 'SMN',
+		[16] = 'BLU',
+		[17] = 'COR',
+		[18] = 'PUP',
+		[19] = 'DNC',
+		[20] = 'SCH',
+		[21] = 'GEO',
+		[22] = 'RUN',
+		
+	},
+	equipRaces = {
+		[2]	= 'Hum.M',
+		[4]	= 'Hum.F',
+		[6]	= 'Hume',
+		[8] = 'Elv.M',
+		[16] = 'Elv.F',
+		[24] = 'Elv.',
+		[32] = 'Tar.M',
+		[64] = 'Tar.F',
+		[96] = 'Taru.',
+		[128] = 'Mith.',
+		[212] = 'All F',
+		[256] = 'Galk.',
+		[298] = 'All M',
+		[510] = 'All',
+		
+	},
 }
 
+utils.GetEquipJobs = function (jobsbytes)
+	local Jobs = {}
+	local jobsstring = ''
+    if jobsbytes == 8388606 then
+		table.insert(Jobs, 'All Jobs')
+	else
+		for i = 1, 23 do
+			if bit.band(1, bit.rshift(jobsbytes, i)) == 1 then
+				table.insert(Jobs, utils.equipJobs[i])
+			end
+		end
+    end
+	if #Jobs > 0 then
+		jobsstring = Jobs[1]
+		for j = 2,#Jobs do
+			jobsstring=jobsstring..'/'..Jobs[j]
+		end
+	end
+    return jobsstring
+end
 
 utils.SetClipboardText = function(text)
     if user32.OpenClipboard(nil) == 0 then
@@ -848,6 +689,28 @@ local function LoadTexture(textures, name)
     d3d.gc_safe_release(textures[name]);
 end
 
+utils.ItemIcon = function(bitmap, size)
+    local texturePtr = ffi.new('IDirect3DTexture8*[1]')
+	
+    local createTexture = C.D3DXCreateTextureFromFileInMemoryEx(
+        gfxDevice, bitmap, size, 0xFFFFFFFF, 0xFFFFFFFF, 1, 0, C.D3DFMT_A8R8G8B8, C.D3DPOOL_MANAGED, C.D3DX_DEFAULT, C.D3DX_DEFAULT, 0xFF000000, nil, nil, texturePtr)
+    if createTexture == C.S_OK then
+        return d3d.gc_safe_release(ffi.cast('IDirect3DTexture8*', texturePtr[0]))
+    else
+        return nil
+    end
+end
+
+utils.ItemIconRelease = function(ptr)
+	if ptr then
+		d3d.gc_safe_release(ptr)
+	end
+end
+
+local function cleanMC(text)
+	return text:gsub("\\§........ç\\", "")
+end
+
 utils.LoadTextures = function()
     local textures = T{};
 
@@ -866,15 +729,15 @@ utils.LoadTextures = function()
     return textures;
 end
 
-utils.RGBAToHex = function(T)
-    -- Ensure r, g, b, a are integers between 0 and 1
-    r = math.max(0, math.min(255, math.floor(T[1]*255)))
-    g = math.max(0, math.min(255, math.floor(T[2]*255)))
-    b = math.max(0, math.min(255, math.floor(T[3]*255)))
-    a = a and math.max(0, math.min(255, math.floor(T[4]*255))) or 255 -- Default alpha is 1 (fully opaque)
+-- utils.RGBAToHex = function(T)
+    -- -- Ensure r, g, b, a are integers between 0 and 1
+    -- r = math.max(0, math.min(255, math.floor(T[1]*255)))
+    -- g = math.max(0, math.min(255, math.floor(T[2]*255)))
+    -- b = math.max(0, math.min(255, math.floor(T[3]*255)))
+    -- a = a and math.max(0, math.min(255, math.floor(T[4]*255))) or 255 -- Default alpha is 1 (fully opaque)
 	
-    return string.format("0x%02X%02X%02X%02X", a, r, g, b)
-end
+    -- return string.format("0x%02X%02X%02X%02X", a, r, g, b)
+-- end
 
 utils.hexToRGBA = function(hex)
     
@@ -920,8 +783,8 @@ utils.FindInTableFind = function(sometable, f, l)
 	if (sometable ~= nil) then
 		for _, t in pairs(sometable) do
 			idx=idx+1;
-			if l == 0 and (string.find(t,f)) then return idx 
-			elseif l > 0 and (string.find(t[l],f)) then return idx end
+			if l == 0 and (string.find(t,f,1,true)) then return idx 
+			elseif l > 0 and (string.find(t[l],f,1,true)) then return idx end
 		end
 	end
 	return nil
@@ -932,8 +795,8 @@ utils.FindInStringTable = function(f, sometable, l)
 	if (sometable ~= nil) then
 		for _, t in pairs(sometable) do
 			idx=idx+1;
-			if l == 0 and (string.find(f,t)) then return idx 
-			elseif l > 0 and (string.find(f,t[l])) then return idx end
+			if l == 0 and (string.find(f,t,1,true)) then return idx 
+			elseif l > 0 and (string.find(f,t[l],1,true)) then return idx end
 		end
 	end
 	return nil
@@ -946,9 +809,9 @@ utils.FindInStringTableFilters = function(f, sometable, scope)
 		for _, t in ipairs(sometable) do
 			
 			idx=idx+1;
-			if t[2] == '_z' or t[2] ~= scope then
-				--Debug(t[2],1,true);
-				if string.find(lowerf,string.lower(t[1]),1,true) then return idx end
+			if t[2] == '_z' or not t[2]:find(scope) then
+				
+				if string.find(lowerf,string.lower(t[1]),1,false) then return idx end
 			end
 		end
 	end
@@ -965,19 +828,33 @@ utils.FindLastOf = function(str, chr)
     return nil -- Return nil if the character is not found
 end
 
-utils.FindLastOfMB = function(str, chr)
-    local strlen = #str
-    local chr_byte = chr:byte() -- Get the first byte of 'chr'
+utils.FindLastOfString = function(str, str2)
+	local idx = 0
+	local last = nil
+	local found = true
+	while found and idx+1 < #str do
+		found, idx = str:find(str2, idx+1, true)
+		if idx then last = idx end
+	end
+	return last
+end
 
-    -- Start scanning backwards
-    for i = strlen, 1, -1 do
-        if str:byte(i) == chr_byte then
-            -- Backtrack to find the start of the multi-byte character
-            local start = i
-            while start > 1 and str:byte(start - 1) >= 0x80 and str:byte(start - 1) < 0xC0 do
-                start = start - 1
+utils.FindLastOfMB = function(str, chr)
+    local chr_bytes = {chr:byte(1, -1)} -- all bytes of target char
+    local chr_len = #chr_bytes
+    local strlen = #str
+
+    -- Scan backwards
+    for i = strlen - chr_len + 1, 1, -1 do
+        local match = true
+        for j = 1, chr_len do
+            if str:byte(i + j - 1) ~= chr_bytes[j] then
+                match = false
+                break
             end
-            return start
+        end
+        if match then
+            return i -- return the byte index of the match
         end
     end
     return nil
@@ -1033,31 +910,50 @@ utils.ParseUrlLink = function(text)
 	end
 	return ''
 end
---[[
-utils.FormatNotepadString = function(input, n)
-    local output = ""
-    local count = 0
 
-    for i = 1, #input do
-        local char = input:sub(i, i)
-        count = count + 1
-        output = output .. char
+utils.ExportColors = function(addonpath, charname, colors)
+    local f = assert(io.open(addonpath..'\\colorset_'..charname, "w"))
+    for k,v in pairs(colors) do
+		f:write(string.format("%s,%#x\n", k, v[1])) -- %#x = hex like 0xFFD35AFF
+    end
+    f:close()
+	local msg = 'Exported colorsert to: '..addonpath..'\\colorset_'..charname
+	print((msg:gsub('\\\\','\\')))
+end--
 
-        -- Reset count and skip adding a newline if we encounter an existing \n
-        if char == "\n" then
-            count = 0 -- Reset because \n is already present
-        elseif count == n then
-            -- Add a newline at every nth character unless there's already a newline
-            if input:sub(i + 1, i + 1) ~= "\n" then
-                output = output .. "\n"
+-- Load table from file and merge into colors
+utils.ImportColors = function(addonpath, charname, colors)
+	local cols = {}
+	for k, v in pairs(colors) do
+		cols[k] = v
+	end
+    local f = io.open(addonpath..'\\colorset_'..charname, "r")
+    if not f then print('colorset file not found') return cols end
+    for line in f:lines() do
+        local key, val = line:match("([^,]+),([^,]+)")
+        if key and val then
+            local num = tonumber(val) -- works with "0x..." hex or decimal
+            if num and cols[key] then
+                cols[key][1] = num
             end
-            count = 0
         end
     end
-
-    return output
+    f:close()
+    return cols
 end
-]]--
+
+utils.cloneTable = function(t)
+    local copy = {}
+    for k, v in pairs(t) do
+        if type(v) == "table" then
+            copy[k] = utils.cloneTable(v)
+        else
+            copy[k] = v
+        end
+    end
+    return copy
+end
+
 utils.SaveLogs = function(ChatBuffer1, ChatBuffer2, ChatName, PlayerName, AddonPath, TimeStamp)
 
 	
@@ -1084,7 +980,7 @@ utils.SaveLogs = function(ChatBuffer1, ChatBuffer2, ChatName, PlayerName, AddonP
 		for i = 1, max_rows do
 			local row1 = ChatBuffer1[i] or "" -- If table1 doesn't have this row, use an empty string
 			local row2 = ChatBuffer2[i] or "" -- If table2 doesn't have this row, use an empty string
-			file:write(row1 .. ' '.. row2 .. "\n") -- Concatenate the rows and write to the file
+			file:write(cleanMC(row1) .. ' '.. cleanMC(row2) .. "\n") -- Concatenate the rows and write to the file
 		end
 		io.close(file);
 		return true;
@@ -1093,7 +989,7 @@ utils.SaveLogs = function(ChatBuffer1, ChatBuffer2, ChatName, PlayerName, AddonP
 		for i = 1, max_rows do
 			local row1 = ChatBuffer1[i] or "" -- If table1 doesn't have this row, use an empty string
 			--local row2 = ChatBuffer2[i] or "" -- If table2 doesn't have this row, use an empty string
-			file:write(row1.."\n") -- Concatenate the rows and write to the file
+			file:write(cleanMC(row1).."\n") -- Concatenate the rows and write to the file
 		end
 		io.close(file);
 		return true;
@@ -1209,8 +1105,11 @@ end
 utils.int2text = function(input_table, utf8_list)
     local result = {}
 	local count = 0;
+	local extra_bytes = 0
     for _, value in ipairs(input_table) do
-        if value >= 32 and value <= 126 then
+		if extra_bytes > 0 then
+			table.insert(result, string.char(value))
+        elseif value >= 32 and value <= 126 then
             -- Keep integers between 32 and 126
             table.insert(result, string.char(value))
         elseif value < -1 and value > -1000 then
@@ -1229,6 +1128,9 @@ utils.int2text = function(input_table, utf8_list)
 			--	local offset = -1*(value + 1000)-30;-- print(offset);
 			--	table.insert(result, utf8.char(0x0431+offset))
 			end
+		elseif value >= 0xF0 then
+			table.insert(result, string.char(value))
+			extra_bytes = 3
         end
         -- All other values are discarded
     end
@@ -1299,6 +1201,14 @@ utils.CleanInts = function(main_table)
         return int >= 0 and int <= 252
     end
 	
+	local function is_utf32(int)
+		if int >= 0xF0
+		then
+			return true
+		end
+		return false
+	end
+	
 
     -- Iterate through main_table
     while i <= #main_table do
@@ -1307,6 +1217,8 @@ utils.CleanInts = function(main_table)
         if value >= 0  then
             if is_ascii(value) then
                 i = i + 1
+			elseif is_utf32(value) then
+				i = i + 4
 			elseif i < #main_table -1 and is_timed_message(main_table[i],main_table[i + 1],main_table[i + 2]) then
 				table.remove(main_table, i) -- Remove the start byte
 				table.remove(main_table, i + 1) -- Remove the start byte
@@ -1429,164 +1341,89 @@ utils.IsInTable = function(t, x)
 	return nil;
 end
 
-utils.StringFindTable = function(s, t)
+utils.StringFindTable = function(s, t, m)
+	if not m then m = true else m = false end
 	if #t == 0 then return nil; end
 	for i = 1, #t do
-		local f = string.find(s, t[i]);
+		local f = string.find(s, t[i], 1, m);
 		if f then return f end
 	end
 	return nil;
 end
 
-utils.Utf8Len = function(s)
-    local length = 0
-    for _ in s:gmatch("[\x00-\x7F\xC2-\xF4][\x80-\xBF]*") do
-        length = length + 1
-    end
-    return length
-end
-
-utils.Utf8SpaceSavings = function(s)
-    local byte_length = #s  -- Total bytes in the original string
-    local char_length = 0   -- Counted UTF-8 characters
-
-    for _ in s:gmatch("[\x00-\x7F\xC2-\xF4][\x80-\xBF]*") do
-        char_length = char_length + 1
-    end
-
-    local saved_spaces = byte_length - char_length
-    return saved_spaces
-end
-
-
-utils.CountMultiByteChars = function(s)
-    local count = 0      -- Number of multi-byte characters
-    local byte_total = 0 -- Total bytes used by multi-byte characters
-
-    for match in s:gmatch("[\xC2-\xDF][\x80-\xBF]"    -- 2-byte characters
-                         .. "|[\xE0-\xEF][\x80-\xBF]{2}" -- 3-byte characters
-                         .. "|[\xF0-\xF4][\x80-\xBF]{3}") -- 4-byte characters
-    do
-        count = count + 1
-        byte_total = byte_total + #match -- Add the byte length of this character
-    end
-
-    return byte_total - count
-end
-
-utils.CountExtraBytes = function(s)
-    local i = 1
-    local extra_bytes = 0
-    local len = #s
-
-    while i <= len do
-        local b = s:byte(i)
-
-        if b < 0x80 then
-            -- ASCII (single byte), no extra bytes
-            i = i + 1
-        elseif b >= 0xC2 and b <= 0xDF then
-            -- 2-byte sequence (0xC2–0xDF)
-            if i + 1 <= len and s:byte(i + 1) >= 0x80 and s:byte(i + 1) <= 0xBF then
-                extra_bytes = extra_bytes +1
-                i = i + 2
-            else
-                -- Invalid sequence, skip
-                i = i + 1
-            end
-        elseif b >= 0xE0 and b <= 0xEF then
-            -- 3-byte sequence (0xE0–0xEF)226,157,175
-            if i + 2 <= len and
-               s:byte(i + 1) >= 0x80 and s:byte(i + 1) <= 0xBF and
-               s:byte(i + 2) >= 0x80 and s:byte(i + 2) <= 0xBF then
-                extra_bytes = extra_bytes + 2
-                i = i + 3
-            else
-                -- Invalid sequence, skip
-                i = i + 1
-            end
-        elseif b >= 0xF0 and b <= 0xF4 then
-            -- 4-byte sequence (0xF0–0xF4)
-            if i + 3 <= len and
-               s:byte(i + 1) >= 0x80 and s:byte(i + 1) <= 0xBF and
-               s:byte(i + 2) >= 0x80 and s:byte(i + 2) <= 0xBF and
-               s:byte(i + 3) >= 0x80 and s:byte(i + 3) <= 0xBF then
-                extra_bytes = extra_bytes + 3
-                i = i + 4
-            else
-                -- Invalid sequence, skip
-                i = i + 1
-            end
-        else
-            -- Garbage byte, skip
-            i = i + 1
-        end
-    end
-
-    return extra_bytes 
-end
-
 utils.CountExtraBytesT = function(s)
     local i = 1
-    local extra_bytes = 0
-	local ebTable = {}
     local len = #s
+    local ebTable = {}
+    local extra_bytes = 0
 
     while i <= len do
         local b = s:byte(i)
 
         if b < 0x80 then
-            -- ASCII (single byte), no extra bytes
+            -- ASCII: 1 byte
+            table.insert(ebTable, extra_bytes)
             i = i + 1
-			table.insert(ebTable, extra_bytes)
+
         elseif b >= 0xC2 and b <= 0xDF then
-            -- 2-byte sequence (0xC2–0xDF)
-            if i + 1 <= len and s:byte(i + 1) >= 0x80 and s:byte(i + 1) <= 0xBF then
-                extra_bytes = extra_bytes +1
+            -- 2-byte sequence
+            if i + 1 <= len and bit.band(s:byte(i+1), 0xC0) == 0x80 then
+                extra_bytes = extra_bytes + 1
                 i = i + 2
-				table.insert(ebTable, extra_bytes)
             else
-                -- Invalid sequence, skip
                 i = i + 1
-				table.insert(ebTable, extra_bytes)
             end
+            table.insert(ebTable, extra_bytes)
+
         elseif b >= 0xE0 and b <= 0xEF then
-            -- 3-byte sequence (0xE0–0xEF)226,157,175
+            -- 3-byte sequence
             if i + 2 <= len and
-               s:byte(i + 1) >= 0x80 and s:byte(i + 1) <= 0xBF and
-               s:byte(i + 2) >= 0x80 and s:byte(i + 2) <= 0xBF then
-                extra_bytes = extra_bytes + 2
-                i = i + 3
-				table.insert(ebTable, extra_bytes)
-
+               bit.band(s:byte(i+1), 0xC0) == 0x80 and
+               bit.band(s:byte(i+2), 0xC0) == 0x80 then
+               extra_bytes = extra_bytes + 2
+				if b == 0xE2 then
+					if (s:byte(i+1) == 0x98 and (
+						s:byte(i+2) == 0x85 or
+						s:byte(i+2) == 0x86)
+						) or (
+						s:byte(i+1) == 0x97 and (
+						s:byte(i+2) == 0x86 or
+						s:byte(i+2) == 0x87)
+						) or (
+						s:byte(i+1) == 0x9D and (
+						s:byte(i+2) == 0xA4)
+						)
+					then
+						extra_bytes = extra_bytes - 1
+					end
+				end
+               i = i + 3
             else
-                -- Invalid sequence, skip
-                i = i + 1
-				table.insert(ebTable, extra_bytes)
+               i = i + 1
             end
+            table.insert(ebTable, extra_bytes)
+
         elseif b >= 0xF0 and b <= 0xF4 then
-            -- 4-byte sequence (0xF0–0xF4)
+            -- 4-byte sequence
             if i + 3 <= len and
-               s:byte(i + 1) >= 0x80 and s:byte(i + 1) <= 0xBF and
-               s:byte(i + 2) >= 0x80 and s:byte(i + 2) <= 0xBF and
-               s:byte(i + 3) >= 0x80 and s:byte(i + 3) <= 0xBF then
-                extra_bytes = extra_bytes + 3
+               bit.band(s:byte(i+1), 0xC0) == 0x80 and
+               bit.band(s:byte(i+2), 0xC0) == 0x80 and
+               bit.band(s:byte(i+3), 0xC0) == 0x80 then
+                extra_bytes = extra_bytes + 2
                 i = i + 4
-				table.insert(ebTable, extra_bytes)
-
             else
-                -- Invalid sequence, skip
                 i = i + 1
-				table.insert(ebTable, extra_bytes)
             end
+            table.insert(ebTable, extra_bytes)
+
         else
-            -- Garbage byte, skip
+            -- Invalid byte, skip
             i = i + 1
-			table.insert(ebTable, extra_bytes)
+            table.insert(ebTable, extra_bytes)
         end
     end
 
-    return ebTable 
+    return ebTable
 end
 
 
@@ -1614,33 +1451,6 @@ utils.breakLine = function(s, breakpoint)
     return table.concat(result, "\n")
 end
 
---[[
-utils.HandleNewLines = function(text)
-    local bytes = {text:byte(1, #text)}  -- Convert string to byte sequence
-    local cleaned_bytes = {}
-    local removed_indices = {}
-    local i = 1
-
-    while i <= #bytes do
-        -- Check if we find the pattern 220, 140
-        if bytes[i] == 220 and bytes[i + 1] == 140 then
-            if #cleaned_bytes > 0 then
-                table.insert(removed_indices, #cleaned_bytes)  -- Store last valid index before 220
-            end
-            i = i + 2  -- Skip both bytes
-        else
-            table.insert(cleaned_bytes, bytes[i])
-            i = i + 1
-        end
-    end
-
-    -- Convert back to string
-    local cleaned_text = string.char(table.unpack(cleaned_bytes))
-
-    return cleaned_text, removed_indices
-end
-]]--
-
 utils.LoadCustomFilters = function()
 	custmFilters = T{};
 	
@@ -1666,17 +1476,130 @@ utils.LoadCustomFilters = function()
 	return custmFilters
 end
 
-utils.RevertShiftJIT = function(text)
-	for i = 1, #utils.ShiftJITback do
-		local char = utf8.char(utils.ShiftJITback[i][1])
+utils.RevertShiftJIS = function(text)
+	for i = 1, #utils.ShiftJISback do
+		local char = utf8.char(utils.ShiftJISback[i][1])
 		local bytes = {char:byte(1, #char)}
 		local chars = ''
 		for b = 1, #bytes do
 			chars = chars..string.char(bytes[b])
 		end		
-		text = text:gsub(chars,utils.ShiftJITback[i][3])
+		text = text:gsub(chars,utils.ShiftJISback[i][3])
 	end
 	return text
+end
+
+local function multi_gsub(text, subs, range)
+    -- Escape special characters in patterns and collect them
+    local keys = {}
+    local replacements = {}
+
+    for i, pair in ipairs(subs) do
+		if i >= range[1] and i <= range[2] then
+			local pattern, replacement = pair[2], utf8.char(pair[1])
+			local escaped_pattern = pattern:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?])", "%%%1") -- Escape special chars
+			table.insert(keys, escaped_pattern)
+			replacements[escaped_pattern] = replacement
+		end
+    end
+
+    -- Create a pattern to match any of the given keys
+    local pattern = table.concat(keys, "()") -- No '|' used!
+
+    -- Perform gsub using a lookup function
+    return text:gsub(pattern, function(match) return replacements[match] end)
+end
+
+utils.cleanstr = function(str)
+    -- Parse the strings auto-translate tags..
+    str = AshitaCore:GetChatManager():ParseAutoTranslate(str, true);
+
+    -- Strip FFXI-specific color and translate tags..
+    str = str:strip_colors();
+--	str = (str:gsub(string.char(0xEF) .. '[' .. string.char(0x27) .. ']', utf8.char(0x276E)));
+--  str = (str:gsub(string.char(0xEF) .. '[' .. string.char(0x28) .. ']', utf8.char(0x276F)));
+	str = (str:gsub(string.char(0xEF) .. '[' .. string.char(0x27) .. ']', '£'));
+    str = (str:gsub(string.char(0xEF) .. '[' .. string.char(0x28) .. ']', '£'));
+
+	
+    -- Strip line breaks..
+    while (true) do
+        local hasN = str:endswith('\n');
+        local hasR = str:endswith('\r');
+
+        if (not hasN and not hasR) then
+            break;
+        end
+
+        if (hasN) then str = str:trimend('\n'); end
+        if (hasR) then str = str:trimend('\r'); end
+    end
+	
+	local i = 1
+    local result = ""
+
+    while i <= #str - 1 do
+        -- Get the 2-character substring starting from position i
+        local pair = str:sub(i, i + 1)
+
+        -- Check if the 2-character substring is in ShiftJISReps
+		local found = false
+		utils.ShiftJISRanges:each(function(v)
+			if (string.byte(pair[1]) >= v[1] and string.byte(pair[1]) <= v[2]) and
+			   (v[3] == -1 or (string.byte(pair[2]) >= v[3] and string.byte(pair[2]) <= v[4]))
+			then
+				found = true
+			end
+		end)
+		if found then
+			if utils.ShiftJISReps[pair] then
+				-- Replace with the corresponding value and skip 2 characters
+				str = str:sub(1, i - 1) .. utils.ShiftJISReps[pair] .. str:sub(i + 2)
+				i = i + 2
+			else
+				i = i + 1
+			end
+		else
+			str = str:sub(1, i - 1) .. str:sub(i + 1)
+		end
+    end
+	
+    -- Replace mid-linebreaks..
+    return (str:gsub(string.char(0x07), '\n'));
+end
+
+utils.ImguiVis = function(visible)
+    AshitaCore:GetFontManager():SetVisible(visible);
+    AshitaCore:GetPrimitiveManager():SetVisible(visible);
+    AshitaCore:GetGuiManager():SetVisible(visible);
+end
+
+utils.rgbaToHexNum = function(t)
+    local r = math.floor(t[1] * 255)
+	local g = math.floor(t[2] * 255)
+	local b = math.floor(t[3] * 255)
+	local a = math.floor(t[4] * 255)
+
+	local packed = bit.bor(
+        bit.lshift(a, 24),
+        bit.lshift(r, 16),
+        bit.lshift(g, 8),
+        b
+    )
+	return tonumber(ffi.new("uint32_t", packed))
+end
+
+utils.stringsplit = function(input, sep)
+    if sep == nil then
+        sep = "%s"  -- default: split by whitespace
+    end
+    local result = {}
+	if not input or #input == 0 then return result end
+	for str in string.gmatch(input, "([^" .. sep .. "]+)") do
+        table.insert(result, str)
+    end
+
+    return result
 end
 
 return utils;

@@ -10,6 +10,9 @@
 ## Experimental: you can add _y or _p to let through messages that refer to you (_y) or you and party membembers (_p)
 ## (e.g. effect wears off _y , only shows the "effect wears off messages" for you) 
 ##
+## Experimental: support for lua pattern matching syntax ("lua regex")
+## es. %s %d ? .- .* (see https://gist.github.com/spr2-dev/46ca9f4a6f933fa266bccd87fd15d09a)
+##
 ## !!! Very long lists could cause performance issues !!!
 
 
@@ -18,11 +21,17 @@
 ## Examples:
 ## effect wears off
 ## gains the effect of _y
+##
+## Nsages like additional effects are ote:
+## messent on the same channel so they cannot individually filtered
+## (for example only showing yours)
  
 effect wears off _y
 gains the effect of _y
 is afflicted _y
-
+no effect _y
+Additional effect: .- HP
+%sRoll _y
 
 ## Spells
 
