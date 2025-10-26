@@ -11,13 +11,9 @@ local IntVerNew = 4.3
 imguiWrap.isNewVer = IntVer >= IntVerNew
 
 imguiWrap.ImageButton = function(id, texture_id, size, uv0, uv1, framePadding, bg_col, tint_col)
---ImageButton(const char* str_id, ImTextureRef tex_ref, const ImVec2& image_size, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1), const ImVec4& bg_col = ImVec4(0, 0, 0, 0), const ImVec4& tint_col = ImVec4(1, 1, 1, 1)) = 0;
---ImageButton(ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1), int frame_padding = -1, const ImVec4& bg_col = ImVec4(0, 0, 0, 0), const ImVec4& tint_col = ImVec4(1, 1, 1, 1)) = 0;
 
-	if imguiWrap.isNewVer then
-		--imgui.PushStyleVar(ImGuiStyleVar_FramePadding, {-1,-1})
+	if imguiWrap.isNewVer then	
 		local result = imgui.ImageButton(id, texture_id, size, uv0, uv1, bg_col, tint_col)
-		--imgui.PopStyleVar(1)
 		return result
 	else
 		return imgui.ImageButton(texture_id, size, uv0, uv1, framePadding, bg_col, tint_col)
@@ -29,10 +25,7 @@ imguiWrap.SetWindowFontScale = function(scale)
 	if imguiWrap.isNewVer then
 		local font = imgui.GetFont();
 		local size = imgui.GetFontSize();
-		--imgui.PushStyleVar(ImGuiStyleVar_FramePadding, {-1,-1})
-		--imgui.SetWindowFontScale(allSettings.fontSettings.font_height/25)
 		imgui.PushFont(font, size * scale)
-		--imgui.PopStyleVar(1)
 		return true
 	else
 		if imgui.SetWindowFontScale then
@@ -48,7 +41,6 @@ imguiWrap.PushFont = function(font, scale)
 		imgui.PushFont(font, font.LegacySize * scale)
 		return 1
 	else
-		--local old_scale = font.Scale
 		font.Scale = scale
 		imgui.PushFont(font)
 		return 1
@@ -56,8 +48,6 @@ imguiWrap.PushFont = function(font, scale)
 end
 
 imguiWrap.BeginChild = function(id, size, border, window_flags, child_flags)
---BeginChild(const char* str_id, const ImVec2& size = ImVec2(0, 0), ImGuiChildFlags child_flags = 0, ImGuiWindowFlags window_flags = 0) = 0;
---BeginChild(const char* str_id, const ImVec2& size = ImVec2(0, 0), bool border = false, ImGuiWindowFlags flags = 0) = 0;
 	if imguiWrap.isNewVer then
 		return imgui.BeginChild(id, size, bit.bor(border and ImGuiChildFlags_Borders or ImGuiChildFlags_None,child_flags or 0), window_flags);
 	else
@@ -67,10 +57,6 @@ imguiWrap.BeginChild = function(id, size, border, window_flags, child_flags)
 end
 
 imguiWrap.Image = function(tex_id, size, uv0, uv1, tint_col, border_col)
---Image(ImTextureRef tex_ref, const ImVec2& image_size, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1,1))                                                                                                                   = 0;
---ImageWithBg(ImTextureRef tex_ref, const ImVec2& image_size, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1), const ImVec4& bg_col = ImVec4(0, 0, 0, 0), const ImVec4& tint_col = ImVec4(1, 1, 1, 1))                     = 0;
---Image(ImTextureID user_texture_id, const ImVec2& size, const ImVec2& uv0 = ImVec2(0, 0), const ImVec2& uv1 = ImVec2(1, 1), const ImVec4& tint_col = ImVec4(1, 1, 1, 1), const ImVec4& border_col = ImVec4(0, 0, 0, 0))                           = 0;
-
 	if imguiWrap.isNewVer then
 		if tint_col then
 			imgui.ImageWithBg(tex_id, size, uv0, uv1, border_color or {0,0,0,0}, tint_col)
@@ -103,6 +89,47 @@ imguiWrap.IsWindowHovered = function(flags)
 	else
 		return imgui.IsWindowHovered(flags)
 	end
+end
+
+imguiWrap.GetKeyDown = function(key)
+	if imguiWrap.isNewVer then
+		return imgui.GetIO().KeysData[key].Down	
+	else
+		return imgui.GetIO().KeysDown[key]
+	end
+end
+
+imguiWrap.TextLinkOpenURL = function(text, link)
+	if imguiWrap.isNewVer then
+		return imgui.TextLinkOpenURL(text, link)
+	else
+		
+		local linkHoverColor = imgui.GetColorU32({0.4, 0.6, 0.8, 1})
+		local normalColor = imgui.GetColorU32({1.0, 1.0, 1.0, 0})
+		
+		local draw = imgui.GetWindowDrawList()
+		local cposX, cposY = imgui.GetCursorScreenPos()
+		local sizeX, sizeY = imgui.CalcTextSize(text);
+		local rect = {{cposX , cposY + imgui.GetFontSize()},{cposX + sizeX, cposY + imgui.GetFontSize()}}
+
+
+		imgui.Text(text)
+		local isHovered = imgui.IsItemHovered()
+		local color = normalColor
+		if isHovered and imgui.IsMouseClicked(0) then
+			color = linkHoverColor
+			ashita.misc.open_url(link);
+		elseif isHovered then
+			color = linkHoverColor
+			imgui.SetCursorScreenPos({cposX, cposY})
+			imgui.TextColored({0.4, 0.6, 0.8, 1}, text)
+		end
+		
+		draw:AddLine(rect[1], rect[2], color, 1.0)
+
+		return 
+	end
+	
 end
 
 return imguiWrap;

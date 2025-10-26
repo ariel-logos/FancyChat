@@ -21,6 +21,7 @@ local targets = require ('targets');
 local help = require('help');
 local http = require("socket.http")
 local imguiWrap = require('imguiWrap')
+--local emojis = require('emojis')
 
 -- --dofile(addon.path.."\\imguiwrap.lua")
 
@@ -71,6 +72,7 @@ local mvc_targetposX = 0;
 
 local fcw = T{
 	T{	
+		itemInfo = {},
 		itemIcons = T{{},{},{},{}},
 		itemTexture = T{{},{},{},{}},
 		autoHideFadeTime = 0,
@@ -238,7 +240,7 @@ local set_CustomTabModes = T{}
 local set_SecondChat = T{false}
 local set_AdjWin1 = T{false};
 local set_AdjWin2 = T{false};
-local set_CombatSplitCharList = {{'Greater >',0x003E}, {'Column :',0x0589}, {'Tilde ~',0x007E}, {'Bullet',0x2022}, {'Bullet hypen',0x2043}, {'R.Triangle',0x25B6}};
+local set_CombatSplitCharList = {{'Greater >',0x003E}, {'Column :',0x0589}, {'Tilde ~',0x007E}, {'Bullet',0x2022}, {'Bullet hypen',0x2043}, {'R.Triangle',0x25B6}, {'Arrow ->',0x2192},{'Arrow (big) ->',0x1F81E}};
 
 -- Debug window variables --
 local dw_PLRCount = 0;
@@ -252,7 +254,7 @@ local dw_frameID = 1
 local dw_addr = 0
 
 -- Text parsing variables --
-
+local par_emojiChannel = 5;
 local par_allowed = {0, 0};
 local par_dumping = false;
 local par_LastMsgLength = 0;
@@ -425,6 +427,7 @@ local defaultColors = {
 	combatspell		= {0xFFDDC9FF},
 	spelldamage		= {0xFFF0FFF0},
 	lot				= {0xFFE2FA0C},
+	attain			= {0xFFFFE438},
 	obtained		= {0xFFA1FF3D},
 	keyitem			= {0xFFC797FF},
 	learn			= {0xFF5C71FF},
@@ -453,6 +456,7 @@ local colorDesc =
 	combatspell		= {'Combat Spell','Spell base color'},
 	spelldamage		= {'Spell Dmg','Default spell DMG color'},
 	lot				= {'Cast Lot','Casting lot color'},
+	attain			= {'Attain','For level up and other character progression messages'},
 	obtained		= {'Obtain/Gain', 'For messages such as x obtains/gains y'},
 	keyitem			= {'Key Item','Obtained key item messages'},
 	learn			= {'Learn','Learning new skills/spells messages'},
@@ -556,7 +560,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 		fcw[1].PlayerName = settings.name;
 		
 		par_InEvent = ashita.memory.read_uint8(ashita.memory.read_uint32(uiw.EventPtr + 1)) == 1
-	
+		if par_InEvent then ResetAutoHideTimer() end
 
 		uiw.MemValue = bit.band(ashita.memory.read_uint32(ashita.memory.read_uint32(uiw.WinPtr1)+0x42),0x0000FFFF);
 		if (uiw.MemValue ~= 0) then
@@ -622,6 +626,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			
 		else
 			mvc_Menu1 = false;  mvc_Menu2 = false;  mvc_Menu3 = false;  mvc_Menu4 = false; mvc_Menu5 =false; mvc_Menu6 =false;
+			if imguiWrap.GetKeyDown(28) then ResetAutoHideTimer() end
 		end
 		if MenuName:find('auc1') and #uiw.MenuList > 0 and uiw.MenuList[#uiw.MenuList][1]=='menucomyn' then uiw.MenuList = {{'menuauc1',0}} end
 		Debug(MenuName, 2, false);	
@@ -852,7 +857,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 		local windowFlags = 0
 		
 		
-		if AshitaCore:GetChatManager():IsInputOpen() ~= 0x00 then fcw[1].autoHideTime = os.time() end
+		if AshitaCore:GetChatManager():IsInputOpen() ~= 0x00 then ResetAutoHideTimer() end
 		if (allSettings.AutoHideWindow[1] and os.time() - fcw[1].autoHideTime > allSettings.AutoHideTimeMax) then
 			if fcw[1].autoHideFadeTime == 0 then fcw[1].autoHideFadeTime = os.clock() end
 			fcw[1].autoHideFade = (os.clock()-fcw[1].autoHideFadeTime)/0.135
@@ -987,7 +992,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					if (fo_Aux[1][targetLine].settings.visible and fo_Aux[1][targetLine].settings.text == '[link]' and
 						fo_Chat[1][targetLine].rect ~= nil and fo_Aux[1][targetLine].rect~= nil and 
 						mouseX >  fo_Aux[1][targetLine].settings.position_x and mouseX < fo_Aux[1][targetLine].settings.position_x + fo_Aux[1][targetLine].rect.right and
-						mouseY > positionStartY+lineOffset and mouseY < positionStartY+lineOffset+allSettings.fontSettings.font_height and not fcw[1].Dragging
+						mouseY > positionStartY+lineOffset and mouseY < positionStartY+lineOffset+allSettings.fontSettings.font_height
+						and not fcw[1].Dragging
 						)
 					then --b_msgID
 						if (fo_Aux[1][targetLine] ~= nil) then
@@ -999,22 +1005,26 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 								--parsedUrl = utils.ParseUrlLink(b_ChatBuffer[b_ChatBufferMode][2].text[ChatHoverIdx]);
 								--Debug(tostring(b_ChatBuffer[b_ChatBufferMode][2].url[ChatHoverIdx]), 2, false);
 								
-								if imgui.IsMouseClicked(ImGuiMouseButton_Left) then 
-								 ashita.misc.open_url(string.find(b_ChatBuffer[b_ChatBufferMode[1]][2].url[ChatHoverIdx], 'https://')and b_ChatBuffer[b_ChatBufferMode[1]][2].url[ChatHoverIdx] or 'https://'..b_ChatBuffer[b_ChatBufferMode[1]][2].url[ChatHoverIdx]); end
-								
+								if imgui.IsMouseClicked(ImGuiMouseButton_Left) then
+									local urlText = utils.stringsplit(b_ChatBuffer[b_ChatBufferMode[1]][2].url[ChatHoverIdx],'|')
+									ashita.misc.open_url(string.find(urlText[2], 'https://') and urlText[2] or 'https://'..urlText[2]);
+									--print(b_ChatBuffer[b_ChatBufferMode[1]][2].url[ChatHoverIdx])
 								end
-								fcw[1].HoverLine = -1;
 							end
-							break
-						else
-							if (fo_Aux[1][targetLine]~= nil and fo_Aux[1][targetLine].settings.text == '[link]') then
-								fo_Aux[1][targetLine]:set_font_color(0xFF44CCFF);
-							end
-							if (mouseX > fcw[1].Anchor_X and mouseX < fcw[1].Anchor_X+fcw[1].BG_W and
-							mouseY > positionStartY+lineOffset and mouseY < positionStartY+lineOffset+allSettings.fontSettings.font_height and
-							(imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) or (fcw[1].MoveChat and IsRectHovered(ro_RectBG[1].settings,0)))
-							)
-							then
+							fcw[1].HoverLine = -1;
+						end
+							--break
+					else
+						--print(fo_Aux[1][targetLine])
+						--Debug(tostring(fo_Aux[1][targetLine]),1,false)
+						if (fo_Aux[1][targetLine]~= nil and fo_Aux[1][targetLine].settings.text == '[link]') then
+							fo_Aux[1][targetLine]:set_font_color(0xFF44CCFF);
+						end
+						if (mouseX > fcw[1].Anchor_X and mouseX < fcw[1].Anchor_X+fcw[1].BG_W and
+						mouseY > positionStartY+lineOffset and mouseY < positionStartY+lineOffset+allSettings.fontSettings.font_height and
+						(imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) or (fcw[1].MoveChat and IsRectHovered(ro_RectBG[1].settings,0)))
+						)
+						then
 							--local targetLine = 8-HL_i+fcw[1].ChatHead-1; if targetLine > 8 then targetLine = targetLine -8 end
 							--dw_TestMessage = tostring(targetLine)..'-'..tostring(fo_Chat[1][targetLine] ~= nil);
 							--if fo_Chat[1][targetLine] ~= nil then Debug(fo_Chat[1][targetLine].settings.text, 1, false); end
@@ -1027,9 +1037,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 							imgui.GetColorU32({ 1.0, 1.0, 1.0, 0.0 }),
 							imgui.GetColorU32({ 1.0, 1.0, 1.0, highlight_alpha })
 							);
-							break
+							--break
 						end
-						
 					end
 					
 				end
@@ -1070,7 +1079,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				end
 				end
 				
-				copyBufferText = cleanMC(copyBufferText)
+				copyBufferText = utils.cleanMC(copyBufferText)
 				if allSettings.ItemPreview[1] then
 					DrawInfo(copyBufferText)
 				end
@@ -1108,22 +1117,32 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					and utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[1]][2].text) - fcw[1].ScrolledBack - (b_ChatBufferN[1]-b_ChatBufferIdx[1]) > allSettings.ChatLines
 				)
 				then
-					fcw[1].ScrollDelta = 0;
-					fcw[2].ScrollDelta = 0;
-					fcw[1].Scrolling = true;
-					fcw[1].ChatShift = allSettings.fontSettings.font_height
-					fcw[1].ScrollUpRequest = true;
-				else
-					if ( fcw[1].ScrollDelta < 0 and fcw[1].ScrolledBack > 0 ) then
+					if not imgui.GetIO().KeyShift or not fcw[1].Scrolling then
 						fcw[1].ScrollDelta = 0;
 						fcw[2].ScrollDelta = 0;
 						fcw[1].Scrolling = true;
 						fcw[1].ChatShift = allSettings.fontSettings.font_height
-						fcw[1].ScrollDownRequest = true;
-
+						fcw[1].ScrollUpRequest = true;
+					elseif fcw[1].Scrolling then
+						local currentIdx = #b_ChatBuffer[b_ChatBufferMode[1]][2].text - (b_ChatBufferN[1]-b_ChatBufferIdx[1]) - 1
+						GoToLine(1,math.max(currentIdx-(fcw[1].ScrolledBack+5), allSettings.ChatLines), currentIdx);
+					end
+				else
+					if ( fcw[1].ScrollDelta < 0 and fcw[1].ScrolledBack > 0 ) 
+					then
+						if  not imgui.GetIO().KeyShift or not fcw[1].Scrolling then
+							fcw[1].ScrollDelta = 0;
+							fcw[2].ScrollDelta = 0;
+							fcw[1].Scrolling = true;
+							fcw[1].ChatShift = allSettings.fontSettings.font_height
+							fcw[1].ScrollDownRequest = true;
+						elseif fcw[1].Scrolling then
+							local currentIdx = #b_ChatBuffer[b_ChatBufferMode[1]][2].text - (b_ChatBufferN[1]-b_ChatBufferIdx[1]) - 1
+							GoToLine(1,math.min(currentIdx-(fcw[1].ScrolledBack-5), currentIdx-1), currentIdx);
+						end
 					end
 				end
-			
+				ResetAutoHideTimer()
 			end
 			fcw[1].ScrollDelta=0;
 			
@@ -1280,14 +1299,21 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				end
 				
 				imgui.SetCursorPos({(tabsW/#tab_Tabs)-(tabsH-8),0});
-			
-				if(fcw[1].TextureIDCompact ~= nil) then
-					if imguiWrap.ImageButton('TextureIDCompact', fcw[1].TextureIDCompact, {tabsH-8,tabsH-12},{1.05,1.05},{-0.05,-0.05},-1,{0,0,0,0},{1,1,1,0.5}) then
-					--if (imguiWrap.ImageButton(fcw[1].TextureIDCompact,{tabsH-8,tabsH-12},{1.05,1.05},{-0.05,-0.05},-1,{0,0,0,0},{1,1,1,0.5})) then
-						allSettings.CompactTabs = false;
-						fcw[1].PosChanged = true
-						fcw[2].PosChanged = true
-						SaveSettings();
+				
+				if imgui.GetIO().KeyShift then
+					if(fcw[1].TextureIDSettings ~= nil) then
+						if imguiWrap.ImageButton('TextureIDSettings',fcw[1].TextureIDSettings, {tabsH-8,tabsH-12},{1.05,1.0},{-0.05,-0.0},-1,{0,0,0,0},{1,1,1,0.5}) then
+							allSettings.settingsOpened[1] = not allSettings.settingsOpened[1];
+						end
+					end
+				else
+					if(fcw[1].TextureIDCompact ~= nil) then
+						if imguiWrap.ImageButton('TextureIDCompact', fcw[1].TextureIDCompact, {tabsH-8,tabsH-12},{1.05,1.05},{-0.05,-0.05},-1,{0,0,0,0},{1,1,1,0.5}) then
+							allSettings.CompactTabs = false;
+							fcw[1].PosChanged = true
+							fcw[2].PosChanged = true
+							SaveSettings();
+						end
 					end
 				end
 				imgui.PopStyleVar(1);
@@ -1323,6 +1349,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				PushWindowStyle()
 								
 				if imgui.Begin('FancyChat - GuideMe (experimental)', fcw[1].GuideMeOpened, windowFlags) then
+					
+					if imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) then ResetAutoHideTimer() end
 					local response, status, headers;
 					
 					--InputText(const char* label, char* buf, size_t buf_size, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void* user_data = nullptr)
@@ -1478,6 +1506,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				PushWindowStyle()
 								
 				if imgui.Begin('FancyChat - Notes (experimental)', fcw[1].NotepadOpened, windowFlags) then
+					if imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) then ResetAutoHideTimer() end
 					imgui.PushItemWidth(imgui.GetWindowWidth()-290);
 					if imgui.InputText('##NoteInput', fcw[1].Note, 300, bit.bor(ImGuiInputTextFlags_AutoSelectAll)) then
 					end imgui.SameLine()
@@ -1541,7 +1570,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 		-- Setting up the Settings window elements --
 		
 		if (allSettings.settingsOpened[1]) then
-			fcw[1].autoHideTime = os.time()
+			ResetAutoHideTimer()
 			PushWindowStyle()
 			--print('hello')
 			imgui.SetNextWindowSize({ dsize.x/3.8, dsize.y/2.7 });
@@ -2295,25 +2324,27 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 							SaveSettings();
 						end
 					end
-					imgui.PushItemWidth(dsize.x/10);
-					--imgui.PushItemWidth(100);
-					imgui.Dummy({0,10});
-					imgui.Dummy({5,0}); imgui.SameLine();
-					imgui.Text('Combat log separator character')
-					AddTooltip('Customize the character that, in Combat log, separates the main message from the result (the main and colored parts).',0)
-					imgui.Dummy({5,0}); imgui.SameLine();
+					
+					--------------------------------------------------------------------------
+					-- imgui.PushItemWidth(dsize.x/10);
+					-- imgui.Dummy({0,10});
+					-- imgui.Dummy({5,0}); imgui.SameLine();
+					-- imgui.Text('Combat log separator character')
+					-- AddTooltip('Customize the character that, in Combat log, separates the main message from the result (the main and colored parts).',0)
+					-- imgui.Dummy({5,0}); imgui.SameLine();
 					--imgui.Text('[ Combat log character before the colored part ]')
 					--imgui.Dummy({5,0}); imgui.SameLine();
-					if imgui.BeginCombo('##SplittingChar', allSettings.CombatSplitChar[1] , ImGuiComboFlags_None) then
-						for SC_i = 1, #set_CombatSplitCharList do
-							if imgui.Selectable(set_CombatSplitCharList[SC_i][1]) then
-								allSettings.CombatSplitChar = set_CombatSplitCharList[SC_i];
-								SaveSettings();
-							end
-						end
-					imgui.EndCombo();
-					end
-					imgui.PopItemWidth();
+					-- if imgui.BeginCombo('##SplittingChar', allSettings.CombatSplitChar[1] , ImGuiComboFlags_None) then
+						-- for SC_i = 1, #set_CombatSplitCharList do
+							-- if imgui.Selectable(set_CombatSplitCharList[SC_i][1]) then
+								-- allSettings.CombatSplitChar = set_CombatSplitCharList[SC_i];
+								-- SaveSettings();
+							-- end
+						-- end
+					-- imgui.EndCombo();
+					-- end
+					-- imgui.PopItemWidth();
+					---------------------------------------------------------------------------------
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0}); imgui.SameLine();
 					if (imgui.Checkbox('Preview Items/Abilities/Spells on mouse hover',{allSettings.ItemPreview[1]})) then 
@@ -2748,12 +2779,14 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 								if ChatHoverIdx > 0 then
 									--parsedUrl = utils.ParseUrlLink(b_ChatBuffer[b_ChatBufferMode][2].text[ChatHoverIdx]);
 									--Debug(tostring(b_ChatBuffer[b_ChatBufferMode][2].url[ChatHoverIdx]), 2, false);
-									if imgui.IsMouseClicked(ImGuiMouseButton_Left) then ashita.misc.open_url(b_ChatBuffer[b_ChatBufferMode[2]][2].url[ChatHoverIdx]); end
-									
+									if imgui.IsMouseClicked(ImGuiMouseButton_Left) then
+									local urlText = utils.stringsplit(b_ChatBuffer[b_ChatBufferMode[2]][2].url[ChatHoverIdx],'|')
+									ashita.misc.open_url(string.find(urlText[2], 'https://') and urlText[2] or 'https://'..urlText[2]);
+								end
 								end
 								fcw[2].HoverLine = -1;
 							end
-							break
+							--break
 						else
 							if (fo_Aux[2][targetLine]~= nil and fo_Aux[2][targetLine].settings.text == '[link]') then
 								fo_Aux[2][targetLine]:set_font_color(0xFF44CCFF);
@@ -2774,7 +2807,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 								imgui.GetColorU32({ 1.0, 1.0, 1.0, 0.0 }),
 								imgui.GetColorU32({ 1.0, 1.0, 1.0, highlight_alpha })
 								);
-								break
+								--break
 							end
 							
 						end
@@ -2814,7 +2847,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					IDi = IDi + 1;
 					end
 					end
-					copyBufferText = cleanMC(copyBufferText)
+					copyBufferText = utils.cleanMC(copyBufferText)
 					if allSettings.ItemPreview[1] then
 						DrawInfo(copyBufferText)
 					end
@@ -2849,20 +2882,31 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						and utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[2]][2].text) - fcw[2].ScrolledBack - (b_ChatBufferN[2]-b_ChatBufferIdx[2]) > allSettings.ChatLines
 					)
 					then
-						fcw[2].ScrollDelta = 0;
-						fcw[1].ScrollDelta = 0;
-						fcw[2].Scrolling = true;
-						fcw[2].ChatShift = allSettings.fontSettings.font_height
-						fcw[2].ScrollUpRequest = true;
-					else
-						if ( fcw[2].ScrollDelta < 0 and fcw[2].ScrolledBack > 0 ) then
+						if not imgui.GetIO().KeyShift or not fcw[2].Scrolling then
 							fcw[2].ScrollDelta = 0;
 							fcw[1].ScrollDelta = 0;
 							fcw[2].Scrolling = true;
 							fcw[2].ChatShift = allSettings.fontSettings.font_height
-							fcw[2].ScrollDownRequest = true;
+							fcw[2].ScrollUpRequest = true;
+						elseif fcw[2].Scrolling then
+							local currentIdx = #b_ChatBuffer[b_ChatBufferMode[2]][2].text - (b_ChatBufferN[2]-b_ChatBufferIdx[2]) - 1
+							GoToLine(2,math.max(currentIdx-(fcw[2].ScrolledBack+5), allSettings.ChatLines), currentIdx);
+						end
+					else
+						if ( fcw[2].ScrollDelta < 0 and fcw[2].ScrolledBack > 0 ) then
+							if not imgui.GetIO().KeyShift or not fcw[2].Scrolling then
+								fcw[2].ScrollDelta = 0;
+								fcw[1].ScrollDelta = 0;
+								fcw[2].Scrolling = true;
+								fcw[2].ChatShift = allSettings.fontSettings.font_height
+								fcw[2].ScrollDownRequest = true;
+							elseif fcw[2].Scrolling then
+								local currentIdx = #b_ChatBuffer[b_ChatBufferMode[2]][2].text - (b_ChatBufferN[2]-b_ChatBufferIdx[2]) - 1
+								GoToLine(2,math.min(currentIdx-(fcw[2].ScrolledBack-5), currentIdx-1), currentIdx);
+							end
 						end
 					end
+					ResetAutoHideTimer()
 				end
 				fcw[2].ScrollDelta=0;
 				
@@ -3157,7 +3201,7 @@ end);
 ashita.events.register('text_in', 'text_in_cb', function (e)
 	
 	if par_dumping then return end
-	
+	if #e.message > 2048 then return end
 	
 	
 	--local socialChns = {1, 4, 5, 6, 7, 10, 11, 14, 15, 213, 214, 217};
@@ -3208,6 +3252,10 @@ ashita.events.register('text_in', 'text_in_cb', function (e)
 		e_message= AshitaCore:GetChatManager():ParseAutoTranslate(e.message, true);
 	else
 		e_message = e.message;
+	end
+	
+	if mode_pre == par_emojiChannel then
+		e_message = utils.parseEmoji(e_message)
 	end
 	
 	local e_messages = {}
@@ -3410,7 +3458,7 @@ ashita.events.register('load', 'load_cb', function ()
 		end
 	end
 	
-	fcw[1].autoHideTime = os.time()
+	ResetAutoHideTimer()
 	set_alertList = utils.stringsplit(allSettings.alertwords, ',')
 	set_alertBuffer[1] = allSettings.alertwords;
 	par_customFilters = utils.LoadCustomFilters();
@@ -3549,8 +3597,10 @@ ashita.events.register('load', 'load_cb', function ()
 		--table.insert(b_ChatBuffer[W_i][2].text, '-- We\\!FF0000FF?\\lcom\\!--------?\\e to ');
 		--[12:56] Strolling Sapling > [Volker] > 10 DMG 
 		--table.insert(b_ChatBuffer[W_i][2].text, '\\!FFFFFFFF?\\Test\\!--------?\\ \\!FFDBF5C9?\\Hello\\!--------?\\ \\!FFDBF510?\\Hello\\!--------?\\ \\!FFDB30C9?\\Hello\\!--------?\\');
-		--table.insert(b_ChatBuffer[W_i][2].text, utf8.char(0x22EF)..utf8.char(0x25AE)..utf8.char(0x3010)..utf8.char(0x3011));
+		--table.insert(b_ChatBuffer[W_i][2].text, e9d2 eb09 e95e e70b utf8.char(0x22EF)..utf8.char(0x25AE)..utf8.char(0x3010)..utf8.char(0x3011));'..utf8.char(0x2727)..'
+		--table.insert(b_ChatBuffer[W_i][2].text, '--WelcomH Ho \\§FF44CCFFç\\HancH Hhat--\\§--------ç\\');
 		table.insert(b_ChatBuffer[W_i][2].text, '--Welcome to \\§FF44CCFFç\\Fancy Chat--\\§--------ç\\');
+		--table.insert(b_ChatBuffer[W_i][2].text,  utf8.char(0xE2EF)..' '..utf8.char(0xe41d)..' '..utf8.char(0xe4ba)..' '..utf8.char(0xe4d0)..' '..utf8.char(0xe0a2)..' '..utf8.char(0xe5b8)..' '..utf8.char(0xe755)..' '..utf8.char(0xe816)..' '..utf8.char(0xeb3a)..' '..utf8.char(0xe471));
 		--table.insert(b_ChatBuffer[W_i][2].mode, '0|welcome');
 		table.insert(b_ChatBuffer[W_i][2].color, 0xFFFFFFFF);
 		--table.insert(b_ChatBuffer[W_i][2].auxText,  'FancyChat --');
@@ -3818,8 +3868,14 @@ ashita.events.register('command', 'command_cb', function (e)
 
 		--print("\129\97 \129\99 \129\121 \129\122")
 		--print(utf8.char(0x1F604)..' '..utf8.char(0x1F605)..' '..utf8.char(0x1F606)..' '..utf8.char(0x1F607)..' '..utf8.char(0x1F608))
-		print(utf8.char(0x2727))
-
+		local testemoji = ':grinning: :grin: :joy: :smiley: :smile: :sweat_smile: :laughing: :wink: :blush: :yum: :sunglasses: :smirk: :neutral_face: :expressionless: :unamused: :relieved: :pensive: :confused: :confounded: :kissing: :kissing_heart: :kissing_smiling_eyes: :kissing_closed_eyes: :elephant: :mammoth: :mouse: :rat: :hamster: :rabbit: :bear: :polar_bear: :panda_face: :koala: :sloth: :otter: :skunk: :kangaroo: :badger: :eagle: :duck: :owl: :swan: :dove: :bat:';
+		--local testemoji = ':grinning::grin:';
+		
+		AshitaCore:GetChatManager():AddChatMessage(5, false, testemoji)
+		
+		
+		--print(utils.parseEmoji(testemoji))
+		--print(utils.emoji('joy'))
 		return;
 	end
 	if (#args == 2 and args[2] == 'helpdebug') then
@@ -3884,6 +3940,7 @@ ashita.events.register('key_state', 'key_state_callback1', function (e)
 				GoToLine(1,math.min(currentIdx-(fcw[1].ScrolledBack-5), currentIdx-1), currentIdx);
 				if fcw[1].PrevKeyptr[2] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
 			end
+			ResetAutoHideTimer()
 		end
 		if fcw[2].ChatShift == allSettings.fontSettings.font_height then
 			if (fcw[1].PrevKeyptr[1] == 0 or os.clock()-fcw[1].PrevKeyptr[3] > 0.8) and keyptr[203] ~= 0 and fcw[2].Scrolling and IsRectHovered(ro_RectBG[2].settings, 0) then
@@ -3897,6 +3954,7 @@ ashita.events.register('key_state', 'key_state_callback1', function (e)
 				GoToLine(2,math.min(currentIdx-(fcw[2].ScrolledBack-5), currentIdx-1), currentIdx);
 				if fcw[1].PrevKeyptr[2] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
 			end
+			ResetAutoHideTimer()
 		end
 		fcw[1].PrevKeyptr[1] = keyptr[203];
 		fcw[1].PrevKeyptr[2] = keyptr[205];
@@ -3904,7 +3962,7 @@ ashita.events.register('key_state', 'key_state_callback1', function (e)
 	
     if (allSettings.shortcutHideEnabled[1] and keyptr[allSettings.shortcutHide] ~= 0 and keyptr[allSettings.shortcutHideS] ~= 0 and not fcw[1].Keydown and AshitaCore:GetChatManager():IsInputOpen() == 0x00) then
 		fcw[1].HideChat = not fcw[1].HideChat;
-		fcw[1].autoHideTime = os.time();
+		ResetAutoHideTimer()
 		fcw[1].Keydown = true;
 	else if (keyptr[allSettings.shortcutHide] == 0) then
 			fcw[1].Keydown = false;
@@ -3920,7 +3978,7 @@ ashita.events.register('key_state', 'key_state_callback1', function (e)
 			else
 				tab_NextTab = tab_Tabs[tab_id+1];
 			end
-			fcw[1].autoHideTime = os.time()
+			ResetAutoHideTimer()
 		end
 	else if (keyptr[allSettings.shortcutTab] == 0) then
 			fcw[1].Keydown2 = false;
@@ -3937,7 +3995,7 @@ ashita.events.register('key_state', 'key_state_callback1', function (e)
 				else
 					tab_NextTab2 = tab_Tabs[tab_id+1];
 				end
-				fcw[1].autoHideTime = os.time()
+				ResetAutoHideTimer()
 			end
 		else if (keyptr[allSettings.shortcutTab2] == 0) then
 				fcw[1].Keydown3 = false;
@@ -4557,16 +4615,16 @@ function CleanText(text, mode)
 	end
 	
 	-- local cleantext = '';
-	local intString = {};
+	local cpString = {};
 	
 	for idx = 1, #text do
-		table.insert(intString, string.byte(string.sub(text,idx,idx)));
+		table.insert(cpString, string.byte(string.sub(text,idx,idx)));
 	end
 
 	local dtest = '';
 	for d = 1, #text do
 		
-		dtest = dtest..tostring(intString[d])..','..string.sub(text,d,d)..'|';
+		dtest = dtest..tostring(cpString[d])..','..string.sub(text,d,d)..'|';
 		
 	end
 
@@ -4583,7 +4641,7 @@ function CleanText(text, mode)
 	
 	-- if intString[#intString] == 10 then table.remove(intString, #intString); end
 	
-	if (#intString) > 0 then
+	if (#cpString) > 0 then
 		-- cleanInts = {}
 		-- cleantext = utils.int2text(intString, utils.UTF8chars)
 		-- for a = 1, #cleantext do
@@ -4618,21 +4676,21 @@ function CleanText(text, mode)
 			if (hasR) then text = text:trimend('\r'); end
 		end
 		text = text:strip_colors()
-		local intString = {};
+		local cpString = {};
 		local cleantext
 		for idx = 1, #text do
-			table.insert(intString, string.byte(string.sub(text,idx,idx)));
+			table.insert(cpString, string.byte(string.sub(text,idx,idx)));
 		end
 		--local debugString = ''
 		--for ds = 1, #intString do
 		--	 debugString = debugString..' 0x'..bit.tohex(intString[ds])
 		--end
 		--Debug(tostring(#intString),1,true)
-		intString = utils.ReplaceInts(intString);
+		cpString = utils.ReplaceCPs(cpString);
 		--Debug(tostring(#intString),1,true)
-		intString = utils.CleanInts(intString);
+		cpString = utils.CleanCPs(cpString);
 		--Debug(tostring(#intString),1,true)
-		cleantext = utils.int2text(intString, utils.UTF8chars)
+		cleantext = utils.CPs2text(cpString, utils.UTF8chars)
 		--Debug(tostring(#cleantext),1,true)
 		text = cleantext:trimex()
 		if allSettings.heartEmoji[1] then text = string.gsub(text, '<3', utf8.char(0x2764)); end
@@ -4736,22 +4794,39 @@ end
 
 local combatCP = 
 {
-	RA 		= 	utf8.char(0x27B6),
+	--RA 		= 	utf8.char(0x27B6),
+	RA 		= 	utils.icons.RA,
 	COL		= 	utf8.char(0x589),
-	USE		= 	utf8.char(0x1F4A2),
-	PUM		= 	utf8.char(0x2316),
+	--USE		= 	utf8.char(0x1F4A2),
+	USE		= 	utf8.char(0x1F4AB),
+	--PUM		= 	utf8.char(0x2316),
+	PUM		= 	utils.icons.PUM,
 	CRIT	= 	utf8.char(0x1F4A5),
 	ATK 	=	utf8.char(0x1F5E1),
-	LEFT	= 	utf8.char(0x25C0),
-	RIGHT	= 	utf8.char(0x25B6),
-	PARR	= 	utf8.char(0x2694),
+	SC  	=	utils.icons.SC,
+	--ATK 	=	utils.icons.ATK,
+	--LEFT	= 	utf8.char(0x25C0),
+	LEFT	= 	utf8.char(0x1F81C),
+	--RIGHT	= 	utf8.char(0x25B6),
+	RIGHT	= 	utf8.char(0x1F81E),
+	SPLIT	= 	utf8.char(0x1F81E),
+	--PARR	= 	utf8.char(0x2694),
+	PARR	= 	utils.icons.PARR,
 	CNTR	= 	utf8.char(0x2B8C),
 	KILL	= 	utf8.char(0x2717),
-	CAST	= 	utf8.char(0x1F300),
-	SPELL	= 	utf8.char(0x2727),
-	HEAL	= 	utf8.char(0x2728),
+	--CAST	= 	utf8.char(0x1F300),
+	CAST	= 	utils.icons.CAST,
+	--SPELL	= 	utf8.char(0x2727),
+	SPELL	= 	utils.icons.SPELL,
+	--HEAL	= 	utf8.char(0x2728),
+	HEAL	= 	utils.icons.HEAL,
 	SUB 	= 	utf8.char(0x2514)..utf8.char(0x2500),
 }
+
+--e9d2 dice? 
+--eb09 CE?
+--e95e treasure
+--e70b heal
 
 function CombatText(msg, chn)
 	
@@ -4816,13 +4891,14 @@ function CombatText(msg, chn)
 			end
 			
 			
-			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG'..ra;
-			msg = A..' '..(#ra > 0 and ra or combatCP.ATK)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG';
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG'..ra;
+			--msg = A..' '..(#ra > 0 and ra or combatCP.ATK)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG';
+			msg = A..' '..(#ra > 0 and ra or combatCP.ATK)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG';
 			if (A:find(fcw[1].PlayerName)) then par_DamageDone = true; end;
 			if (B:find(fcw[1].PlayerName)) then par_DamageGot = true; end;
 			
 			
-			par_CombatCutIdx = utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			par_CombatCutIdx = utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			
 			return msg
 		end
@@ -4868,11 +4944,11 @@ function CombatText(msg, chn)
 				end
 			end
 
-			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG '..ra..utf8.char(0x23eb);
-			msg = A..' '..(#ra > 0 and ra or combatCP.ATK)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG '..combatCP.CRIT;
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG '..ra..utf8.char(0x23eb);
+			msg = A..' '..(#ra > 0 and ra or combatCP.ATK)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG '..combatCP.CRIT;
 			
 			--msg = msg:gsub('ranged attack', 'RA');
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
 	end
@@ -4887,8 +4963,8 @@ function CombatText(msg, chn)
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
-			msg = A..' '..utf8.char(allSettings.CombatSplitChar[2])..' Miss '..combatCP.RA--' Miss [R.Atk]';
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			msg = A..' '..combatCP.SPLIT..' Miss '..combatCP.RA--' Miss [R.Atk]';
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		elseif Ext:find('pummeling') then
 			B, DMG = Ext:match('^.*pummeling (.*) for (.*) points of damage!$')
@@ -4915,13 +4991,13 @@ function CombatText(msg, chn)
 			end
 			
 			
-			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG '..utf8.char(0x27B6)..utf8.char(0x2316);
-			msg = A..' '..combatCP.RA..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG '..combatCP.PUM;
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG '..utf8.char(0x27B6)..utf8.char(0x2316);
+			msg = A..' '..combatCP.RA..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG '..combatCP.PUM;
 			if (A:find(fcw[1].PlayerName)) then par_DamageDone = true; end;
 			if (B:find(fcw[1].PlayerName)) then par_DamageGot = true; end;
 			
 			
-			par_CombatCutIdx = utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			par_CombatCutIdx = utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 		end
 	end	
 	--Debug(tostring(A)..'-'..tostring(B)..'-'..tostring(DMG),1,true)
@@ -4961,13 +5037,13 @@ function CombatText(msg, chn)
 					par_actor2 = B;
 				end
 			end
-			S = '\\'..S..'/'
+			S = '\\'..S..'/'..combatCP.COL
 			par_action1 = S;
 			
-			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']'..utf8.char(0x589)..' '..DMG..' DMG';
-			msg = A..' '..combatCP.USE..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..combatCP.COL..' '..DMG..' DMG';
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' ['..S..']'..utf8.char(0x589)..' '..DMG..' DMG';
+			msg = A..' '..combatCP.USE..' '..B..' '..combatCP.SPLIT..' '..S..' '..DMG..' DMG';
 			
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
 
@@ -5020,13 +5096,15 @@ function CombatText(msg, chn)
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
-			S = '\\'..S:gsub('Skillchain:','SC')..'/'
+			S = '\\'..S:gsub('Skillchain:','SC')..'/'--..combatCP.COL
 			par_action1 = S;
 			--msg = A..' '..utf8.char(0x25C0)..' ['..S:gsub('Skillchain:','SC')..']'..utf8.char(0x589)..' '..DMG..' DMG';
 			--msg = A..' '..utf8.char(0x25C0)..' '..S..' '..utf8.char(0x589)..' '..DMG..' DMG';
-			msg = A..' '..combatCP.LEFT..' '..S..combatCP.COL..' '..DMG..' DMG';
+			--msg = A..' '..combatCP.LEFT..' '..S..' '..DMG..' DMG';
+			msg = S..' '..combatCP.SC..' '..A..' '..combatCP.RIGHT..' '..DMG..' DMG';
 			
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.LEFT)+string.len(combatCP.LEFT)-1;
+			--par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.LEFT)+string.len(combatCP.LEFT)-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.RIGHT)+string.len(combatCP.RIGHT)-1;
 			return msg;
 		end
 	end
@@ -5035,7 +5113,7 @@ function CombatText(msg, chn)
 	--[00:31:31] yYou do not meet the requirements to obtain the monk's testimony. Monk's testimony lost.â¯121
 	
 	if msg:find('take') then
-		A, DMG = msg:match("^([^%.]*) takes? (%d*) points? of damage%.$")
+		A, DMG = msg:match("^([^%.]+) takes? (%d*) points? of damage%.$")
 		if A and DMG then
 			--if A:find('^[Tt]he ') then A = A:gsub('[Tt]he ',' ') else A = '['..ES..A..ES..']' end
 			if utils.StringFindTable(A, par_party_names) then
@@ -5044,6 +5122,7 @@ function CombatText(msg, chn)
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
+			
 			msg = combatCP.SUB..A..' '..combatCP.LEFT..' '..DMG..' DMG';
 			if (A == fcw[1].PlayerName) then par_DamageGot = true; end;
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.LEFT)+string.len(combatCP.LEFT)-1;
@@ -5064,8 +5143,8 @@ function CombatText(msg, chn)
 			S = S:gsub('points? of damage','DMG')
 			S = '\\'..S..'/'
 			par_action1 = S;
-			msg = combatCP.SUB..'Add.E. '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..' ';
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			msg = combatCP.SUB..'Add.E. '..combatCP.SPLIT..' '..S..' ';
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
 	end
@@ -5083,9 +5162,9 @@ function CombatText(msg, chn)
 			end
 			S = '\\'..S..'/'
 			par_action1 = S;
-			--msg = A..' '..utf8.char(allSettings.CombatSplitChar[2])..' readies...'..'['..S..']';
-			msg = A..' '..utf8.char(allSettings.CombatSplitChar[2])..' readies...'..S..' ';
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			--msg = A..' '..combatCP.SPLIT..' readies...'..'['..S..']';
+			msg = A..' '..combatCP.SPLIT..' readies...'..S..' ';
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
 	end	
@@ -5122,9 +5201,10 @@ function CombatText(msg, chn)
 					par_actor2 = B;
 				end
 			end
-			--msg = B..' '..utf8.char(0x2694)..' '..A..' '..utf8.char(allSettings.CombatSplitChar[2])..' Parry ';
-			msg = A..' '..combatCP.PARR..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' Parry ';
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			--msg = B..' '..utf8.char(0x2694)..' '..A..' '..combatCP.SPLIT..' Parry ';
+			msg = A..' '..'parry '..combatCP.PARR..' '..B..'\'s attack'--..combatCP.SPLIT..' Parry ';
+			--par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, 'parry '..combatCP.PARR)-1;
 			return msg;
 		end
 	end
@@ -5158,13 +5238,13 @@ function CombatText(msg, chn)
 			end
 			
 			
-			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG '..utf8.char(0x2B8C);
-			msg = A..' '..combatCP.CNTR..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..DMG..' DMG ';
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG '..utf8.char(0x2B8C);
+			msg = A..' '..combatCP.CNTR..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG ';
 			if (A:find(fcw[1].PlayerName)) then par_DamageDone = true; end;
 			if (B:find(fcw[1].PlayerName)) then par_DamageGot = true; end;
 			
 			
-			par_CombatCutIdx = utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			par_CombatCutIdx = utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			
 			return msg
 		end
@@ -5211,12 +5291,12 @@ function CombatText(msg, chn)
 			--Ext = Ext:gsub('^( uses? )([^,]*)(.*)$', function(c1,c2,c3) return ' '..utf8.char(0x25B6)..' '..B end)
 			Ext = Ext:gsub('^( uses? )([^,]*)(.*)$', function(c1,c2,c3) return c2 end) 
 			if F then
-				Ext = '\\'..Ext..'/'
-				par_action1 = Ext;
-				Ext = ' '..Ext..combatCP.COL
+				Ext = '\\'..Ext..'/'..combatCP.COL
+				par_action1 = Ext
+				Ext = ' '..Ext
 			end
-			msg = A..' '..combatCP.ATK..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..Ext..' Miss';
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			msg = A..' '..combatCP.ATK..' '..B..' '..combatCP.SPLIT..Ext..' Miss';
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
 	end	
@@ -5285,6 +5365,26 @@ function CombatText(msg, chn)
 			return msg;
 		end
 	end
+	
+	if msg:find('shadows') then
+		--Rosabelle uses Animated Flourish on the Tchakka.65
+		Ext, A = msg:match('^(%d*) of (.+)\'s shadows.*$')
+		if A and Ext then
+			
+			Ext = '-'..Ext
+			if utils.StringFindTable(A, par_party_names) then
+				par_actor1 = A;
+			else
+				A = A:gsub('[Tt]he ', '');
+				par_actor2 = A;
+			end
+
+			msg = A..' '..utils.icons.UTSU..Ext
+					
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, utils.icons.UTSU)+string.len(utils.icons.UTSU)-1;
+			return msg;
+		end
+	end	
 	
 	local c = 0
 	msg, c = msg:gsub('(receives the effect of )([^%.]*)(%.)', function(c1, c2, c3) return combatCP.LEFT..' ['..c2..']' end)
@@ -5357,19 +5457,19 @@ function CombatSpellText(msg, chn)
 						par_actor2 = B;
 					end
 				end
-				--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' casting...['..S..']';
-				msg = A..' '..combatCP.CAST..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' casting...'..S..' ';
+				--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' casting...['..S..']';
+				msg = A..' '..combatCP.CAST..' '..B..' '..combatCP.SPLIT..' casting...'..S..' ';
 				
 			else
-				--msg = A..' '..utf8.char(allSettings.CombatSplitChar[2])..' casting...['..S..']';
-				msg = A..' '..utf8.char(allSettings.CombatSplitChar[2])..' casting...'..S..' ';
+				--msg = A..' '..combatCP.SPLIT..' casting...['..S..']';
+				msg = A..' '..combatCP.SPLIT..' casting...'..S..' ';
 			end
 			
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
 	end
-
+	
 	if msg:find('cast') then
 		A, S, B, DMG = msg:match("^(.*) casts? (.*)%. (.*) takes? (%d*) points? of damage%.$")
 		--Debug(tostring(A)..'-'..tostring(S)..'-'..tostring(B)..'-'..tostring(DMG),1,true)
@@ -5404,12 +5504,12 @@ function CombatSpellText(msg, chn)
 					par_actor2 = B;
 				end
 			end
-			S = '\\'..S..'/'
+			S = '\\'..S..'/'..combatCP.COL
 			par_action1 = S;
-			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']'..utf8.char(0x589)..' '..DMG..' DMG';
-			msg = A..' '..combatCP.SPELL..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..combatCP.COL..' '..DMG..' DMG';
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' ['..S..']'..utf8.char(0x589)..' '..DMG..' DMG';
+			msg = A..' '..combatCP.SPELL..' '..B..' '..combatCP.SPLIT..' '..S..' '..DMG..' DMG';
 			
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
 		
@@ -5449,12 +5549,12 @@ function CombatSpellText(msg, chn)
 					par_actor2 = B;
 				end
 			end
-			S = '\\'..S..'/'
+			S = '\\'..S..'/'..combatCP.COL
 			par_action1 = S;
-			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']'..utf8.char(0x589)..' '..DMG..' '..T..' drained';
-			msg = A..' '..combatCP.SPELL..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..combatCP.COL..' '..DMG..' '..T..' drained';
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' ['..S..']'..utf8.char(0x589)..' '..DMG..' '..T..' drained';
+			msg = A..' '..combatCP.SPELL..' '..B..' '..combatCP.SPLIT..' '..S..' '..DMG..' '..T..' drained';
 			
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
 		
@@ -5492,12 +5592,12 @@ function CombatSpellText(msg, chn)
 					par_actor2 = B;
 				end
 			end
-			S = '\\'..S..'/'
+			S = '\\'..S..'/'..combatCP.COL
 			par_action1 = S;
-			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']'..utf8.char(0x589)..' +'..DMG..' '..T;
-			msg = A..' '..combatCP.HEAL..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..combatCP.COL..' +'..DMG..' '..T;
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' ['..S..']'..utf8.char(0x589)..' +'..DMG..' '..T;
+			msg = A..' '..combatCP.HEAL..' '..B..' '..combatCP.SPLIT..' '..S..' +'..DMG..' '..T;
 
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
 		
@@ -5533,13 +5633,13 @@ function CombatSpellText(msg, chn)
 			end
 			S = '\\'..S..'/'
 			par_action1 = S;
-			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']';
-			msg = A..' '..combatCP.CAST..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..' ';
+			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' ['..S..']';
+			msg = A..' '..combatCP.CAST..' '..B..' '..combatCP.SPLIT..' '..S..' ';
 					
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
-		
+		--Joachim casts Carnage Elegy. The Yagudo Prior receives the effect of Elegy.
 		A, S, Ext = msg:match("^(.*) casts? ([^%.]*)%.%s*(.*)$")
 		if A and S and
 			not msg:find('^.- cannot ' ) and
@@ -5556,11 +5656,39 @@ function CombatSpellText(msg, chn)
 			if Ext and Ext:trimex() ~= '' then
 				--Ext = Ext:gsub(A..' ', '')..' '
 				--Ext = Ext:gsub('^.', string.upper(Ext:sub(1,1)))
-				Ext = Ext:gsub('receives the effect of', combatCP.LEFT)
-				Ext = Ext:gsub('gains the effect of', combatCP.LEFT)
-				Ext = Ext:gsub('is afflicted with', combatCP.LEFT)
+				local c = 0
+				Ext, c = Ext:gsub('receives the effect of', combatCP.LEFT)
+				if c == 0 then
+					Ext, c = Ext:gsub('gains the effect of', combatCP.LEFT)
+				end
+				if c == 0 then
+					Ext, c = Ext:gsub('is afflicted with', combatCP.LEFT)
+				end
 				Ext = Ext:gsub('successfully (.)', function(c) return combatCP.RIGHT..' '..c:upper() end)
 				Ext = Ext..' '
+				if c > 0 then
+					B = Ext:match('^(.+) '..combatCP.LEFT..'.*$')
+					if B then 
+						
+						--B = B:gsub('[Tt]he ', '');
+						--par_actor2 = B;
+						
+						if utils.StringFindTable(B, par_party_names) then
+							if #par_actor1 > 0 then
+								par_actorP = B;
+							else
+								par_actor1 = B;
+							end
+						else
+							B = B:gsub('[Tt]he ', '');
+							if #par_actor2 > 0 then
+								par_actorE = B;
+							else
+								par_actor2 = B;
+							end
+						end
+					end
+				end
 			else
 				Ext = ''
 			end
@@ -5613,10 +5741,10 @@ function CombatSpellText(msg, chn)
 		end
 		S = '\\'..S..'/'
 		par_action1 = S;
-		--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' ['..S..']';
-		msg = A..' '..combatCP.CAST..' '..B..' '..utf8.char(allSettings.CombatSplitChar[2])..' '..S..' ';
+		--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' ['..S..']';
+		msg = A..' '..combatCP.CAST..' '..B..' '..combatCP.SPLIT..' '..S..' ';
 				
-		par_CombatCutIdx =  utils.FindLastOfMB(msg, utf8.char(allSettings.CombatSplitChar[2]))+string.len(utf8.char(allSettings.CombatSplitChar[2]))-1;
+		par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 		return msg;
 	end
 	
@@ -5656,6 +5784,9 @@ function CombatSpellText(msg, chn)
 			return msg;
 		end
 	end	
+	
+	--1 of the Yagudo Conquistador's shadows absorbs the damage and disappears. 
+	
 		
 	
 	local c = 0
@@ -5935,7 +6066,7 @@ parseThis = function(e, e_message)
 			par_MessageMode = 121; par_LastMode = 'craft'; col = utils.modesDA[par_MessageMode+1][3];
 		end
 	elseif par_MessageMode == 121 and string.find(newText, ' lot for ') then
-		newText = newText:gsub('(: )(%d)',' [%2'):gsub(' points%.',']')
+		newText = newText:gsub('(: )(%d)',utils.icons.ROLL..' %2'):gsub(' points%.','')
 	end
 	
 	
@@ -5969,7 +6100,7 @@ parseThis = function(e, e_message)
 	
 	local player_name = fcw[1].PlayerName;
 	par_party_names = T{};
-	for P_i = 1, 5 do
+	for P_i = 0, 5 do
 		if party:GetMemberIsActive(P_i) ~= 0 then
 			table.insert(par_party_names, party:GetMemberName(P_i))
 		end
@@ -6147,7 +6278,10 @@ parseThis = function(e, e_message)
 		local skipped = 0;
 		local HELMfound = FindHELM(newText, par_MessageMode);
 		--Debug(tostring(HELMfound), 1, true)
+		
 		while L_i <= n_lines do
+		
+			
 			--if L_i > 1 then newText = newText:trimex(); end
 			newText = newText:trimex()
 			if (newText:match("^%s$") or newText == '') then  n_lines = L_i-1; break; end;
@@ -6170,7 +6304,7 @@ parseThis = function(e, e_message)
 			-- end
 			--local cutIdx = math.min(allSettings.chatLineMaxL+savedBytesLine,textLeft);
 			local bytesLine = utils.CountExtraBytesT(newText)
-			local cutIdx =  math.min(allSettings.chatLineMaxL+bytesLine[math.min(allSettings.chatLineMaxL,#bytesLine)],textLeft);
+			local cutIdx =  math.min(allSettings.chatLineMaxL+bytesLine[math.min(allSettings.chatLineMaxL,#bytesLine)]+1,textLeft);
 			--local cutIdx = utils.compute_cut_byte_index(newText, allSettings.chatLineMaxL, textLeft)
 			-- local clusters = utils.grapheme_cluster_positions(newText)
 			-- local cutIdx = utils.cut_byte_index_from_clusters(clusters, allSettings.chatLineMaxL, textLeft)
@@ -6358,7 +6492,14 @@ parseThis = function(e, e_message)
 					special_text = string.sub(newText,special_idx+special_offset+1,cutIdx)..lineBreak;
 				elseif special_type == 'obtain' then 
 					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
-					special_text = string.sub(newText,special_idx+special_offset+1,cutIdx):gsub('the temporary item:%s*(.-)([!%p])$', '%1%2 [temp. item]')..lineBreak;
+					special_text = string.sub(newText,special_idx+special_offset+1,cutIdx):gsub('the temporary item:%s*(.-)([!%p])$', function(item, punct)
+						local cap = item:gsub("^%l", string.upper)
+						return utils.icons.TEMP .. ' ' .. cap .. punct
+					end
+					):gsub('gil%.', 'gil'..utils.icons.GIL):gsub('points%.','points'..utils.icons.EXP)..lineBreak;
+				elseif special_type == 'attain' then
+					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
+					special_text = string.sub(newText,special_idx+special_offset+1,cutIdx):gsub("^%l", string.upper):gsub('!',' ')..utils.icons.LVLUP..lineBreak;
 				elseif special_type == 'synth' then
 					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
 					special_text = string.sub(newText,special_idx+special_offset+1,cutIdx)..lineBreak;
@@ -6369,7 +6510,7 @@ parseThis = function(e, e_message)
 					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
 					special_text = string.sub(newText,special_idx+special_offset+1,cutIdx)..lineBreak;
 				elseif special_type == 'find' then
-					local F_start = special_idx+9;
+					local F_start = special_idx+9; 
 					
 					special_idx = string.find(newText, ' on ');
 					if special_idx == nil then special_idx = string.find(newText, ' in '); end
@@ -6377,12 +6518,15 @@ parseThis = function(e, e_message)
 					local findText = ''
 					if special_idx then
 						local F_end = special_idx-1;
-						local F = '['..string.sub(string.sub(newText,1,#newText),F_start,F_end):gsub('^an? ','')..']';
+						local F = string.sub(string.sub(newText,1,#newText),F_start,F_end):gsub('^an? ',' '):gsub("^ %l", string.upper);
+						F = utils.icons.LOOT..F
 						local B_start = special_idx+4;
 						local B_end = #string.sub(newText,1,#newText)-1;
 						local B = string.sub(string.sub(newText,1,#newText),B_start,B_end);
 						--local findText = ts..'Found on '..B;
-						findText = ts..'Found on '..B..':';
+						--findText = ts..'Found on '..B:gsub('the ','')..combatCP.RIGHT;
+						findText = ts..B:gsub('the ','')..combatCP.RIGHT;
+						--findText = ts..B..' '..utils.icons.LOOT..':';
 						--special_text = '> '..F..'.';
 						special_text = F;
 						newText = findText..special_text;
@@ -6547,16 +6691,23 @@ parseThis = function(e, e_message)
 				
 				for i = 1, #MCList do
 					local mcoff = 28 * (i-1)
-					mctext = string.sub(mctext,1,MCList[i][1]+mcoff)..MC(MCList[i][3])..string.sub(mctext,MCList[i][1]+1+mcoff,MCList[i][2]+mcoff)..MC('reset')..string.sub(mctext, MCList[i][2]+1+mcoff,#mctext)
+					mctext = string.sub(mctext,1,MCList[i][1]+mcoff)..utils.MC(MCList[i][3])..string.sub(mctext,MCList[i][1]+1+mcoff,MCList[i][2]+mcoff)..utils.MC('reset')..string.sub(mctext, MCList[i][2]+1+mcoff,#mctext)
 				end
 				
 				if allSettings.CompactCombat[1] then
 					mctext = HandleActors(mctext, special_color)
 				end
 				--if MCCheck(mctext) then 
-				b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text] = MCCheck(mctext)
+				b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text] = utils.MCCheck(mctext)
 					--Debug(b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text], 1, true)
-				--end
+			end
+			if par_LastMode == 'party_out' then
+				
+				local mctext = b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text]
+				mctext = utils.emojiCols(mctext)
+				if #mctext < 4096 then
+					b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text] = utils.MCCheck(mctext)
+				end
 			end
 			
 			if not b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text] then
@@ -6589,7 +6740,7 @@ parseThis = function(e, e_message)
 						table.insert(b_ChatBuffer[1][2].url, b_msgID)
 					else
 						table.insert(b_ChatBuffer[1][2].auxText, dw_ShowMessageMode[1] and (auxURL_text..'>'..tostring(par_MessageMode)) or auxURL_text);
-						table.insert(b_ChatBuffer[1][2].url, urlText);
+						table.insert(b_ChatBuffer[1][2].url, tostring(b_msgID)..'|'..urlText);
 					end
 					table.insert(b_ChatBuffer[1][2].auxColor, 0xFF44CCFF);
 				end
@@ -6682,27 +6833,27 @@ parseThis = function(e, e_message)
 		n_lines = n_lines-skipped;
 		b_ChatBufferN_All  = b_ChatBufferN_All+n_lines;
 		if (tabmode ~= 3 and not par_isCustom) then b_ChatBufferN_AllAlt = b_ChatBufferN_AllAlt + n_lines; end
-		if allSettings.SelectedTab:find('^All') or allSettings.SelectedTab2:find('^All') then fcw[1].autoHideTime = os.time() end
+		if allSettings.SelectedTab:find('^All') or allSettings.SelectedTab2:find('^All') then ResetAutoHideTimer() end
 		
 		if (string.find(par_LastMode, '^combat')) then
 			b_ChatBufferN_Combat = b_ChatBufferN_Combat + n_lines;
-			if allSettings.SelectedTab == 'Combat' or allSettings.SelectedTab2 == 'Combat' then fcw[1].autoHideTime = os.time() end
+			if allSettings.SelectedTab == 'Combat' or allSettings.SelectedTab2 == 'Combat' then ResetAutoHideTimer() end
 		elseif (string.find(par_LastMode, '^linkshell')) then
 			b_ChatBufferN_Linkshell = b_ChatBufferN_Linkshell + n_lines;
-			if allSettings.SelectedTab == 'Linkshell' or allSettings.SelectedTab2 == 'Linkshell' then fcw[1].autoHideTime = os.time() end
+			if allSettings.SelectedTab == 'Linkshell' or allSettings.SelectedTab2 == 'Linkshell' then ResetAutoHideTimer() end
 		elseif (string.find(par_LastMode, '^party')) then
 			b_ChatBufferN_Party = b_ChatBufferN_Party + n_lines;
-			if allSettings.SelectedTab == 'Party' or allSettings.SelectedTab2 == 'Party' then fcw[1].autoHideTime = os.time() end
+			if allSettings.SelectedTab == 'Party' or allSettings.SelectedTab2 == 'Party' then ResetAutoHideTimer() end
 		elseif (string.find(par_LastMode, '^tell')) then
 			b_ChatBufferN_Tell = b_ChatBufferN_Tell + n_lines;
-			if allSettings.SelectedTab == 'Tell' or allSettings.SelectedTab2 == 'Tell' then fcw[1].autoHideTime = os.time() end
+			if allSettings.SelectedTab == 'Tell' or allSettings.SelectedTab2 == 'Tell' then ResetAutoHideTimer() end
 		elseif (string.find(par_LastMode, '^shout')) then
 			b_ChatBufferN_Shout = b_ChatBufferN_Shout + n_lines;
-			if allSettings.SelectedTab == 'Shout' or allSettings.SelectedTab2 == 'Shout' then fcw[1].autoHideTime = os.time() end
+			if allSettings.SelectedTab == 'Shout' or allSettings.SelectedTab2 == 'Shout' then ResetAutoHideTimer() end
 		end
 		if (string.find(par_LastMode, 'C$')) then
 			b_ChatBufferN_Custom = b_ChatBufferN_Custom + n_lines;
-			if allSettings.SelectedTab == 'Custom' or allSettings.SelectedTab2 == 'Custom' then fcw[1].autoHideTime = os.time() end
+			if allSettings.SelectedTab == 'Custom' or allSettings.SelectedTab2 == 'Custom' then ResetAutoHideTimer() end
 		end
 
 	end
@@ -6806,11 +6957,20 @@ function CheckSpecial (special_idx, special_offset, special_type, special_color,
 		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.obtained[1]; end end
 		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
 		end
+		--Eleanor attains level 17!
+		check_mode = par_MessageMode == 121;
+		if check_mode then
+		special_idx = string.find(newText, ' attains level [%d]+!');
+		if (special_idx ~= nil and string.find(newText, fcw[1].PlayerName)) then special_offset = 8; special_type = 'attain';
+		special_color = allSettings.colors.attain[1];
+		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.attain[1]; end end
+		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
+		end
 				
 		check_mode = par_MessageMode == 121;
 		if check_mode then
 		special_idx = string.find(newText, ' caught ');
-		if (special_idx ~= nil and string.find(newText, fcw[1].PlayerName)) then	special_offset = 7; special_type = 'synth';
+		if (special_idx ~= nil and string.find(newText, fcw[1].PlayerName)) then special_offset = 7; special_type = 'synth';
 		if special_idx+special_offset > cutIdx then check_again = true; else if #newText > cutIdx then carry_over_color = allSettings.colors.obtained[1]; end end
 		return special_idx, special_offset, special_type, special_color, tabmode, check_again, check_again_text, carry_over, carry_over_color; end
 		end
@@ -6915,7 +7075,7 @@ function DumpChat(closingline)
 				
 				-- nextLine = nextLine:gsub(chars,utils.ShiftJISback[i][2])
 			-- end
-			-- AshitaCore:GetChatManager():AddChatMessage(tonumber(b_ChatBuffer[1][2].mode[i]:sub(1,b_ChatBuffer[1][2].mode[i]:find('|')-1)), false, cleanMC(nextLine))
+			-- AshitaCore:GetChatManager():AddChatMessage(tonumber(b_ChatBuffer[1][2].mode[i]:sub(1,b_ChatBuffer[1][2].mode[i]:find('|')-1)), false, utils.cleanMC((nextLine))
 			-- coroutine.sleep(1/#b_ChatBuffer[1][2].text)
 			-- i = i + j
 		-- end
@@ -7005,76 +7165,34 @@ function BulkRemoveCombat(buffer, line)
 	
 end
 
-function MC(color)
-
-	if color == 'reset' then
-	return '\\§--------ç\\'; end
-	--return '\\a--------b\\'; end
-	colortext = string.format("%08X", tonumber(color))
-	
-	return '\\§'..colortext..'ç\\';
-	--return '\\a'..colortext..'b\\';
-end--\aFFFFFFFFb\[17:25]\a--------b\ [Eleanor] > Bumblebee >\aFF47FF91b\ 104 DMG\a--------b\ 
---\aFFFFFFFFb\[12:54]\a--------b\ (Snuggle) <H\aFF0D9441b\ell\a--------b\o!> <H\aFFBB2F38b\ell\a--------b\o!>\aFF0D9441b\ â\a--------b\®Hello!>\aFFBB2F38b\\a--------b\\aFF0D9441b\\a--------b\\aFFBB2F38b\\a--------b\ 
-function MCCheck(text)
-
-	--text = text:gsub("(\\§........ç\\)%s+(\\§........ç\\)", "%1%2 ")
-	--text = text:gsub("(\\\\§........ç\\\\)(%1)", "%1")
-	text = text:gsub('(ç\\(%s+)\\§........ç\\)', string.gsub('%1','%s*','')..'%2')
-	local idx = 1
-	while true do
-		local f1 = string.find(text, '\\§', idx, true)
-		if f1 then
-			--Debug('bad string'..text:sub(f1+11,f1+13), 1, true)
-			--Debug('bad string'..text:sub(f1,f1+2), 1, true)
-			if not string.find(text:sub(f1+11,f1+13 ), 'ç\\', 1, true) then
-				return 'Bad MC format'
-			else
-				idx = f1+4
-			end
-		else
-			break;
-		end
-		
-	end
-	--Debug('good string', 1, true)
-	return text
-end
-
-function cleanMC(text)
-	return text:gsub("\\§........ç\\", "")
-end
-
-
-
 function HandleActors(text, scol)
 	--text = text:gsub("%-", "%-")
 	if scol == 0xFFFFFFFF then scol = 'reset' end
 	
 	if #par_actor1 > 0 then
 		par_handled_actors = true	
-		text = text:replace(par_actor1,MC(allSettings.colors.actor1[1])..par_actor1..MC('reset'))	
+		text = text:replace(par_actor1,utils.MC(allSettings.colors.actor1[1])..par_actor1..utils.MC('reset'))	
 	end
 	
 	if #par_actorP > 0 and #par_actorP ~= #par_actor1 then
 		par_handled_actors = true
-		text = text:replace(par_actorP, MC(allSettings.colors.actor1[1])..par_actorP..MC('reset'))	
+		text = text:replace(par_actorP, utils.MC(allSettings.colors.actor1[1])..par_actorP..utils.MC('reset'))	
 	end
 	
 	if #par_actor2 > 0 then
 		par_handled_actors = true
-		text = text:replace(par_actor2, MC(allSettings.colors.actor2[1])..par_actor2..MC('reset'))
+		text = text:replace(par_actor2, utils.MC(allSettings.colors.actor2[1])..par_actor2..utils.MC('reset'))
 		
 	end
 	
 	if #par_actorE > 0 and #par_actorE ~= #par_actor2 then
 		par_handled_actors = true
-		text = text:replace(par_actorE, MC(allSettings.colors.actor2[1])..par_actorE..MC('reset'))
+		text = text:replace(par_actorE, utils.MC(allSettings.colors.actor2[1])..par_actorE..utils.MC('reset'))
 	end
 
 	if #par_action1 > 0 then
 		par_handled_actors = true
-		text = text:replace(par_action1, MC(allSettings.colors.ability[1])..par_action1:gsub('\\','['):gsub('/',']')..MC(scol))
+		text = text:replace(par_action1, utils.MC(allSettings.colors.ability[1])..par_action1:gsub('\\','['):gsub('/',']')..utils.MC(scol))
 	end
 	
 	return text
@@ -7147,13 +7265,24 @@ function FindHELM(text, mode)
 	return false
 end
 
-function DrawInfoWin(idx, name, text, icon)
+function ResetAutoHideTimer()
+	fcw[1].autoHideTime = os.time()
+end
+
+function DrawInfoWin(maxh, idx, name, text, icon)
 	
+	if not maxh then maxh = 0 end
 	local font = imgui.GetFont();
 	local fontSize = font.FontSize or font.LegacySize;
 	local W = fcw[1].BG_W/4;
 	--local H = (fontSize*16)/((allSettings.chatLineMaxL*allSettings.fontSettings.font_height)/1800);
-	local H = 32 + (3500 * fontSize / W);
+	--local H = 32 + (3750 * fontSize / W);
+	local font = imgui.GetFont()
+	--local test = font:FindGlyph(font.EllipsisChar)
+	--local textwW, TextwH = font:CalcTextSizeA(imgui.GetFontSize(), FLT_MAX, W-16, text[1])
+	--local textW, TextH = imgui.CalcTextSize(text)
+	local H = maxh
+	--print(textW..textwW)
 	
 	imgui.SetNextWindowPos({ro_RectBG[1].settings.position_x+(W*(idx-1)),ro_RectBG[1].settings.position_y-H});
 	imgui.SetNextWindowSize({ W, H });
@@ -7188,8 +7317,11 @@ end
 
 function DrawInfo(text)
 
+	local drawcalls = {}
+	local H = 0
 	
-	info = {}
+	
+	local info = {}
 	
 	local ATstart = 1
 	while ATstart < #text do
@@ -7206,93 +7338,117 @@ function DrawInfo(text)
 		end
 	end
 	
+	if #info < 1 then
+		fcw[1].itemInfo = {}
+		return
+	end
 	
+	local updated = false
+	local update_idx = 1;
+	if #fcw[1].itemInfo ~= #info then
+		updated = true
+		fcw[1].itemInfo = {}
+		
+	end
+	
+	while update_idx <= #info do
+		if fcw[1].itemInfo[update_idx] ~= info[update_idx] then
+			updated = true
+			info[update_idx] = info[update_idx]:gsub("([%l%d%.])(%u)", "%1 %2"):gsub('  ',' ')
+			fcw[1].itemInfo[update_idx] = info[update_idx]
+		end
+		update_idx = update_idx + 1
+	end
+	updated = true
 
-	local idx = 0
+
+	local idx = 1
 	for i = 1, #info do
 		if idx > 4 then break end
-		if info[i] then
-			--manage item
-			--info[i] = 'Desert Belt'
+		if info[i] and info[i] then
+		
 			local item
 			local ability
 			local spell
-			local RM = AshitaCore:GetResourceManager()
-			--item = RM:GetItemByName(info[i], 0);
-			if fcw[1].itemIcons[idx+1] and fcw[1].itemIcons[idx+1][3] and info[i] == fcw[1].itemIcons[idx+1][3] then
-				if fcw[1].itemIcons[idx+1][5] == 1 then
-					item = fcw[1].itemIcons[idx+1][4]
-				elseif fcw[1].itemIcons[idx+1][5] == 2 then
-					ability = fcw[1].itemIcons[idx+1][4]
-				elseif fcw[1].itemIcons[idx+1][5] == 3 then
-					spell = fcw[1].itemIcons[idx+1][4]
+			--if fcw[1].itemIcons[idx] and fcw[1].itemIcons[idx][3] and info[i] == fcw[1].itemIcons[idx][3] then	
+			if not updated then	
+				if fcw[1].itemIcons[idx][5] == 1 then
+					item = fcw[1].itemIcons[idx][4]
+				elseif fcw[1].itemIcons[idx][5] == 2 then
+					ability = fcw[1].itemIcons[idx][4]
+				elseif fcw[1].itemIcons[idx][5] == 3 then
+					spell = fcw[1].itemIcons[idx][4]
 				end
 			else
+				local RM = AshitaCore:GetResourceManager()
 				if not item then
 					item = RM:GetItemByName(info[i], 0);
 					--print('updated item')
 				end
 				if not item then
 					ability = RM:GetAbilityByName(info[i], 0);
-				end
+				end 	
 				if not ability then
 					spell = RM:GetSpellByName(info[i], 0);
 				end
 			end
-			if (item ~= nil and (item.Type == 1 or item.Type == 4 or item.Type == 5 or item.Type == 7)) then
-				idx = idx + 1
-				if item.Id ~= fcw[1].itemIcons[idx][1] then 
+			--and (item.Type == 1 or item.Type == 4 or item.Type == 5 or item.Type == 7)
+			if (item ~= nil ) then
+				--idx = idx + 1
+				--if fcw[1].itemIcons[idx][1] and item.Id ~= fcw[1].itemIcons[idx][1] then 
 				--if not fcw[1].itemTexture[idx] then
-					fcw[1].itemIcons[idx][1] = item.Id
-					fcw[1].itemIcons[idx][3] = info[i]
-					fcw[1].itemIcons[idx][4] = item
-					fcw[1].itemIcons[idx][5] = 1
-					--fcw[1].itemTexture[idx] = utils.ItemIcon(item.Bitmap, item.ImageSize)
-					fcw[1].itemTexture[idx][1] = utils.ItemIcon(item.Bitmap, item.ImageSize)
-					fcw[1].itemTexture[idx][2] = tonumber(ffi.cast('uint32_t', fcw[1].itemTexture[idx][1]))
-					--Debug(tostring('loadingtex'),1,true)
-					--print('updated icons')
-					--end
-					
-					
-					--local iconID = tonumber(ffi.cast('uint32_t', fcw[1].itemTexture[idx]))
-					
-					local inf = ''
-
-					local flags = ''
-					flags = flags..(bit.band(0x8000,item.Flags)~= 0 and '[Rare]' or '' )
-					flags = flags..(bit.band(0x6040,item.Flags)~= 0 and '[Ex]' or '' )
-					if flags ~= '' then
-						inf = inf..flags..'\n'--..string.rep('-',#flags)..'\n'
-					end
-					--inf = inf..item.Id..'\n'
-					--inf = inf..item.Type..'\n'
-					-- misc= 1, weapon= 4, armor = 5, consumable = 7
-
-					local desc = item.Description[1]
-					if desc then
-						desc = desc:replace('\x81\x60', '~'):replace('\xEF\x1F', 'Fire'):replace('\xEF\x20', 'Ice'):replace('\xEF\x21', 'Wind'):replace('\xEF\x22', 'Earth'):replace('\xEF\x23', 'Lgtn'):replace('\xEF\x24', 'Water'):replace('\xEF\x25', 'Light'):replace('\xEF\x26', 'Dark'):replace('%', '%%'):replace('\n',' ')
-					end
-					
+				fcw[1].itemIcons[idx][1] = item.Id
+				fcw[1].itemIcons[idx][3] = info[i]
+				fcw[1].itemIcons[idx][4] = item
+				fcw[1].itemIcons[idx][5] = 1
+				--fcw[1].itemTexture[idx] = utils.ItemIcon(item.Bitmap, item.ImageSize)
+				fcw[1].itemTexture[idx][1] = utils.ItemIcon(item.Bitmap, item.ImageSize)
+				fcw[1].itemTexture[idx][2] = tonumber(ffi.cast('uint32_t', fcw[1].itemTexture[idx][1]))
+				--Debug(tostring('loadingtex'),1,true)
+				--print('updated icons')
+				--end
 				
-					if item.Type == 1 or item.Type == 7 then
-						inf = inf..desc
-					elseif item.Type == 4 or item.Type == 5 then
+				
+				--local iconID = tonumber(ffi.cast('uint32_t', fcw[1].itemTexture[idx]))
+				
+				local inf = ''
+
+				local flags = ''
+				flags = flags..(bit.band(0x8000,item.Flags)~= 0 and '[Rare]' or '' )
+				flags = flags..(bit.band(0x6040,item.Flags)~= 0 and '[Ex]' or '' )
+				if flags ~= '' then
+					inf = inf..flags..'\n'--..string.rep('-',#flags)..'\n'
+				end
+				--inf = inf..item.Id..'\n'
+				--inf = inf..item.Type..'\n'
+				-- misc= 1, weapon= 4, armor = 5, consumable = 7
+
+				local desc = item.Description[1]
+				if desc then
+					desc = desc:replace('\x81\x60', '~'):replace('\xEF\x1F', 'Fire'):replace('\xEF\x20', 'Ice'):replace('\xEF\x21', 'Wind'):replace('\xEF\x22', 'Earth'):replace('\xEF\x23', 'Lgtn'):replace('\xEF\x24', 'Water'):replace('\xEF\x25', 'Light'):replace('\xEF\x26', 'Dark'):replace('%', '%%'):replace('\n',' ')
+
+					if item.Type == 4 or item.Type == 5 then
+						
 						--slot,race,desc,lvl,job
 						inf = inf..'['..utils.equipSlots[item.Slots]..']'..utils.equipRaces[item.Races]..'\n'
 						inf = inf..desc..'\n'
 						inf = inf..'Lv: '..item.Level..' '..utils.GetEquipJobs(item.Jobs)
+					else--if item.Type == 1 or item.Type == 7 then
+						inf = inf..desc
 					end
 					fcw[1].itemIcons[idx][2] = inf
-					--print('updated info')
+					
+					--local textW, TextH = imgui.CalcTextSize(info[i]..fcw[1].itemIcons[idx][2])
+					--H = math.max(H, TextH * ((textW/((fcw[1].BG_W/4)-16))+2))
+					H = math.max(H, ((imgui.GetFontSize()*1)*(utils.CalcRows(inf, (fcw[1].BG_W/4)-32,imgui.CalcTextSize('H'))+1)+28+40))--+(#flags>0 and 1 or 0)
+					table.insert(drawcalls, {idx, info[i], fcw[1].itemIcons[idx][2], fcw[1].itemTexture[idx][2]})
+					--DrawInfoWin(idx,info[i],fcw[1].itemIcons[idx][2], fcw[1].itemTexture[idx][2])
+					idx = idx + 1
 				end
-				DrawInfoWin(idx,info[i],fcw[1].itemIcons[idx][2], fcw[1].itemTexture[idx][2])
-			
-				
 				
 			elseif ability then
-				idx = idx + 1
-				fcw[1].itemIcons[idx][1] = nil
+				--idx = idx + 1
+				--fcw[1].itemIcons[idx][1] = nil
 				if fcw[1].itemTexture[idx] then
 					fcw[1].itemTexture[idx][2] = nil
 					utils.ItemIconRelease(fcw[1].itemTexture[idx][1])
@@ -7311,19 +7467,24 @@ function DrawInfo(text)
 					if ability.TPCost > 0 then inf = inf..'TP: '..ability.TPCost..'\n' end
 					if ability.ManaCost > 0 then inf = inf..'MP: '..ability.ManaCost..'\n' end
 					inf = inf..desc
-					DrawInfoWin(idx,info[i],inf)
+					--local textW, TextH = imgui.CalcTextSize(info[i]..inf)
+					--H = math.max(H, TextH * ((textW/((fcw[1].BG_W/4)-16))+3))
+					H = math.max(H, ((imgui.GetFontSize()*1)*(utils.CalcRows(inf, (fcw[1].BG_W/4)-32,imgui.CalcTextSize('H'))+3)+28))
+					table.insert(drawcalls, {idx, info[i], inf, nil})
+					--DrawInfoWin(idx,info[i],inf)
+					idx = idx + 1
 					--idx = idx + 1
 				end
 			elseif spell then
-				idx = idx + 1
+				--idx = idx + 1
 				
-				fcw[1].itemIcons[idx][1] = nil
+				--fcw[1].itemIcons[idx][1] = nil
 				if fcw[1].itemTexture[idx] then
 					fcw[1].itemTexture[idx][2] = nil
 					utils.ItemIconRelease(fcw[1].itemTexture[idx][1])
 				end
 				fcw[1].itemIcons[idx][3] = info[i]
-				fcw[1].itemIcons[idx][4] = ability
+				fcw[1].itemIcons[idx][4] = spell
 				fcw[1].itemIcons[idx][5] = 3
 				local inf = '[Spell]\n'
 				local desc = spell.Description[1]
@@ -7331,7 +7492,12 @@ function DrawInfo(text)
 					--if spell.TPCost > 0 then inf = inf..'TP: '..spell.TPCost..'\n' end
 					if spell.ManaCost > 0 then inf = inf..'MP: '..spell.ManaCost..'\n' end
 					inf = inf..desc
-					DrawInfoWin(idx,info[i],inf)
+					--local textW, TextH = imgui.CalcTextSize(info[i]..inf)
+					--H = math.max(H, TextH * ((textW/((fcw[1].BG_W/4)-16))+3))
+					H = math.max(H, ((imgui.GetFontSize()*1)*(utils.CalcRows(info[i]..inf,(fcw[1].BG_W/4)-32,imgui.CalcTextSize('H'))+3)+28))
+					table.insert(drawcalls, {idx, info[i], inf, nil})
+					--DrawInfoWin(idx,info[i],inf)
+					idx = idx + 1
 					--idx = idx + 1
 				end
 			end
@@ -7339,14 +7505,29 @@ function DrawInfo(text)
 			break
 		end
 	end
-	for del_i = idx+1, 4 do
-		fcw[1].itemIcons[del_i][1] = nil
+	
+	for del_i = idx, 4 do
+		-- fcw[1].itemIcons[del_i][1] = 0
+		-- fcw[1].itemIcons[del_i][2] = ''
+		-- fcw[1].itemIcons[del_i][3] = ''
+		-- fcw[1].itemIcons[del_i][4] = nil
+		-- fcw[1].itemIcons[del_i][5] = 0
+		fcw[1].itemIcons[del_i] = {}
 		if fcw[1].itemTexture[del_i] then
 			fcw[1].itemTexture[del_i][2] = nil
 			utils.ItemIconRelease(fcw[1].itemTexture[del_i][1])
 		end
 
 	end
+	
+	for d = 1, #drawcalls do
+		if drawcalls[d][4] then
+			DrawInfoWin(H, drawcalls[d][1],drawcalls[d][2],drawcalls[d][3],drawcalls[d][4])
+		else
+			DrawInfoWin(H, drawcalls[d][1],drawcalls[d][2],drawcalls[d][3])
+		end
+	end
 	--Debug(tostring(fcw[1].itemTexture[idx]),1,true)
 
 end
+

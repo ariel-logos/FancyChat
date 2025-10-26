@@ -7,6 +7,7 @@ local d3d8dev   = d3d.get_device();
 local user32 = ffi.load("user32");
 local kernel32 = ffi.load("kernel32");
 local gfxDevice = d3d.get_device()
+local emojis = require('emojis')
 
 
 ffi.cdef[[
@@ -612,7 +613,30 @@ local utils =
 		[510] = 'All',
 		
 	},
+	
+	icons = {
+		--utf8.char(0xe9d2)..utf8.char(0xeb09)..utf8.char(0xe95e)..utf8.char(0xe70b)..
+		ROLL = utf8.char(0xEAE9), --EAE9
+		CE = utf8.char(0xEB09),
+		LOOT = utf8.char(0xE95E), --e826 --e316 --0xE95E --ED13
+		HEAL = utf8.char(0xE70B),
+		SPELL = utf8.char(0xE36B), --ee17 e372 ed16 eeb6 --xE563 --e36b
+		CAST = utf8.char(0xECA4), 
+		ATK = utf8.char(0xEC64),
+		PARR = utf8.char(0xE3C6),
+		PUM = utf8.char(0xE23D),
+		RA = utf8.char(0xE1FC),
+		TEMP = utf8.char(0xEB26), --&#xeb26; -e4a2
+		GIL = utf8.char(0xEE1B), --0xEE1B  0xE3AA
+		EXP = utf8.char(0xEEC3), --e186 e392 e4da EA1A ECE7
+		LVLUP = utf8.char(0xE4DA),
+		KEY = utf8.char(0xE79C),
+		UTSU = utf8.char(0xEE1E),
+		SC = utf8.char(0xE471), --0xE2EF --e41d --e471 --e4ba --e4d0 --e0a2 --e5b8 --e755 --e816 --eb3a
+	},
 }
+
+
 
 utils.GetEquipJobs = function (jobsbytes)
 	local Jobs = {}
@@ -996,7 +1020,7 @@ utils.SaveLogs = function(ChatBuffer1, ChatBuffer2, ChatName, PlayerName, AddonP
 	end
 end
 
-utils.ReplaceInts = function(main_table)
+utils.ReplaceCPs = function(main_table)
     local i = 1
 	local ext = 0;
 	local replacement_rules = {};
@@ -1029,7 +1053,7 @@ utils.ReplaceInts = function(main_table)
 							end
 							
 						else
-				-- Wildcard matching: only matches positive integers
+				-- Wildcard matching: only matches positive codepoints
 							if main_table[i + j - 1-adj] == nil or main_table[i + j - 1-adj] < 0 then
 								return false
 							end
@@ -1102,18 +1126,19 @@ utils.ReplaceInts = function(main_table)
 end
 
 
-utils.int2text = function(input_table, utf8_list)
+utils.CPs2text = function(input_table, utf8_list)
     local result = {}
 	local count = 0;
 	local extra_bytes = 0
     for _, value in ipairs(input_table) do
 		if extra_bytes > 0 then
+			extra_bytes = extra_bytes -1
 			table.insert(result, string.char(value))
         elseif value >= 32 and value <= 126 then
-            -- Keep integers between 32 and 126
+            -- Keep codepoints between 32 and 126
             table.insert(result, string.char(value))
         elseif value < -1 and value > -1000 then
-            -- Handle negative integers starting from -2
+            -- Handle negative values starting from -2
             local index = -value - 1  -- Calculate the index for utf8_list
             if utf8_list[index] then
                 table.insert(result, utf8.char(utf8_list[index]))
@@ -1178,31 +1203,30 @@ utils.utf8split = function(input_str, split_index)
     return 0
 end
 
--- Helper function to check if an integer corresponds to an ASCII character
-utils.CleanInts = function(main_table)
+utils.CleanCPs = function(main_table)
     local i = 1
 
-    -- Helper function to check if an integer corresponds to an ASCII character
-    local function is_ascii(int)
-        return (int >= 32 and int <= 126) 
+    -- Helper function to check if a codepoint corresponds to an ASCII character
+    local function is_ascii(cp)
+        return (cp >= 32 and cp <= 126) 
 	end
 
-	local function is_timed_message(int1, int2, int3)
-        return (int1 == 127) and (int2 >= 49 and int2 <= 55) and (int3 >= 1 and int3 <= 6)
+	local function is_timed_message(cp1, cp2, cp3)
+        return (cp1 == 127) and (cp2 >= 49 and cp2 <= 55) and (cp3 >= 1 and cp3 <= 6)
     end
 
 
     -- Helper function to check if an integer is part of a Shift-JIS multibyte pattern
-    local function is_shiftjis_multibyte_start(int)
-        return (int >= 129 and int <= 159) or (int >= 224 and int <= 239) or (int == 127)
+    local function is_shiftjis_multibyte_start(cp)
+        return (cp >= 129 and cp <= 159) or (cp >= 224 and cp <= 239) or (cp == 127)
     end
 
-    local function is_shiftjis_multibyte_continuation(int)
-        return int >= 0 and int <= 252
+    local function is_shiftjis_multibyte_continuation(cp)
+        return cp >= 0 and cp <= 252
     end
 	
-	local function is_utf32(int)
-		if int >= 0xF0
+	local function is_utf32(cp)
+		if cp >= 0xF0
 		then
 			return true
 		end
@@ -1232,7 +1256,7 @@ utils.CleanInts = function(main_table)
                 table.remove(main_table, i)
             end
         else
-            -- Skip negative integers
+            -- Skip negative values
             i = i + 1
         end
     end
@@ -1409,7 +1433,7 @@ utils.CountExtraBytesT = function(s)
                bit.band(s:byte(i+1), 0xC0) == 0x80 and
                bit.band(s:byte(i+2), 0xC0) == 0x80 and
                bit.band(s:byte(i+3), 0xC0) == 0x80 then
-                extra_bytes = extra_bytes + 2
+                extra_bytes = extra_bytes + 2 --+ (math.fmod(i,2) == 0 and 1 or 0)
                 i = i + 4
             else
                 i = i + 1
@@ -1601,6 +1625,125 @@ utils.stringsplit = function(input, sep)
 
     return result
 end
+
+utils.MC = function(color)
+
+	if color == 'reset' then
+	return '\\§--------ç\\'; end
+	--return '\\a--------b\\'; end
+	colortext = string.format("%08X", tonumber(color))
+	
+	return '\\§'..colortext..'ç\\';
+	--return '\\a'..colortext..'b\\';
+end--\aFFFFFFFFb\[17:25]\a--------b\ [Eleanor] > Bumblebee >\aFF47FF91b\ 104 DMG\a--------b\ 
+--\aFFFFFFFFb\[12:54]\a--------b\ (Snuggle) <H\aFF0D9441b\ell\a--------b\o!> <H\aFFBB2F38b\ell\a--------b\o!>\aFF0D9441b\ â\a--------b\®Hello!>\aFFBB2F38b\\a--------b\\aFF0D9441b\\a--------b\\aFFBB2F38b\\a--------b\ 
+utils.MCCheck = function(text)
+
+	--text = text:gsub("(\\§........ç\\)%s+(\\§........ç\\)", "%1%2 ")
+	--text = text:gsub("(\\\\§........ç\\\\)(%1)", "%1")
+	--text = text:gsub('(ç\\(%s+)\\§........ç\\)', string.gsub('%1','%s*','')..'%2')
+	text = text:gsub('(ç\\)(%s+)(\\§........ç\\)', '%1%3%2')
+	local idx = 1
+	while true do
+		local f1 = string.find(text, '\\§', idx, true)
+		if f1 then
+			--Debug('bad string'..text:sub(f1+11,f1+13), 1, true)
+			--Debug('bad string'..text:sub(f1,f1+2), 1, true)
+			if not string.find(text:sub(f1+11,f1+13 ), 'ç\\', 1, true) then
+				return 'Bad MC format'
+			else
+				idx = f1+4
+			end
+		else
+			break;
+		end
+		
+	end
+	--Debug('good string', 1, true)
+	return text
+end
+
+utils.cleanMC = function(text)
+	return text:gsub("\\§........ç\\", "")
+end
+
+--local s, c = text:gsub(':([^%s]+):', function(e) return utils.MC(0xFFFBD043)..utf8.char(emojis[e])..utils.MC('reset') or ':'..e..':' end)
+utils.parseEmoji = function(text)
+	local s, c = text:gsub(':([^%s]+):', function(e) return utf8.char(emojis[1][e]) or ':'..e..':' end)
+	local s, c = text:gsub(':([^:]+):', function(e)
+        return utf8.char(emojis[1][e]) or (':'..e..':')
+    end)
+	return s
+end
+
+utils.emojiCols = function(text)
+	--local s, c = text:gsub(':([^%s]+):', function(e) return utils.MC(0xFFFBD043)..utf8.char(emojis[e])..utils.MC('reset') or ':'..e..':' end)
+	local newText = ''
+	idx = 1
+	while idx <= #text do
+		if text:byte(idx) >= 0xF0 then
+			newText = newText..text:sub(idx,idx-1)..utils.MC(0xFFFBD043)..text:sub(idx,idx+3)..utils.MC('reset')
+			idx = idx+4
+		else
+			newText = newText..text[idx]
+			idx = idx+1
+		end
+	end
+	return newText
+end
+
+utils.CalcRows = function(text, line_width, char_size)
+	
+	-- Calc how many chars fit in a line
+	local chars_in_line = math.floor(line_width/char_size)
+	
+	-- Actual lines used after text wrapping
+	local lines_tot = 0
+
+	-- Condition breaks when text remaining fits in a line
+	while #text >= chars_in_line do 
+		
+		-- Check for newline chars in the first line
+		local n = text:find('\n')
+		-- If found...
+		if n and n <= chars_in_line then
+		
+			-- Increase lines_tot count
+			lines_tot = lines_tot + 1
+			-- Set the next char after \n as the new text start
+			--print('n> '..text[n-1])
+			text = text:sub(n+2, #text)
+			
+		-- If not found..
+		else
+
+			-- Find the last space within the first line
+			local last_space = utils.FindLastOf(text:sub(1,chars_in_line), ' ')
+			-- If there isn't one, set it to the last char in the line
+			if not last_space then last_space = chars_in_line end
+			
+			-- Increase lines_tot count
+			lines_tot = lines_tot + 1
+			-- Move the text start after tha last space (or last char) in line
+			--print('s> '..text[last_space-1])
+			text = text:sub(last_space+1, #text)
+			
+		end
+	end
+	
+	-- Count an extra line for each \n left in text
+	lines_tot = lines_tot + select(2, text:gsub("\n", ""))
+	
+	-- Count one more line for the remaining text
+	lines_tot = lines_tot + 1
+	--print(lines_tot)
+	return lines_tot
+end
+
+		--safety = safety+1
+--if safety > 5000 then print('safety triggered') end
+	--print(1+math.ceil(charstot/charsinline))
+--local safety = 1--and safety < 5000 do
 
 return utils;
 
