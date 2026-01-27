@@ -610,7 +610,7 @@ local utils =
 		[212] = 'All F',
 		[256] = 'Galk.',
 		[298] = 'All M',
-		[510] = 'All',
+		[510] = '',
 		
 	},
 	
@@ -626,6 +626,7 @@ local utils =
 		PARR = utf8.char(0xE3C6),
 		PUM = utf8.char(0xE23D),
 		RA = utf8.char(0xE1FC),
+		--RA = utf8.char(0x27BC),
 		TEMP = utf8.char(0xEB26), --&#xeb26; -e4a2
 		GIL = utf8.char(0xEE1B), --0xEE1B  0xE3AA
 		EXP = utf8.char(0xEEC3), --e186 e392 e4da EA1A ECE7
@@ -870,6 +871,27 @@ utils.FindLastOfMB = function(str, chr)
 
     -- Scan backwards
     for i = strlen - chr_len + 1, 1, -1 do
+        local match = true
+        for j = 1, chr_len do
+            if str:byte(i + j - 1) ~= chr_bytes[j] then
+                match = false
+                break
+            end
+        end
+        if match then
+            return i -- return the byte index of the match
+        end
+    end
+    return nil
+end
+
+utils.FindFirstOfMB = function(str, chr)
+    local chr_bytes = {chr:byte(1, -1)} -- all bytes of target char
+    local chr_len = #chr_bytes
+    local strlen = #str
+
+    -- Scan backwards
+    for i = 1, strlen - chr_len + 1, 1 do
         local match = true
         for j = 1, chr_len do
             if str:byte(i + j - 1) ~= chr_bytes[j] then
@@ -1365,10 +1387,11 @@ utils.IsInTable = function(t, x)
 	return nil;
 end
 
-utils.StringFindTable = function(s, t, m)
+utils.StringFindTable = function(s, t, m, e)
 	if not m then m = true else m = false end
 	if #t == 0 then return nil; end
 	for i = 1, #t do
+		if e and s == t[1] then return 1 end
 		local f = string.find(s, t[i], 1, m);
 		if f then return f end
 	end
@@ -1627,8 +1650,8 @@ utils.stringsplit = function(input, sep)
 end
 
 utils.MC = function(color)
-
-	if color == 'reset' then
+	
+	if color == 'reset' or color == '' then
 	return '\\§--------ç\\'; end
 	--return '\\a--------b\\'; end
 	colortext = string.format("%08X", tonumber(color))

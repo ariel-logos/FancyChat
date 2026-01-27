@@ -72,6 +72,7 @@ local mvc_targetposX = 0;
 
 local fcw = T{
 	T{	
+		WasRendered = false,
 		itemInfo = {},
 		itemIcons = T{{},{},{},{}},
 		itemTexture = T{{},{},{},{}},
@@ -314,6 +315,7 @@ local par_actor2 = '';
 local par_actorP = '';
 local par_actorE = '';
 local par_action1 = '';
+local par_isDamage = false;
 local par_handled_actors = false;
 local par_party_names = {};
 
@@ -358,6 +360,7 @@ local ro_BigMode;
 local fo_BigMode;
 
 local allSettings = T{
+	BigModeWarning = T{false},
 	MoveChatATMenu = T{true},
 	CustomFilters = T{false},
 	autoDumpChat = T{false},
@@ -933,18 +936,18 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			ro_RectBG[1]:set_fill_color(0);
 			if allSettings.SecondChat[1] then ro_RectBG[2]:set_fill_color(0); end
 			for C_i = 1, allSettings.ChatLines do
-				fo_Chat[1][C_i]:set_opacity(0)
-				fo_Aux[1][C_i]:set_opacity(0)
+				SetChatOpacity(0,1)
 				if allSettings.SecondChat[1] then
-					fo_Chat[2][C_i]:set_opacity(0)
-					fo_Aux[2][C_i]:set_opacity(0)
+					SetChatOpacity(0,2)
 				end
 			end
 			ShowBigMode(true)
-			ResetScrolling(3, fcw[3].ChatLines);
+			--print(fcw[3].BigModePrev)
+			if #fo_Chat[3]>0 and not fcw[3].BigModePrev then ResetScrolling(3, fcw[3].ChatLines); end
 			DrawBigMode()
 			fcw[3].BigModePrev = true
 		elseif fcw[3].BigModePrev then
+		--print('hello')
 			ShowBigMode(false)
 			ro_RectBG[1]:set_fill_color(allSettings.rectSettings.fill_color);
 			if allSettings.SecondChat[1] then ro_RectBG[2]:set_fill_color(allSettings.rectSettings.fill_color); end
@@ -977,10 +980,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				local updateColor = bit.band(allSettings.rectSettings.fill_color -(fcw[1].autoHideFade * allSettings.rectSettings.fill_color), 0xFF000000)
 				if ro_RectBG[1].fill_color ~= updateColor then
 					ro_RectBG[1]:set_fill_color(updateColor);
-					for C_i = 1, allSettings.ChatLines do
-						fo_Chat[1][C_i]:set_opacity(math.max(1-fcw[1].autoHideFade,0))
-						fo_Aux[1][C_i]:set_opacity(math.max(1-fcw[1].autoHideFade,0))
-					end
+					SetChatOpacity(math.max(1-fcw[1].autoHideFade,0),1)
 				end
 				-- for C_i = 1, allSettings.ChatLines do
 					-- fo_Chat[1][C_i]:set_opacity(math.max(1-fcw[1].autoHideFade,0))
@@ -2834,10 +2834,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				local updateColor = bit.band(allSettings.rectSettings.fill_color -(fcw[1].autoHideFade * allSettings.rectSettings.fill_color), 0xFF000000)
 				if ro_RectBG[2].fill_color ~= updateColor then
 					ro_RectBG[2]:set_fill_color(updateColor);
-					for C_i = 1, allSettings.ChatLines do
-						fo_Chat[2][C_i]:set_opacity(math.max(1-fcw[1].autoHideFade,0))
-						fo_Aux[2][C_i]:set_opacity(math.max(1-fcw[1].autoHideFade,0))
-					end
+					SetChatOpacity(math.max(1-fcw[1].autoHideFade,0),2)
 				end
 				
 				imgui.SetNextWindowSize({ fcw[2].BG_W, ro_RectBG[2].settings.height+16 }, ImGuiCond_Once);
@@ -3329,7 +3326,6 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 	
 end);
 
-
 ashita.events.register('d3d_endscene', 'd3d_endscene_callback1', function (isRenderingBackBuffer)
 
 	if (not isRenderingBackBuffer) then return; end
@@ -3345,6 +3341,21 @@ ashita.events.register('d3d_endscene', 'd3d_endscene_callback1', function (isRen
 		else
 			if fcw[3].RequestAuxFix then FixAux(3, fcw[3].ChatLines) end
 			PositionLines(3, fcw[3].ChatLines)
+		end
+		if not fcw[1].WasRendered then
+			--print('restored')
+			--PositionLines(1);
+			for C_i = 1, allSettings.ChatLines do
+				fo_Chat[1][C_i]:set_visible(true)
+				fo_Aux[1][C_i]:set_visible(true)
+				if allSettings.SecondChat[1] then
+					fo_Chat[2][C_i]:set_visible(true)
+					fo_Aux[2][C_i]:set_visible(true)
+				end
+			end
+			SetChatOpacity(1,1)
+			SetChatOpacity(1,2)
+			SetChatOpacity(1,3)
 		end
 		--L_i+1-allSettings.ChatLines == fcwFoId.ChatHead  and not (fcw[1].ChatHead == 1 and C_i == allSettings.ChatLines)
 		-- for C_i = 1, allSettings.ChatLines do
@@ -3384,9 +3395,11 @@ ashita.events.register('d3d_endscene', 'd3d_endscene_callback1', function (isRen
 		
 		--print('hello'..tostring(os.clock()))
 		gdi:render();
+		fcw[1].WasRendered = true
 		--gdi:set_auto_render(true);
 	else
 		--gdi:set_auto_render(false);
+		fcw[1].WasRendered = false
 	end;
 	
 	
@@ -4089,7 +4102,8 @@ ashita.events.register('command', 'command_cb', function (e)
 
 		--AshitaCore:GetChatManager():AddChatMessage(5, false, testemoji)
 		
-		print('Please Read!\n\nWelcome to FancyChat addon!\n\nThis is addon provides a highly customizable and interactive chat replacemante for Final Fantasy XI.\nPlease take your time to check all the settings by either clicking the cog wheel icon at the bottom of the chat window or by typing the command \"/fancychat settings\".\n\nYou can hover with your mouse over the (i) icons to learn more about each functionality. This addon features some advanced options that can include unwanted behaviors for certain players. Therefore, please pay extra attention to the (i) marked in red to learn about important critical information about such features.\n\nFor further help you can check the addon manual accessible from the settings menu or through the command \"/fancychat manual\".\n\nHave fun!')
+		--print('Please Read!\n\nWelcome to FancyChat addon!\n\nThis is addon provides a highly customizable and interactive chat replacemante for Final Fantasy XI.\nPlease take your time to check all the settings by either clicking the cog wheel icon at the bottom of the chat window or by typing the command \"/fancychat settings\".\n\nYou can hover with your mouse over the (i) icons to learn more about each functionality. This addon features some advanced options that can include unwanted behaviors for certain players. Therefore, please pay extra attention to the (i) marked in red to learn about important critical information about such features.\n\nFor further help you can check the addon manual accessible from the settings menu or through the command \"/fancychat manual\".\n\nHave fun!')
+		AshitaCore:GetChatManager():AddChatMessage(21,false,'The Puffer Pugil uses Plaguebreath.'..'\10'..'Ryzar takes 345 points of damage.')
 		return;
 	end
 	if (#args == 2 and args[2] == 'helpdebug') then
@@ -4177,6 +4191,8 @@ ashita.events.register('key_state', 'key_state_callback1', function (e)
     if (allSettings.shortcutHideEnabled[1] and keyptr[allSettings.shortcutHide] ~= 0 and keyptr[allSettings.shortcutHideS] ~= 0 and not fcw[1].Keydown and AshitaCore:GetChatManager():IsInputOpen() == 0x00) then
 		fcw[1].HideChat = not fcw[1].HideChat;
 		ResetAutoHideTimer()
+		SetChatOpacity(1,1)
+		if allSettings.SecondChat[1] then SetChatOpacity(1,2) end
 		fcw[1].Keydown = true;
 	else if (keyptr[allSettings.shortcutHide] == 0) then
 			fcw[1].Keydown = false;
@@ -4556,7 +4572,7 @@ function ResetLines(fo_id, ChatLines)
 	end
 	--if allSettings.SelectedTab == 'All' and allSettings.HideCombatFromAll[1] then b_ChatBufferN[fo_id]=b_ChatBufferN_AllAlt;  end
 	fcw[fo_id].ChatShift = allSettings.fontSettings.font_height
-	b_ChatBufferIdx[fo_id] = b_ChatBufferN[fo_id];
+	b_ChatBufferIdx[fo_id] = fo_id < 3 and b_ChatBufferN[fo_id] or b_ChatBufferN[1]
 	fcw[fo_id].PositionLinesRequest = {true,true};
 	--fcw[1].ResetCD = os.clock();
 	--SetLinesVisible(fo_id, false)
@@ -4792,7 +4808,11 @@ function PositionLines(fo_id, ChatLines)
 			-- end
 		end
 		fo_Chat[fo_id][fcw[fo_id].ChatHead]:set_visible(true)
-		if not fcw[fo_id].RequestAuxFix then fo_Aux[fo_id][fcw[fo_id].ChatHead]:set_visible(true) end
+		fo_Chat[fo_id][fcw[fo_id].ChatHead]:set_opacity(1)
+		if not fcw[fo_id].RequestAuxFix then
+			fo_Aux[fo_id][fcw[fo_id].ChatHead]:set_visible(true)
+			fo_Aux[fo_id][fcw[fo_id].ChatHead]:set_opacity(1)
+		end
 	end
 	--fo_Chat[fo_id][fcw[fo_id].ChatHead]:set_visible(true)
 	--fo_Aux[fo_id][fcw[fo_id].ChatHead]:set_visible(true)
@@ -4802,15 +4822,25 @@ function PositionLines(fo_id, ChatLines)
 	-- fo_Aux[fo_id][prevChatHead]:set_opacity(1)
 end
 
+function SetChatOpacity(opacity, fo_id)
+	for C_i = 1, #fo_Chat[fo_id] do
+		fo_Chat[fo_id][C_i]:set_opacity(opacity)
+		fo_Aux[fo_id][C_i]:set_opacity(opacity)
+	end
+end
+
 function FixAux(fo_id, ChatLines)
 	if not ChatLines then ChatLines = allSettings.ChatLines end
 	--Debug('FixAux'..fo_id,1,true)
 	--Debug('Redo'..fo_id,1,true) 
 	for C_i = 1, ChatLines do
 		if #fo_Aux[fo_id][C_i].settings.text > 0 then
+			fo_Chat[fo_id][C_i]:set_visible(true);
+			fo_Chat[fo_id][C_i]:set_opacity(1);
 			if fo_Chat[fo_id][C_i].rect == nil  or fo_Chat[fo_id][C_i].is_dirty then return end
 			fo_Aux[fo_id][C_i]:set_position_x(math.floor(fcw[fo_id].Anchor_X+fo_Chat[fo_id][C_i].rect.right+allSettings.fontSettings.font_height/1.7));
 			fo_Aux[fo_id][C_i]:set_visible(true)
+			fo_Aux[fo_id][C_i]:set_opacity(1);
 		end
 	end
 	--Debug('FixAux Done'..fo_id,1,true)
@@ -4858,6 +4888,9 @@ end
 
 function DrawBigMode()
 
+	if not allSettings.BigModeWarning[1] then
+		AddWarning('This feature is not optimized!\n\nIt should be used mainly to review chat history.\n\nIt will cause stuttering if kept open on combat logs during a fight.',280, allSettings.BigModeWarning)
+	end
 	-- local ostime = tostring(os.time())
 	-- print(string.rep('O',tonumber(ostime[#ostime])))
 	ResetAutoHideTimer()
@@ -4870,8 +4903,8 @@ function DrawBigMode()
 	---local buff_idx = 1;
 	--b_ChatBufferIdx[1] =
 	ChatLines = fcw[3].ChatLines
-	
-	if not fcw[3].BigModePrev then if #fo_Chat[3] > 0 then ResetLines(3, ChatLines) end b_ChatBufferIdx[3] = 1 end
+	--print(fcw[3].Scrolling)and not fcw[3].Scrolling
+	if not fcw[3].BigModePrev  then if #fo_Chat[3] > 0  then ResetLines(3, ChatLines) end b_ChatBufferIdx[3] = 1 end
 	--Debug(tostring(b_ChatBufferIdx[3]), 1, false)
 	if #fo_Chat[3] == 0 then
 		
@@ -5070,18 +5103,20 @@ function DrawBigMode()
 		)
 		then
 			--if fcw[3].ScrollDelta > 0 then print('scroll!') end
+			--if fcw[3].ScrollDelta > 0 then print(b_ChatBufferIdx[3]) end
 			if (
 				fcw[3].ScrollDelta > 0
 				
 				and utils.GetTableLen(b_ChatBuffer[b_ChatBufferMode[1]][2].text) - fcw[3].ScrolledBack - (b_ChatBufferN[1]-b_ChatBufferIdx[3]) > ChatLines
 			)
 			then
-				
+				--print('scroll!')
 				if not imgui.GetIO().KeyShift or not fcw[3].Scrolling then
 					fcw[1].ScrollDelta = 0;
 					fcw[2].ScrollDelta = 0;
 					fcw[3].ScrollDelta = 0;
 					fcw[3].Scrolling = true;
+					--print(fcw[3].Scrolling)
 					fcw[3].ChatShift = allSettings.fontSettings.font_height
 					fcw[3].ScrollUpRequest = true;
 				elseif fcw[3].Scrolling then
@@ -5158,12 +5193,15 @@ function DrawBigMode()
 		);
 		fcw[3].ScrolledBack = fcw[3].ScrolledBack -1;
 		if fcw[3].ScrolledBack == 0 then
+			print('reset')
 			fcw[3].Scrolling = false;
 			ResetLines(3, ChatLines);
 		end
 	elseif not fcw[3].BigModePrev or (not fcw[3].Scrolling and b_ChatBufferIdx[3] < b_ChatBufferN[1]) then
 		ResetLines(3, ChatLines)
 		b_ChatBufferIdx[3] = b_ChatBufferN[1]
+		--print('hello')
+		--print(b_ChatBufferIdx[3])
 		--print(fcw[3].BigModePrev)
 	end
 	fcw[3].RequestAuxFix = true
@@ -5183,7 +5221,8 @@ end
 function CleanText(text, mode)
 	
 	local addLog = true;
-	if not string.find(mode, '^combat') and not string.find(mode,'^combatspell') and not string.find(mode,'^shout') and not string.find(mode,'^unity') and par_MessageMode ~= 152 and not string.find(mode, '^linkshell') then addLog = true; end
+	--if not string.find(mode, '^combat') and not string.find(mode,'^combatspell') and
+	if not string.find(mode,'^shout') and not string.find(mode,'^unity') and par_MessageMode ~= 152 and not string.find(mode, '^linkshell') then addLog = true; end
 	
 	if (par_MessageMode == 150 or par_MessageMode == 151) and par_LastMsgInConv then uiw.DialogPromptStart = os.clock(); end 
 	if (par_MessageMode == 150 or par_MessageMode == 151)	then 
@@ -5450,14 +5489,14 @@ function CombatText(msg, chn)
 			-- end
 			--Debug(tostring(#par_party_names), 1, true)
 			
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '')--:gsub('ranged attack', 'RA');
 				par_actor2 = A;
 			end
 			------
-			if utils.StringFindTable(B, par_party_names) then
+			if utils.StringFindTable(B, par_party_names, nil, true) then
 				if #par_actor1 > 0 then
 					par_actorP = B;
 				else
@@ -5476,10 +5515,15 @@ function CombatText(msg, chn)
 			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG'..ra;
 			--msg = A..' '..(#ra > 0 and ra or combatCP.ATK)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG';
 			msg = A..' '..(#ra > 0 and ra or combatCP.ATK)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG';
-			if (A:find(fcw[1].PlayerName)) then par_DamageDone = true; end;
-			if (B:find(fcw[1].PlayerName)) then par_DamageGot = true; end;
+			--msg = A..' '..(#ra > 0 and ra or combatCP.ATK)..' '..DMG..' DMG '..combatCP.SPLIT..' '..B;
+			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
+			if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
 			
-			
+			par_isDamage = true;
+	--		Debug('par_actor1: '..par_actor1,1,true)
+	--		Debug('par_actorP: '..par_actorP,1,true)
+	--		Debug('par_actor2: '..par_actor2,1,true)
+	--		Debug('par_actorE: '..par_actorE,1,true)
 			par_CombatCutIdx = utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			
 			return msg
@@ -5496,22 +5540,22 @@ function CombatText(msg, chn)
 				--ra = ' [R.Atk]'
 				ra = combatCP.RA
 			end
-			if (A:find(fcw[1].PlayerName)) then par_DamageDone = true; end;
-			if (B:find(fcw[1].PlayerName)) then par_DamageGot = true; end;
+			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
+			if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
 			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
 			-- A = A:gsub('[Tt]he ', ''); end
 			-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
 			-- B = B:gsub('[Tt]he ', '');
 			-- end
 			
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
 			------
-			if utils.StringFindTable(B, par_party_names) then
+			if utils.StringFindTable(B, par_party_names, nil, true) then
 				if #par_actor1 > 0 then
 					par_actorP = B;
 				else
@@ -5528,7 +5572,7 @@ function CombatText(msg, chn)
 
 			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG '..ra..utf8.char(0x23eb);
 			msg = A..' '..(#ra > 0 and ra or combatCP.ATK)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG '..combatCP.CRIT;
-			
+			par_isDamage = true;
 			--msg = msg:gsub('ranged attack', 'RA');
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
@@ -5539,25 +5583,26 @@ function CombatText(msg, chn)
 		A, Ext = msg:match('^(.*)(%\'s.*)$')
 		if Ext:find('miss') then
 			if (A == fcw[1].PlayerName) then par_DamageGot = true; end;
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
 			msg = A..' '..combatCP.SPLIT..' Miss '..combatCP.RA--' Miss [R.Atk]';
+			par_isDamage = true;
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		elseif Ext:find('pummeling') then
 			B, DMG = Ext:match('^.*pummeling (.*) for (.*) points of damage!$')
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '')--:gsub('ranged attack', 'RA');
 				par_actor2 = A;
 			end
 			------
-			if utils.StringFindTable(B, par_party_names) then
+			if utils.StringFindTable(B, par_party_names, nil, true) then
 				if #par_actor1 > 0 then
 					par_actorP = B;
 				else
@@ -5575,11 +5620,13 @@ function CombatText(msg, chn)
 			
 			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG '..utf8.char(0x27B6)..utf8.char(0x2316);
 			msg = A..' '..combatCP.RA..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG '..combatCP.PUM;
-			if (A:find(fcw[1].PlayerName)) then par_DamageDone = true; end;
-			if (B:find(fcw[1].PlayerName)) then par_DamageGot = true; end;
-			
+			par_isDamage = true;
+			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
+			if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
+			par_isDamage = true;
 			
 			par_CombatCutIdx = utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
+			return msg
 		end
 	end	
 	--Debug(tostring(A)..'-'..tostring(B)..'-'..tostring(DMG),1,true)
@@ -5598,14 +5645,14 @@ function CombatText(msg, chn)
 			-- B = B:gsub('[Tt]he ', '');
 			-- end
 			
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
 			------
-			if utils.StringFindTable(B, par_party_names) then
+			if utils.StringFindTable(B, par_party_names, nil, true) then
 				if #par_actor1 > 0 then
 					par_actorP = B;
 				else
@@ -5624,7 +5671,7 @@ function CombatText(msg, chn)
 			
 			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' ['..S..']'..utf8.char(0x589)..' '..DMG..' DMG';
 			msg = A..' '..combatCP.USE..' '..B..' '..combatCP.SPLIT..' '..S..' '..DMG..' DMG';
-			
+			par_isDamage = true;
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
@@ -5633,7 +5680,7 @@ function CombatText(msg, chn)
 		A, S, Ext = msg:match("^(.*) uses? ([^%.]*)%.%s*(.*)$")
 		if A and S and not msg:find('damage', #A) and not msg:find('miss', #A)  and not msg:find('^You must') and not msg:find('lacks the') and not msg:find('^You are') and not msg:find('Unable to') and not msg:find('cannot') then
 			--Debug(A,1,true)
-			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
+			--if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
 			-- --if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
 			if Ext and Ext:trimex() ~= '' then
 				--Everoth uses Double-Up. The total for Chaos Roll increases to 7! Everoth receives the effect of Chaos Roll
@@ -5643,14 +5690,14 @@ function CombatText(msg, chn)
 				Ext = Ext:gsub(' increases to', ':')
 				Ext = Ext:gsub('The total for ', '')
 				Ext = Ext:gsub('successfully (.)', function(c) return combatCP.RIGHT..' '..c:upper() end)
-				Ext = Ext..' '
+				Ext = ': '..Ext..' '
 			else
 				Ext = ''
 			end
 			--Debug(Ext,1,true)
 			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
 			-- A = A:gsub('[Tt]he ', ''); end
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
@@ -5659,10 +5706,18 @@ function CombatText(msg, chn)
 			S = '\\'..S..'/'
 			par_action1 = S;
 			
+			
+			--plague
 			--msg = Ext..A..' '..utf8.char(0x25B6)..' ['..S..']';
-			msg = Ext..A..' '..combatCP.RIGHT..' '..S..' ';
-					
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.RIGHT)+string.len(combatCP.RIGHT)-1;
+			--The Miter Worm casts Stonega. August takes 23 points of damage.
+			--OLD message
+			--msg = Ext..A..' '..combatCP.RIGHT..' '..S..' ';
+			--par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.RIGHT)+string.len(combatCP.RIGHT)-1;
+			
+			msg = A..' '..combatCP.RIGHT..' '..S..Ext;	
+			
+			par_CombatCutIdx =  utils.FindFirstOfMB(msg, combatCP.RIGHT)+string.len(combatCP.RIGHT)-1;
+			
 			return msg;
 		end
 	end
@@ -5672,7 +5727,7 @@ function CombatText(msg, chn)
 		if S and A and DMG then
 			-- A = '['..ES..A..ES..']'
 			-- A = A:gsub('[Tt]he ', '');
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
@@ -5684,7 +5739,7 @@ function CombatText(msg, chn)
 			--msg = A..' '..utf8.char(0x25C0)..' '..S..' '..utf8.char(0x589)..' '..DMG..' DMG';
 			--msg = A..' '..combatCP.LEFT..' '..S..' '..DMG..' DMG';
 			msg = S..' '..combatCP.SC..' '..A..' '..combatCP.RIGHT..' '..DMG..' DMG';
-			
+			par_isDamage = true;
 			--par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.LEFT)+string.len(combatCP.LEFT)-1;
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.RIGHT)+string.len(combatCP.RIGHT)-1;
 			return msg;
@@ -5698,7 +5753,7 @@ function CombatText(msg, chn)
 		A, DMG = msg:match("^([^%.]+) takes? (%d*) points? of damage%.$")
 		if A and DMG then
 			--if A:find('^[Tt]he ') then A = A:gsub('[Tt]he ',' ') else A = '['..ES..A..ES..']' end
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
@@ -5706,6 +5761,7 @@ function CombatText(msg, chn)
 			end
 			
 			msg = combatCP.SUB..A..' '..combatCP.LEFT..' '..DMG..' DMG';
+			par_isDamage = true;
 			if (A == fcw[1].PlayerName) then par_DamageGot = true; end;
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.LEFT)+string.len(combatCP.LEFT)-1;
 			return msg;
@@ -5736,7 +5792,7 @@ function CombatText(msg, chn)
 		if A and S then
 			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
 			-- A = A:gsub('[Tt]he ', ''); end
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
@@ -5762,14 +5818,14 @@ function CombatText(msg, chn)
 			-- if not B:find('[Tt]he') then B = '['..ES..B..ES..']' else
 			-- B = B:gsub('[Tt]he ', '');
 			-- end
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
 			------
-			if utils.StringFindTable(B, par_party_names) then
+			if utils.StringFindTable(B, par_party_names, nil, true) then
 				if #par_actor1 > 0 then
 					par_actorP = B;
 				else
@@ -5786,6 +5842,7 @@ function CombatText(msg, chn)
 			--msg = B..' '..utf8.char(0x2694)..' '..A..' '..combatCP.SPLIT..' Parry ';
 			msg = A..' '..'parry '..combatCP.PARR..' '..B..'\'s attack'--..combatCP.SPLIT..' Parry ';
 			--par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
+			par_isDamage = true;
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, 'parry '..combatCP.PARR)-1;
 			return msg;
 		end
@@ -5797,14 +5854,14 @@ function CombatText(msg, chn)
 		B, A, DMG = msg:match("^(.-)'s%s.-by%s(.-)%..-takes%s(.-)%spoint.*$")
 		if A and B and DMG then
 			
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '')
 				par_actor2 = A;
 			end
 			------
-			if utils.StringFindTable(B, par_party_names) then
+			if utils.StringFindTable(B, par_party_names, nil, true) then
 				if #par_actor1 > 0 then
 					par_actorP = B;
 				else
@@ -5822,8 +5879,9 @@ function CombatText(msg, chn)
 			
 			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG '..utf8.char(0x2B8C);
 			msg = A..' '..combatCP.CNTR..' '..B..' '..combatCP.SPLIT..' '..DMG..' DMG ';
-			if (A:find(fcw[1].PlayerName)) then par_DamageDone = true; end;
-			if (B:find(fcw[1].PlayerName)) then par_DamageGot = true; end;
+			par_isDamage = true;
+			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
+			if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
 			
 			
 			par_CombatCutIdx = utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
@@ -5848,14 +5906,14 @@ function CombatText(msg, chn)
 			-- if not B:find('[Tt]he') then B = '['..ES..B..ES..']' else
 			-- B = B:gsub('[Tt]he ', '');
 			-- end
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
 			------
-			if utils.StringFindTable(B, par_party_names) then
+			if utils.StringFindTable(B, par_party_names, nil, true) then
 				if #par_actor1 > 0 then
 					par_actorP = B;
 				else
@@ -5878,6 +5936,7 @@ function CombatText(msg, chn)
 				Ext = ' '..Ext
 			end
 			msg = A..' '..combatCP.ATK..' '..B..' '..combatCP.SPLIT..Ext..' Miss';
+			par_isDamage = true;
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
@@ -5888,14 +5947,14 @@ function CombatText(msg, chn)
 		A, B = msg:match("^(.*) defeats? (.*)%.$")
 		if A and B then
 			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
 			------
-			if utils.StringFindTable(B, par_party_names) then
+			if utils.StringFindTable(B, par_party_names, nil, true) then
 				if #par_actor1 > 0 then
 					par_actorP = B;
 				else
@@ -5912,6 +5971,7 @@ function CombatText(msg, chn)
 			
 			local defeat = 'defeats'..combatCP.KILL
 			msg = A..' '..defeat..' '..B
+			par_isDamage = true;
 			par_CombatCutIdx =  msg:find(defeat,1,true)-1;
 			return msg;
 		end
@@ -5919,14 +5979,14 @@ function CombatText(msg, chn)
 		B, A = msg:match("^(.*) was defeated by (.*)%.$")
 		if A and B then
 			if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
 			------
-			if utils.StringFindTable(B, par_party_names) then
+			if utils.StringFindTable(B, par_party_names, nil, true) then
 				if #par_actor1 > 0 then
 					par_actorP = B;
 				else
@@ -5943,6 +6003,7 @@ function CombatText(msg, chn)
 			
 			local defeat = 'defeats'..combatCP.KILL
 			msg = A..' '..defeat..' '..B
+			par_isDamage = true;
 			par_CombatCutIdx =  msg:find(defeat,1,true)-1;
 			return msg;
 		end
@@ -5954,7 +6015,7 @@ function CombatText(msg, chn)
 		if A and Ext then
 			if (A == fcw[1].PlayerName) then par_DamageGot = true; end;
 			Ext = '-'..Ext
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
@@ -5962,7 +6023,7 @@ function CombatText(msg, chn)
 			end
 
 			msg = A..' '..combatCP.RIGHT..' '..Ext..' '..utils.icons.UTSU
-					
+			par_isDamage = true;		
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.RIGHT)+string.len(combatCP.RIGHT)-1;
 			return msg;
 		end
@@ -6012,7 +6073,7 @@ function CombatSpellText(msg, chn)
 			
 			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
 			-- A = A:gsub('[Tt]he ', ''); end
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
@@ -6025,7 +6086,7 @@ function CombatSpellText(msg, chn)
 				-- B = B:gsub('[Tt]he ', '');
 				-- end
 				------
-				if utils.StringFindTable(B, par_party_names) then
+				if utils.StringFindTable(B, par_party_names, nil, true) then
 					if #par_actor1 > 0 then
 						par_actorP = B;
 					else
@@ -6039,6 +6100,10 @@ function CombatSpellText(msg, chn)
 						par_actor2 = B;
 					end
 				end
+		--		Debug('par_actor1: '..par_actor1,1,true)
+		--		Debug('par_actorP: '..par_actorP,1,true)
+		--		Debug('par_actor2: '..par_actor2,1,true)
+		--		Debug('par_actorE: '..par_actorE,1,true)
 				--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' casting...['..S..']';
 				msg = A..' '..combatCP.CAST..' '..B..' '..combatCP.SPLIT..' casting...'..S..' ';
 				
@@ -6065,14 +6130,14 @@ function CombatSpellText(msg, chn)
 			-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
 			-- B = B:gsub('[Tt]he ', '');
 			-- end
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
 			------
-			if utils.StringFindTable(B, par_party_names) then
+			if utils.StringFindTable(B, par_party_names, nil, true) then
 				if #par_actor1 > 0 then
 					par_actorP = B;
 				else
@@ -6090,7 +6155,7 @@ function CombatSpellText(msg, chn)
 			par_action1 = S;
 			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' ['..S..']'..utf8.char(0x589)..' '..DMG..' DMG';
 			msg = A..' '..combatCP.SPELL..' '..B..' '..combatCP.SPLIT..' '..S..' '..DMG..' DMG';
-			
+			par_isDamage = true;
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
@@ -6110,14 +6175,14 @@ function CombatSpellText(msg, chn)
 			-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
 			-- B = B:gsub('[Tt]he ', '');
 			-- end
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
 			------
-			if utils.StringFindTable(B, par_party_names) then
+			if utils.StringFindTable(B, par_party_names, nil, true) then
 				if #par_actor1 > 0 then
 					par_actorP = B;
 				else
@@ -6135,7 +6200,7 @@ function CombatSpellText(msg, chn)
 			par_action1 = S;
 			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' ['..S..']'..utf8.char(0x589)..' '..DMG..' '..T..' drained';
 			msg = A..' '..combatCP.SPELL..' '..B..' '..combatCP.SPLIT..' '..S..' '..DMG..' '..T..' drained';
-			
+			par_isDamage = true;
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
@@ -6153,14 +6218,14 @@ function CombatSpellText(msg, chn)
 			-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
 			-- B = B:gsub('[Tt]he ', '');
 			-- end
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
 			------
-			if utils.StringFindTable(B, par_party_names) then
+			if utils.StringFindTable(B, par_party_names, nil, true) then
 				if #par_actor1 > 0 then
 					par_actorP = B;
 				else
@@ -6178,7 +6243,7 @@ function CombatSpellText(msg, chn)
 			par_action1 = S;
 			--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' ['..S..']'..utf8.char(0x589)..' +'..DMG..' '..T;
 			msg = A..' '..combatCP.HEAL..' '..B..' '..combatCP.SPLIT..' '..S..' +'..DMG..' '..T;
-
+			par_isDamage = true;
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 			return msg;
 		end
@@ -6192,14 +6257,14 @@ function CombatSpellText(msg, chn)
 			-- A = A:gsub('[Tt]he ', ''); end
 			-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
 			-- B = B:gsub('[Tt]he ', ''); end
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
 			------
-			if utils.StringFindTable(B, par_party_names) then
+			if utils.StringFindTable(B, par_party_names, nil, true) then
 				if #par_actor1 > 0 then
 					par_actorP = B;
 				else
@@ -6233,7 +6298,7 @@ function CombatSpellText(msg, chn)
 			not msg:find('^Unable to')
 		then
 			
-			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
+			--if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
 			-- --if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
 			if Ext and Ext:trimex() ~= '' then
 				--Ext = Ext:gsub(A..' ', '')..' '
@@ -6247,7 +6312,7 @@ function CombatSpellText(msg, chn)
 					Ext, c = Ext:gsub('is afflicted with', combatCP.LEFT)
 				end
 				Ext = Ext:gsub('successfully (.)', function(c) return combatCP.RIGHT..' '..c:upper() end)
-				Ext = Ext..' '
+				Ext = ': '..Ext
 				if c > 0 then
 					B = Ext:match('^(.+) '..combatCP.LEFT..'.*$')
 					if B then 
@@ -6255,7 +6320,7 @@ function CombatSpellText(msg, chn)
 						--B = B:gsub('[Tt]he ', '');
 						--par_actor2 = B;
 						
-						if utils.StringFindTable(B, par_party_names) then
+						if utils.StringFindTable(B, par_party_names, nil, true) then
 							if #par_actor1 > 0 then
 								par_actorP = B;
 							else
@@ -6276,7 +6341,7 @@ function CombatSpellText(msg, chn)
 			end
 			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
 			-- A = A:gsub('[Tt]he ', ''); end
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
@@ -6285,7 +6350,8 @@ function CombatSpellText(msg, chn)
 			S = '\\'..S..'/'
 			par_action1 = S;
 			--msg = Ext..A..' '..utf8.char(0x25B6)..' ['..S..']';
-			msg = Ext..A..' '..combatCP.CAST..' '..S..' ';
+			--msg = Ext..A..' '..combatCP.CAST..' '..S..' ';
+			msg = A..' '..combatCP.CAST..' '..S..Ext;
 					
 			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.CAST)+string.len(combatCP.CAST)-1;
 			
@@ -6300,14 +6366,14 @@ function CombatSpellText(msg, chn)
 		-- A = A:gsub('[Tt]he ', ''); end
 		-- if not B:find('^[Tt]he') then B = '['..ES..B..ES..']' else
 		-- B = B:gsub('[Tt]he ', ''); end
-		if utils.StringFindTable(A, par_party_names) then
+		if utils.StringFindTable(A, par_party_names, nil, true) then
 			par_actor1 = A;
 		else
 			A = A:gsub('[Tt]he ', '');
 			par_actor2 = A;
 		end
 		------
-		if utils.StringFindTable(B, par_party_names) then
+		if utils.StringFindTable(B, par_party_names, nil, true) then
 			if #par_actor1 > 0 then
 				par_actorP = B;
 			else
@@ -6324,7 +6390,7 @@ function CombatSpellText(msg, chn)
 		S = '\\'..S..'/'
 		par_action1 = S;
 		--msg = A..' '..utf8.char(0x25B6)..' '..B..' '..combatCP.SPLIT..' ['..S..']';
-		msg = A..' '..combatCP.CAST..' '..B..' '..combatCP.SPLIT..' '..S..' ';
+		msg = A..' '..combatCP.RIGHT..' '..B..' '..combatCP.SPLIT..' '..S..' ';
 				
 		par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.SPLIT)+string.len(combatCP.SPLIT)-1;
 		return msg;
@@ -6336,7 +6402,7 @@ function CombatSpellText(msg, chn)
 		A, S, Ext = msg:match("^(.*) uses? ([^%.]*)%.%s*(.*)$")
 		if A and S and not msg:find('damage') and not msg:find('^You are') and not msg:find('cannot') then
 			
-			if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
+			--if (A == fcw[1].PlayerName) then par_DamageDone = true; end;
 			-- --if (B == fcw[1].PlayerName) then par_DamageGot = true; end;
 			if Ext and Ext:trimex() ~= '' then
 				--Ext = Ext:gsub(A..' ', '')..' '
@@ -6345,24 +6411,29 @@ function CombatSpellText(msg, chn)
 				Ext = Ext:gsub('gains the effect of', combatCP.LEFT)
 				Ext = Ext:gsub('is afflicted with', combatCP.LEFT)
 				Ext = Ext:gsub('successfully (.)', function(c) return combatCP.RIGHT..' '..c:upper() end)
-				Ext = Ext..' '
+				--Ext = Ext..' '
+				Ext = ': '..Ext..' '
 			else
 				Ext = ''
 			end
 			-- if not A:find('^[Tt]he') then A = '['..ES..A..ES..']' else
 			-- A = A:gsub('[Tt]he ', ''); end
-			if utils.StringFindTable(A, par_party_names) then
+			if utils.StringFindTable(A, par_party_names, nil, true) then
 				par_actor1 = A;
 			else
 				A = A:gsub('[Tt]he ', '');
 				par_actor2 = A;
 			end
 			S = '\\'..S..'/'
+			
 			par_action1 = S;
 			--msg = Ext..A..' '..utf8.char(0x25B6)..' ['..S..']';
-			msg = Ext..A..' '..combatCP.RIGHT..' '..S..' ';
-					
-			par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.RIGHT)+string.len(combatCP.RIGHT)-1;
+			--msg = Ext..A..' '..combatCP.RIGHT..' '..S..' ';
+			msg = A..' '..combatCP.RIGHT..' '..S..Ext;	
+
+			--par_CombatCutIdx =  utils.FindLastOfMB(msg, combatCP.RIGHT)+string.len(combatCP.RIGHT)-1;
+			par_CombatCutIdx =  utils.FindFirstOfMB(msg, combatCP.RIGHT)+string.len(combatCP.RIGHT)-1;
+			par_LastMode:replace('combatspell','combat');
 			return msg;
 		end
 	end	
@@ -6510,6 +6581,7 @@ parseThis = function(e, e_message)
 	par_actorP = '';
 	par_actorE = '';
 	par_action1 = '';
+	par_isDamage = false;
 	par_handled_actors = false;
 	par_DamageDone = false;
 	par_DamageGot = false;
@@ -6565,6 +6637,8 @@ parseThis = function(e, e_message)
 	elseif string.find(par_LastMode,'^shout') then col =  allSettings.colors.shout[1]; 
 	elseif string.find(par_LastMode,'^emote') then col = allSettings.colors.emote[1]; 
 	end
+	
+	
 	
 	if allSettings.tellNotification[1] and par_LastMode == 'tell_in' then ashita.misc.play_sound(string.format('%s\\notifications\\%s%s.wav', addon.path, allSettings.selectedNotification,allSettings.boostNotification[1] and 'B' or '')); end;
 
@@ -6754,7 +6828,7 @@ parseThis = function(e, e_message)
 	end
 	local scope = '_z'
 	if isYou then scope = '_y' elseif isYou or isParty then scope = '_p' end
-	--  elseif isTarget then scope = '_t' and newText:find(fcw[1].PlayerName) 
+	--  elseif isTarget then scope = '_t' and newText == fcw[1].PlayerName 
 	
 	if allSettings.CustomFilters[1] then
 		if par_LastMode:find('combat',1,true) and utils.FindInStringTableFilters(newText, par_customFilters, scope) then par_LastMode = 'filtered' return end
@@ -6872,7 +6946,7 @@ parseThis = function(e, e_message)
 			if carry_over_color ~= nil then col = carry_over_color; end
 			local special_idx = nil;
 			local special_text = '';
-			local special_color = 0xFFFFFFFF;
+			local special_color = '';
 			local special_offset = 0;
 			local special_type = nil;
 			local check_mode = false;
@@ -6917,6 +6991,12 @@ parseThis = function(e, e_message)
 					--if #newLinesIdx > 0 then lineBreak = ''else lineBreak = '-'; end
 					--urlText ~= '' and 
 					if not isCombatMsg and urlText == '' and newText[cutIdx] ~= ' ' and cutIdx < #newText and newText[cutIdx+1] ~= ' ' then lineBreak = '-';else cutIdx = cutIdx +1 end
+					if isCombatMsg and #newText-cutIdx < 3 then
+						local last_space = utils.FindLastOf(string.sub(newText,1,cutIdx),' ');
+						if (last_space ~= nil) and last_space > par_CombatCutIdx then
+							if (cutIdx-last_space)<15 then cutIdx = last_space-1; lineBreak = '' end
+						end
+					end
 					--Debug(tostring(cutIdx)..'-'..tostring(newText[cutIdx])..'-'..tostring(urlText)..'LB:'..lineBreak..'<',1,true)F7CF05
 					if (textLeft > cutIdx and newText[cutIdx] ~= ' ' and newText[cutIdx+1] ~= ' ') then
 						local last_space = utils.FindLastOf(string.sub(newText,1,cutIdx),' ');
@@ -6928,19 +7008,20 @@ parseThis = function(e, e_message)
 			if (allSettings.CompactCombat[1]) then
 				if isCombatMsg and (par_CombatCutIdx > allSettings.chatLineMaxL)  then
 					if #par_actor1 > 0 then
+					
 						local a = newText:find(par_actor1, 1, true)
-						if a and cutIdx >= a and cutIdx - a < #par_actor1 and a-1 > 1 then cutIdx = a-1; end
-						a = utils.FindLastOfString(newText, par_actor1);
-						if a and cutIdx >= a and cutIdx - a < #par_actor1 and a-1 > 1 then cutIdx = a-1; end
+						if a and cutIdx >= a and cutIdx - (a-1) < #par_actor1 and a-1 > 1 then cutIdx = a-1; end
+						--a = utils.FindLastOfString(newText, par_actor1);
+						--if a and cutIdx >= a and cutIdx - (a-1) < #par_actor1 and a-1 > 1 then cutIdx = a-1; end
 					end if #par_actor2 > 0 then
 						local a = newText:find(par_actor2, 1, true)
-						if a and cutIdx >= a and cutIdx - a < #par_actor2 and a-1 > 1 then cutIdx = a-1; end
+						if a and cutIdx >= a and cutIdx - (a-1) < #par_actor2 and a-1 > 1 then cutIdx = a-1; end
 					end if #par_actorP > 0 then
 						local a = newText:find(par_actorP, 1, true)
-						if a and cutIdx >= a and cutIdx - a < #par_actorP and a-1 > 1 then cutIdx = a-1; end
+						if a and cutIdx >= a and cutIdx - (a-1) < #par_actorP and a-1 > 1 then cutIdx = a-1; end
 					end if #par_actorE > 0 then
 						local a = newText:find(par_actorE, 1, true)
-						if a and cutIdx >= a and cutIdx - a < #par_actorE and a-1 > 1 then cutIdx = a-1; end
+						if a and cutIdx >= a and cutIdx - (a-1) < #par_actorE and a-1 > 1 then cutIdx = a-1; end
 					end
 				end
 				
@@ -6950,7 +7031,12 @@ parseThis = function(e, e_message)
 						--par_action1 = par_action1:gsub('%-','%%-');
 						--The Lesser Colibri uses Feather Tickle. Forgivnessssssss's TP is reduced to 0.
 						local a = newText:find(par_action1, 1, true)
-						if a and cutIdx >= a and cutIdx - a < #par_action1 and a-1 > 1 then cutIdx = a-1; end
+						-- Debug(newText, 1, true)
+						-- Debug('cidx: '..cutIdx, 1, true)
+						-- Debug('a+pa1: '..(a-1) + #par_action1, 1, true)
+						-- Debug('paraction: '..#par_action1, 1, true)
+						--if a and cutIdx >= a and (a-1) + #par_action1 < cutIdx and a-1 > 1 then cutIdx = a-1; end
+						if a and cutIdx >= a and cutIdx - (a-1) < #par_action1 and a-1 > 1 then cutIdx = a-1; end
 						--newText:gsub('%-','%%-');
 					end
 				end
@@ -7065,7 +7151,7 @@ parseThis = function(e, e_message)
 				
 			end
 			if ( special_idx ~= nil) then
-				if special_color == 0xFFFFFFFF then special_color = allSettings.colors.obtained[1]; end
+				if special_color == '' then special_color = allSettings.colors.obtained[1]; end
 				col = 0xFFFFFFFF;
 				if special_type == 'prevspecial' then
 					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,special_idx+special_offset));
@@ -7187,7 +7273,8 @@ parseThis = function(e, e_message)
 						table.insert(b_ChatBuffer[1][2].text,  string.sub(newText,1,cutIdx)..lineBreak);
 						
 						--special_text = string.sub(newText,par_CombatCutIdx+1,cutIdx)..lineBreak;
-						if string.find(par_LastMode, 'combat_') then
+						if string.find(par_LastMode, 'combat_') and par_isDamage then
+							
 							special_color = allSettings.colors.damage[1];
 							local cb = allSettings.ColorBlind[1] and 2 or 1;
 							if par_DamageDone then
@@ -7198,7 +7285,7 @@ parseThis = function(e, e_message)
 							end
 							table.insert(MCList, {par_CombatCutIdx, #newText, special_color})
 						else
-							if string.find(par_LastMode,'combatspell_') then
+							if string.find(par_LastMode,'combatspell_') and par_isDamage then
 								special_color = allSettings.colors.spelldamage[1];
 								local cb = allSettings.ColorBlind[1] and 2 or 1;
 								if par_DamageDone then
@@ -7215,7 +7302,7 @@ parseThis = function(e, e_message)
 						if par_CombatCutIdx == 0 then par_CombatCutIdx = -1; end
 					else
 						table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,cutIdx)..lineBreak);
-						if string.find(par_LastMode, 'combat_') then
+						if string.find(par_LastMode, 'combat_') and par_isDamage  then
 							col = allSettings.colors.damage[1];
 							local cb = allSettings.ColorBlind[1] and 2 or 1;
 							if par_DamageDone then
@@ -7226,7 +7313,7 @@ parseThis = function(e, e_message)
 							end
 							--table.insert(MCList, {par_CombatCutIdx, #newText, col})
 						else
-							if string.find(par_LastMode,'combatspell_') then
+							if string.find(par_LastMode,'combatspell_') and par_isDamage then
 								col = allSettings.colors.spelldamage[1];
 								local cb = allSettings.ColorBlind[1] and 2 or 1;
 								if par_DamageDone then
@@ -7243,7 +7330,7 @@ parseThis = function(e, e_message)
 					end
 				else
 					--MCList = HandleActors(MCList, newText)
-					
+												
 					table.insert(b_ChatBuffer[1][2].text, string.sub(newText,1,cutIdx)..lineBreak);
 					par_CombatCutIdx = par_CombatCutIdx - cutIdx;
 					special_text = '';
@@ -7276,11 +7363,14 @@ parseThis = function(e, e_message)
 				for i = 1, #MCList do
 					local mcoff = 28 * (i-1)
 					mctext = string.sub(mctext,1,MCList[i][1]+mcoff)..utils.MC(MCList[i][3])..string.sub(mctext,MCList[i][1]+1+mcoff,MCList[i][2]+mcoff)..utils.MC('reset')..string.sub(mctext, MCList[i][2]+1+mcoff,#mctext)
+					
 				end
 				
 				if allSettings.CompactCombat[1] then
+					--Debug(special_color,1,true)
 					mctext = HandleActors(mctext, special_color)
 				end
+				
 				--if MCCheck(mctext) then 
 				b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text] = utils.MCCheck(mctext)
 					--Debug(b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text], 1, true)
@@ -7751,32 +7841,60 @@ end
 
 function HandleActors(text, scol)
 	--text = text:gsub("%-", "%-")
-	if scol == 0xFFFFFFFF then scol = 'reset' end
+	if scol == '' then scol = 'reset' end
+	local orig_text = text;	
+	local a1 = 1;
+	local a2 = 1;
+	
+	--text = text:gsub(par_actor1:escape() ,utils.MC(allSettings.colors.actor1[1])..par_actor1..utils.MC('reset'):gsub('%%', '%%%%'),1)
 	
 	if #par_actor1 > 0 then
 		par_handled_actors = true	
-		text = text:replace(par_actor1,utils.MC(allSettings.colors.actor1[1])..par_actor1..utils.MC('reset'))	
+		--text = text:replace(par_actor1,utils.MC(allSettings.colors.actor1[1])..par_actor1..utils.MC('reset'),1)	
+		text = text:gsub(par_actor1:escape().."([^%a-])", (utils.MC(allSettings.colors.actor1[1])..par_actor1..utils.MC('reset')):gsub('%%', '%%%%').."%1",1)	
+		_, a1 = text:find(par_actor1:escape(), 1, false)
+		par_actor1 = '';
+		--Debug(a1, 1, true)
 	end
 	
-	if #par_actorP > 0 and #par_actorP ~= #par_actor1 then
+	--if #par_actorP > 0 and #par_actorP ~= #par_actor1 then
+	if #par_actorP > 0 then
 		par_handled_actors = true
-		text = text:replace(par_actorP, utils.MC(allSettings.colors.actor1[1])..par_actorP..utils.MC('reset'))	
+		
+		text = text:sub(1,a1)..text:sub(a1+1,#text):replace(par_actorP, utils.MC(allSettings.colors.actor1[1])..par_actorP..utils.MC('reset'),1)
+		--if a1 then
+			--text = text:replace(par_actorP, utils.MC(allSettings.colors.actor1[1])..par_actorP..utils.MC('reset'),1)
+		---else
+			--text = text:replace(par_actorP, utils.MC(allSettings.colors.actor1[1])..par_actorP..utils.MC('reset'),1)
+		--end
+		par_actorP = '';		
+		--Debug(text, 1, true)
 	end
+	
 	
 	if #par_actor2 > 0 then
 		par_handled_actors = true
-		text = text:replace(par_actor2, utils.MC(allSettings.colors.actor2[1])..par_actor2..utils.MC('reset'))
-		
+		--text = text:sub(1,a2)..text:sub(a2+1,#text):replace(par_actor2, utils.MC(allSettings.colors.actor2[1])..par_actor2..utils.MC('reset'),1)
+		text = text:gsub(par_actor2:escape().."([^%a-])", (utils.MC(allSettings.colors.actor2[1])..par_actor2..utils.MC('reset')):gsub('%%', '%%%%').."%1",1)	
+		_, a2 = text:find(par_actor2:escape(), 1, false)
+		par_actor2 = '';
+		--Debug(text, 1, true)
 	end
 	
-	if #par_actorE > 0 and #par_actorE ~= #par_actor2 then
+	--if #par_actorE > 0 and #par_actorE ~= #par_actor2 then
+	if #par_actorE > 0 then
 		par_handled_actors = true
-		text = text:replace(par_actorE, utils.MC(allSettings.colors.actor2[1])..par_actorE..utils.MC('reset'))
+		--text = text:replace(par_actorE, utils.MC(allSettings.colors.actor2[1])..par_actorE..utils.MC('reset'),1)
+		text = text:sub(1,a2)..text:sub(a2+1,#text):replace(par_actorP, utils.MC(allSettings.colors.actor2[1])..par_actorP..utils.MC('reset'),1)
+		par_actorE = '';
+		--Debug(text, 1, true)
 	end
 
 	if #par_action1 > 0 then
 		par_handled_actors = true
-		text = text:replace(par_action1, utils.MC(allSettings.colors.ability[1])..par_action1:gsub('\\','['):gsub('/',']')..utils.MC(scol))
+		text = text:replace(par_action1, utils.MC(allSettings.colors.ability[1])..par_action1:gsub('\\','['):gsub('/',']')..utils.MC(scol),1)
+		par_action1 = '';
+		
 	end
 	
 	return text
@@ -8017,7 +8135,7 @@ function DrawInfo(text)
 					if item.Type == 4 or item.Type == 5 then
 						
 						--slot,race,desc,lvl,job
-						inf = inf..'['..utils.equipSlots[item.Slots]..']'..utils.equipRaces[item.Races]..'\n'
+						inf = inf..'['..utils.equipSlots[item.Slots]..'] '..utils.equipRaces[item.Races]..'\n'
 						inf = inf..desc..'\n'
 						inf = inf..'Lv: '..item.Level..' '..utils.GetEquipJobs(item.Jobs)
 					else--if item.Type == 1 or item.Type == 7 then
@@ -8051,6 +8169,7 @@ function DrawInfo(text)
 				elseif ability.Type == 4 then inf = '[Job Trait]\n' end
 				local desc = ability.Description[1]
 				if desc then
+					desc = desc:replace('\x81\x60', '~'):replace('\xEF\x1F', 'Fire'):replace('\xEF\x20', 'Ice'):replace('\xEF\x21', 'Wind'):replace('\xEF\x22', 'Earth'):replace('\xEF\x23', 'Lgtn'):replace('\xEF\x24', 'Water'):replace('\xEF\x25', 'Light'):replace('\xEF\x26', 'Dark'):replace('%', '%%'):replace('\n',' ')
 					if ability.TPCost > 0 then inf = inf..'TP: '..ability.TPCost..'\n' end
 					if ability.ManaCost > 0 then inf = inf..'MP: '..ability.ManaCost..'\n' end
 					inf = inf..desc
@@ -8076,6 +8195,7 @@ function DrawInfo(text)
 				local inf = '[Spell]\n'
 				local desc = spell.Description[1]
 				if desc then
+					desc = desc:replace('\x81\x60', '~'):replace('\xEF\x1F', 'Fire'):replace('\xEF\x20', 'Ice'):replace('\xEF\x21', 'Wind'):replace('\xEF\x22', 'Earth'):replace('\xEF\x23', 'Lgtn'):replace('\xEF\x24', 'Water'):replace('\xEF\x25', 'Light'):replace('\xEF\x26', 'Dark'):replace('%', '%%'):replace('\n',' ')
 					--if spell.TPCost > 0 then inf = inf..'TP: '..spell.TPCost..'\n' end
 					if spell.ManaCost > 0 then inf = inf..'MP: '..spell.ManaCost..'\n' end
 					inf = inf..desc
