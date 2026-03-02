@@ -48,7 +48,8 @@ local utils =
 					{5,		'party_out',	0xFF7BD3FF},
 					{6,		'linkshell1out',0xFF50FFD0},
 					{7,		'emote1',		0xFFC797FF},
-					{8,		'_?',		0xFFFFFFFF},
+					--{8,		'_?',		0xFFFFFFFF}, used by simplelog for crafting results
+					{8,		'unused?',		0xFFFFFFFF},
 					{9,		'local',	0xFFFFFFFF},
 					{10,	'shout',		0xFFFF5E5E},
 					{11,	'shout',		0xFFFF5E5E},
@@ -944,7 +945,7 @@ end
 utils.ParseUrlLink = function(text)
 
 	local url = '';
-	if not text:find('https') and not text:find('www.') then return url end
+	if not text:find('https') and not text:find('www.') and not text:find('localhost') then return url end
     --local url_pattern = "https?://?[%w#_/!%?%-\"\'%^%(%);@=%+*%$/%%{}~]+%.[%a]+/?[%w%p]+" -- Matches URLs starting with protocols  --(\S*\s)?((https?:\/\/)?(\S*\.)+(\S*)+)
     ---local url_pattern = '((%s?)([htps:/]*)([^%s%p/]*%.)([A-z://0-9]*%.)([^%s]*))' -- Matches URLs starting with protocols
 	
@@ -956,11 +957,17 @@ utils.ParseUrlLink = function(text)
     --local url = text:gmatch(url_pattern) or '';
     local url, leadingspace, part1, part2, part3  = string.match((text:gsub('https://www.','www.')):gsub('https://','www.'), url_pattern)
     
+		--print(url)
 	if url then
 		local hasletters = part1:match('[A-z]') and part2:match('[A-z]') and part3:match('[A-z]')
 		if hasletters and (leadingspace ~='' or string.find(text, tostring(url:trimex()), 1, true) == 1) then
 			return url:trimex()
 		end
+	elseif text:find('localhost') then
+		
+		url = text:match('.*(http://localhost:[^%s]*).*')
+		--print(url)
+		if url then	return url end
 	end
 	return ''
 end
@@ -1486,28 +1493,49 @@ utils.CountExtraBytesT = function(s)
 end
 
 
-utils.breakLine = function(s, breakpoint)
-    local pos = 1
-    local result = {}
-
-    while pos <= #s do
-        local chunk = s:sub(pos, pos + (breakpoint-1)) -- Get 40-character chunk
-        if #chunk < breakpoint then
-            table.insert(result, chunk) -- Last chunk, no need to break
-            break
-        end
-
-        local lastSpace = chunk:match(".*() ") -- Find last space position
-        if lastSpace then
-            table.insert(result, s:sub(pos, pos + lastSpace - 1)) -- Up to the last space
-            pos = pos + lastSpace -- Move past the space
-        else
-            table.insert(result, chunk) -- No space found, force break at 40
-            pos = pos + breakpoint
-        end
-    end
-
-    return table.concat(result, "\n")
+utils.breakLine = function(text, size)
+	if not text or #text < 1 then return '' end
+	
+	local idx = 1
+	local parts = {}
+			
+	local guard = 0
+	while idx < #text and guard < 100 do
+	--	print('---idx:'..idx)
+		local chunk = text:sub(idx, idx+size)
+			
+		local n = text:find('\n',idx,true)
+		
+		if n and n+1 < idx+size then
+			table.insert(parts, chunk:sub(1, n-(idx)))
+			idx = n+1
+	--		print(chunk:sub(1,n))
+	--		print('n:'..n)
+		elseif #chunk < size then
+			table.insert(parts, chunk)
+			idx = idx + size + 1
+	--		print(chunk)
+	--		print(#chunk..','..size)
+		else
+			local last_space = utils.FindLastOf(chunk, ' ')
+			--print(last_space)
+			if not last_space then
+				table.insert(parts, chunk)
+				idx = idx + size + 1
+	--			print(chunk)
+	--			print('ls:'..last_space)
+			else
+				table.insert(parts, chunk:sub(1, last_space-1))
+				idx = idx + last_space 
+	--			print(chunk:sub(1, last_space))
+	--			print('s:'..last_space)
+			end
+		end
+		guard = guard +1 
+		--print(guard)
+	end
+	--print(#parts)
+	return table.concat(parts, "\n") 
 end
 
 utils.LoadCustomFilters = function()
@@ -1704,39 +1732,81 @@ end
 
 --local s, c = text:gsub(':([^%s]+):', function(e) return utils.MC(0xFFFBD043)..utf8.char(emojis[e])..utils.MC('reset') or ':'..e..':' end)
 utils.parseEmoji = function(text)
-	local s, c = text:gsub(':([^%s]+):', function(e) return utf8.char(emojis[1][e]) or ':'..e..':' end)
-	local s, c = text:gsub(':([^:]+):', function(e)
-        return utf8.char(emojis[1][e]) or (':'..e..':')
-    end)
-	return s
+	text = text:gsub(':1st_place_medal:',':first_place_medal:')
+	text = text:gsub(':2nd_place_medal:',':second_place_medal:')
+	text = text:gsub(':3rd_place_medal:',':third_place_medal:')
+	local idx = 1
+	while idx < #text or idx < 4092 do
+		local b = text:find(':',idx,true)
+		if b then
+			
+			local e = text:find(':',b+1,true)
+			if e and e - 1 > 0 then
+				--Debug(bit.tohex(emojis[1][text:sub(b+1,e-1)]),1,true)
+				local cp = emojis[1][text:sub(b+1,e-1)]
+				if cp then
+					if cp >= 0x1FA70 and cp <= 0x1FAFF then 
+						text = text:sub(1,b-1)..'*'..text:sub(b+1,e-1)..'*'..text:sub(e+1,#text)
+					else
+						text = text:sub(1,b-1)..utf8.char(cp)..text:sub(e+1,#text)
+					end
+					idx = e
+				end
+				idx = b
+			else
+				break;
+			end
+		else
+			break;
+		end
+		idx = idx + 1
+	end
+	
+	return text
 end
 
 utils.emojiCols = function(text)
-	--local s, c = text:gsub(':([^%s]+):', function(e) return utils.MC(0xFFFBD043)..utf8.char(emojis[e])..utils.MC('reset') or ':'..e..':' end)
-	local newText = ''
-	idx = 1
-	while idx <= #text do
-		if text:byte(idx) >= 0xF0 then
-			newText = newText..text:sub(idx,idx-1)..utils.MC(0xFFFBD043)..text:sub(idx,idx+3)..utils.MC('reset')
-			idx = idx+4
-		else
-			newText = newText..text[idx]
-			idx = idx+1
-		end
-	end
-	return newText
+  local out = {}
+  local idx = 1
+  local len = #text
+
+  while idx <= len do
+    local b = text:byte(idx)
+
+    -- 4-byte UTF-8 (U+10000..U+10FFFF) -> 😀 etc.
+    if b >= 0xF0 and b <= 0xF4 and idx + 3 <= len then
+      out[#out+1] = utils.MC(0xFFFBD043)
+      out[#out+1] = text:sub(idx, idx + 3)
+      out[#out+1] = utils.MC('reset')
+      idx = idx + 4
+
+    -- 3-byte UTF-8 (U+0800..U+FFFF) -> ❤ ☀ ♻ ✨ etc.
+    elseif b >= 0xE0 and b <= 0xEF and idx + 2 <= len then
+      out[#out+1] = utils.MC(0xFFFBD043)
+      out[#out+1] = text:sub(idx, idx + 2)
+      out[#out+1] = utils.MC('reset')
+      idx = idx + 3
+
+    else
+      out[#out+1] = text:sub(idx, idx)
+      idx = idx + 1
+    end
+  end
+
+  return table.concat(out)
 end
 
 utils.CalcRows = function(text, line_width, char_size)
 	
 	-- Calc how many chars fit in a line
-	local chars_in_line = math.floor(line_width/char_size)
+	local chars_in_line = math.floor(line_width/char_size + 1e-6)
 	
 	-- Actual lines used after text wrapping
 	local lines_tot = 0
-
+	local loops = 0
+	
 	-- Condition breaks when text remaining fits in a line
-	while #text >= chars_in_line do 
+	while #text > chars_in_line do 
 		
 		-- Check for newline chars in the first line
 		local n = text:find('\n')
@@ -1747,7 +1817,7 @@ utils.CalcRows = function(text, line_width, char_size)
 			lines_tot = lines_tot + 1
 			-- Set the next char after \n as the new text start
 			--print('n> '..text[n-1])
-			text = text:sub(n+2, #text)
+			text = text:sub(n+1, #text)
 			
 		-- If not found..
 		else
@@ -1764,15 +1834,66 @@ utils.CalcRows = function(text, line_width, char_size)
 			text = text:sub(last_space+1, #text)
 			
 		end
+		
+		
 	end
-	
+	--print(loops)
+	--print(lines_tot)
 	-- Count an extra line for each \n left in text
-	lines_tot = lines_tot + select(2, text:gsub("\n", ""))
+	local idx = 1
+	while idx and idx > 0 do
+		idx = text:find('\n', idx+1, true)
+		if idx then
+			lines_tot = lines_tot + 1
+		end
+	end
+	--lines_tot = lines_tot + select(2, text:gsub("\n", ""))
 	
 	-- Count one more line for the remaining text
 	lines_tot = lines_tot + 1
 	--print(lines_tot)
+	
 	return lines_tot
+	
+ -- local chars_in_line = math.floor((line_width / char_size) - 1)
+  -- if chars_in_line < 1 then chars_in_line = 1 end
+
+  -- local lines_tot = 0
+
+  -- while #text > chars_in_line do
+    -- local n = text:find("\n", 1, true)
+
+    -- if n and n <= chars_in_line then
+      -- lines_tot = lines_tot + 1
+      -- text = text:sub(n + 1)
+    -- else
+      -- local head = text:sub(1, chars_in_line)
+
+      -- -- inline deterministic last-space search (same as your FindLastOf)
+      -- local last_space = nil
+      -- for i = #head, 1, -1 do
+        -- if head:byte(i) == 32 then
+          -- last_space = i
+          -- break
+        -- end
+      -- end
+      -- if not last_space then last_space = chars_in_line end
+
+      -- lines_tot = lines_tot + 1
+      -- text = text:sub(last_space + 1)
+    -- end
+  -- end
+
+  -- -- Finish: remainder contributes 0 lines if empty, else number of '\n' splits + 1
+  -- if #text == 0 then
+    -- return lines_tot
+  -- end
+
+  -- local extra = 1
+  -- for _ in text:gmatch("\n") do
+    -- extra = extra + 1
+  -- end
+  -- return lines_tot + extra
 end
 
 utils.RepairSettings = function(t1, t2, seen)

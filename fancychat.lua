@@ -1,6 +1,6 @@
 addon.name      = 'fancychat';
 addon.author    = 'Arielfy';
-addon.version   = '0.9';
+--addon.version   = '0.9';
 addon.desc      = 'Fancy Chat!';
 addon.link      = '';
 
@@ -21,9 +21,12 @@ local targets = require ('targets');
 local help = require('help');
 local http = require("socket.http")
 local imguiWrap = require('imguiWrap')
---local emojis = require('emojis')
+
+local ver = '0.9.260228'
+addon.version = ver
 
 local uiw = T{
+		NetStatObj = T{0,1},
 		UpperMenuPTR,
 		MenuDescPTR,
 		MenuDesc,
@@ -69,6 +72,8 @@ local mvc_targetposX = 0;
 
 local fcw = T{
 	T{	
+		--cexi
+		LastCommands = T{{}, 0, {'!mog','!chef','!signet','!sanction','!sigil','!ventures','!points','!prestige','!fatigue','!currency','!dailies','!pops'}, 1},
 		BufferBusy = false,
 		WasRendered = false,
 		itemInfo = {},
@@ -101,8 +106,6 @@ local fcw = T{
 		MoveChatPos4 = 0,
 		MoveChat = false,
 		PrevMoveChat = false,
-		Chat1WindowPosX = 0,
-		Chat1WindowPosY = 0, 
 		InitDone = false,
 		Closing = false,
 		LoggedIn = false,
@@ -262,6 +265,8 @@ local tab_ButtonColorStylesSelected = {
 }
 
 -- Settings window variables --
+local set_isCEXI = true
+local set_colorTextW = 1
 local set_alertList = {} 
 local set_alertBuffer = T{}
 local set_Popup = {false}
@@ -290,7 +295,7 @@ local dw_addr = 0
 -- Text parsing variables --
 local par_tabmode
 local par_checkAgain = {0, ''}
-local par_emojiChannel = 5;
+local par_emojiChannels = {6,14,205,213,214,217};
 local par_allowed = {0, 0};
 local par_dumping = false;
 local par_LastMsgLength = 0;
@@ -360,6 +365,10 @@ local ro_BigMode;
 local fo_BigMode;
 
 local allSettings = T{
+	ver = '0',
+	GamepadNav = T{false},
+	CompactTabsBL = T{false},
+	R0warning = T{true},
 	UseHalfLength = T{false},
 	PreciseTS = T{false},
 	--BigModeWarning = T{false},
@@ -457,7 +466,6 @@ local allSettings = T{
 		visible = true,
 		z_order = -1,
 	},
-	colors = {},
 }
 
 local defaultColors = {
@@ -493,6 +501,8 @@ local defaultColors = {
 	cexi			= {0xFF00FFB3, 0xFFFF0055},
 }
 
+allSettings.colors = defaultColors
+
 local colorDesc =
 {
 	tell 			= {'Tell','/tell messages'},
@@ -502,19 +512,19 @@ local colorDesc =
 	linkshell2		= {'Linkshell 2','/linkshell2 messages'},
 	emote			= {'Emotes','/emote messages'},
 	combat			= {'Combat','Combat base color'},
-	damage			= {'Damage','Default DMG color'},
+	damage			= {'Damage (Default)','Default DMG color'},
 	combatspell		= {'Combat Spell','Spell base color'},
-	spelldamage		= {'Spell Dmg','Default spell DMG color'},
+	spelldamage		= {'Spell Dmg (Default)','Default spell DMG color'},
 	lot				= {'Cast Lot','Casting lot color'},
 	attain			= {'Attain','For level up and other character progression messages'},
 	obtained		= {'Obtain/Gain', 'For messages such as x obtains/gains y'},
 	keyitem			= {'Key Item','Obtained key item messages'},
 	learn			= {'Learn','Learning new skills/spells messages'},
 	found			= {'Drops','For messages such as Found on x: y'},
-	dmgdone			= {'Damage Done', 'Highlights damage done'},
-	dmggot			= {'Damage Taken', 'Highlights damage taken'},
-	spelldmgdone 	= {'Spell Dmg Done', 'Highlights spell damage done'},
-	spelldmggot		= {'Spell Dmg Taken', 'Highlights spell damage taken'},
+	dmgdone			= {'Your Damage Done', 'Highlights damage done by you or enemy missed attacks.'},
+	dmggot			= {'Your Damage Taken', 'Highlights damage taken by you or your missed attacks.'},
+	spelldmgdone 	= {'Your Spell Dmg Done', 'Highlights spell damage done'},
+	spelldmggot		= {'Yor Spell Dmg Taken', 'Highlights spell damage taken'},
 	cexi			= {'CEXI', 'CEXI content messages'},
 	ability			= {'Ability/Spell', 'Highlights an ability or spell used by an Entity'},
 	you				= {'You', 'Color highlighting youin combat text.'},
@@ -523,6 +533,17 @@ local colorDesc =
 	helm			= {'HELM result', 'Color highlighting the yelded item from an HELM action'},
 	useitem			= {'Item Use', 'Color highlighting the use of an item'},
 	negative		= {'Negative Effect', 'Color that notifies a potential negative action (e.g. throwing items away)'},
+}
+
+local gamepadButtons = {
+	enabled = false,	
+	scroll1 = 0,
+	scroll2 = 0,
+	buttonsCD = 0,
+	buttonsCDready = false,
+	analogCD = 0,
+	analogCDready = false,
+	pressedEnter = false,
 }
 
 ashita.events.register('d3d_present', 'present_cb', function ()
@@ -587,6 +608,10 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			return
 		end;
 		
+		if AshitaCore:GetChatManager():IsInputOpen() ~= 0x11 then
+			fcw[1].LastCommands[2] = 0
+			fcw[1].LastCommands[4] = 0
+		end
 		local imIO = imgui.GetIO()
 		local dsize = imIO.DisplaySize;
 		--if imIO.KeysDown[10] then imgui.SetWindowFocus() end
@@ -611,6 +636,15 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 		else
 			par_timePrinted = true
 		end
+		
+		if allSettings.R0warning[1] and uiw.NetStatObj[1] > 0 and ashita.memory.read_uint32(uiw.NetStatObj[1]) == 0 and uiw.NetStatObj[2] > 0 then	
+			AshitaCore:GetChatManager():AddChatMessage(123, false, '[Warning] R0 detected.')
+			AshitaCore:GetChatManager():AddChatMessage(123, false, 'Use /fchat savelogs to save chat logs.')
+			--CEXI extra message
+			AshitaCore:GetChatManager():AddChatMessage(123, false, 'If this is a server crash and you used a pop item, take a FULL screenshot as proof.')
+		end
+		
+		uiw.NetStatObj[2] = ashita.memory.read_uint32(uiw.NetStatObj[1])
 	
 		fcw[1].PlayerName = settings.name;
 		
@@ -1009,8 +1043,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			--fcw[1].BG_W = allSettings.fontSettings.font_height*allSettings.ChatLines*fcw[1].BGScale*2;
 			
 			
-			imgui.SetNextWindowSize({ fcw[1].BG_W, ro_RectBG[1].settings.height+16 }, ImGuiCond_Once);
-			imgui.SetNextWindowSizeConstraints({ fcw[1].BG_W, ro_RectBG[1].settings.height+16 }, { FLT_MAX, FLT_MAX, }, ImGuiCond_Once);
+			imgui.SetNextWindowSize({ fcw[1].BG_W, ro_RectBG[1].settings.height+16 });
+			imgui.SetNextWindowSizeConstraints({ fcw[1].BG_W, ro_RectBG[1].settings.height+16 }, { FLT_MAX, FLT_MAX, });
 			
 			--local extraFlags = 0
 			--if allSettings.LockWindowPos[1] then extraFlags = (ImGuiWindowFlags_NoMove); end
@@ -1020,7 +1054,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 		-- Setting variables to position the chat window elements --
 			
 			
-			fcw[1].Chat1WindowPosX, fcw[1].Chat1WindowPosY = imgui.GetWindowPos();
+		--	fcw[1].Chat1WindowPosX, fcw[1].Chat1WindowPosY = imgui.GetWindowPos();
 			
 		
 			local positionStartX, positionStartY = imgui.GetCursorScreenPos();
@@ -1139,7 +1173,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 								
 								if imgui.IsMouseClicked(ImGuiMouseButton_Left) then
 									local urlText = utils.stringsplit(b_ChatBuffer[b_ChatBufferMode[1]][2].url[ChatHoverIdx],'|')
-									ashita.misc.open_url(string.find(urlText[2], 'https://') and urlText[2] or 'https://'..urlText[2]);
+									ashita.misc.open_url((string.find(urlText[2], 'https://') or string.find(urlText[2], 'http://localhost:')) and urlText[2] or 'https://'..urlText[2]);
 									--print(b_ChatBuffer[b_ChatBufferMode[1]][2].url[ChatHoverIdx])
 								end
 							end
@@ -1226,7 +1260,10 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						if imgui.GetIO().KeyShift then
 							if #allSettings.Notes < 10 and #copyBufferText > 0 then
 								table.insert(allSettings.Notes, copyBufferText)
+								print('Message saved in the Notepad ['..#allSettings.Notes..'/10]')
 								SaveSettings();
+							else
+								print('Notepad notes full [10/10]')
 							end
 						else
 							utils.SetClipboardText(utils.RevertShiftJIS(copyBufferText))
@@ -1242,10 +1279,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 		-- Setting up line scrolling --
 			local scrollOffset= (fcw[1].BG_H/120);
 
-			if (mouseX > fcw[1].Anchor_X and mouseX < fcw[1].Anchor_X+fcw[1].BG_W and
-			mouseY > positionStartY+scrollOffset and mouseY < positionStartY+scrollOffset+allSettings.fontSettings.font_height*(allSettings.ChatLines+1)
-			and imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) and not fcw[1].BufferBusy
-			)
+			if (imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) or gamepadButtons.enabled) and not fcw[1].BufferBusy
+			
 			then
 				if (
 					fcw[1].ScrollDelta > 0
@@ -1328,7 +1363,14 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				imgui.SetNextWindowSize({ tabsW+8, ro_RectBG[1].settings.height/(allSettings.ChatLines*0.7) });
 				
 			else
-				imgui.SetNextWindowPos(fcw[1].compactPos); 
+				if not allSettings.CompactTabsBL[1] then
+					imgui.SetNextWindowPos(fcw[1].compactPos);
+				else
+					if fcw[1].PosChanged or not fcw[1].TabsPos then
+						fcw[1].TabsPos = {math.floor(fcw[1].Anchor_X-(allSettings.fontSettings.font_height*2/allSettings.fontSettings.font_height)-((allSettings.fontSettings.font_height*5)/allSettings.fontSettings.font_height)),math.floor(fcw[1].Anchor_Y+tabsH-2)+math.floor(allSettings.fontSettings.font_height/25)}
+					end
+					imgui.SetNextWindowPos(fcw[1].TabsPos);
+				end
 				imgui.SetNextWindowSize(fcw[1].compactSize);
 			end
 			
@@ -1373,8 +1415,15 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			
 				if(fcw[1].TextureIDGuideMe ~= nil) then
 					if (imguiWrap.ImageButton('TextureIDGuideMe',fcw[1].TextureIDGuideMe,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
+						
 						fcw[1].GuideMeOpened[1] = not fcw[1].GuideMeOpened[1];
 						if fcw[1].GuideMeOpened[1] then	fcw[1].NotepadOpened[1]  = false end
+					end
+					if (imgui.IsItemHovered(0)) then
+						imgui.BeginTooltip()
+						message = 'Open GuideMe'
+						imgui.SetTooltip(message)
+						imgui.EndTooltip()
 					end
 				end
 				imgui.SetCursorPos({imgui.GetCursorPosX()+reserved+4+(tabsH-8),imgui.GetCursorPosY()-(tabsH+1.6)});
@@ -1384,12 +1433,24 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						fcw[1].NotepadOpened[1] = not fcw[1].NotepadOpened[1]
 						if fcw[1].NotepadOpened[1] then	fcw[1].GuideMeOpened[1] = false end
 					end
+					if (imgui.IsItemHovered(0)) then
+						imgui.BeginTooltip()
+						message = 'Open Notepad'
+						imgui.SetTooltip(message)
+						imgui.EndTooltip()
+					end
 				end
 				
 				imgui.SetCursorPos({imgui.GetCursorPosX()+reserved+4+(tabsH*2-8),imgui.GetCursorPosY()-(tabsH+1.6)});
 				if(fcw[1].TextureIDSettings ~= nil) then
 					if (imguiWrap.ImageButton('TextureIDSettings',fcw[1].TextureIDSettings,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
 						allSettings.settingsOpened[1] = not allSettings.settingsOpened[1];
+					end
+					if (imgui.IsItemHovered(0)) then
+						imgui.BeginTooltip()
+						message = 'Open Settings'
+						imgui.SetTooltip(message)
+						imgui.EndTooltip()
 					end
 				end
 				
@@ -1400,6 +1461,12 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						fcw[1].PosChanged = true
 						fcw[2].PosChanged = true
 						SaveSettings();
+					end
+					if (imgui.IsItemHovered(0)) then
+						imgui.BeginTooltip()
+						message = 'Compact TabBar Mode'
+						imgui.SetTooltip(message)
+						imgui.EndTooltip()
 					end
 				end
 				
@@ -1431,14 +1498,23 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				
 				for T_i = 1, utils.GetTableLen(tab_Tabs) do
 				if (tab_Tabs[T_i] == allSettings.SelectedTab) then
-						imgui.SetCursorPos({button_length[2],0});
+						if allSettings.CompactTabsBL[1] then
+							imgui.SetCursorPos({0,0});
+						else
+							imgui.SetCursorPos({button_length[2],0});
+						end
 						if imgui.Button(tab_Tabs[T_i]:gsub('Alt','##Alt'),{button_length[1],tabsH-6}) then
 							if T_i+1 <= #tab_Tabs then tab_NextTab = tab_Tabs[T_i+1]; else  tab_NextTab = tab_Tabs[1] end
 						end
 					end
 				end
 				
-				imgui.SetCursorPos({(tabsW/#tab_Tabs)-(tabsH-8),0});
+				if allSettings.CompactTabsBL[1] then
+					imgui.SetCursorPos({button_length[1],0});
+				else
+					imgui.SetCursorPos({(tabsW/#tab_Tabs)-(tabsH-8),0});
+				end
+				
 				
 				if imgui.GetIO().KeyShift then
 					if(fcw[1].TextureIDSettings ~= nil) then
@@ -1489,7 +1565,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				PushWindowStyle()
 								
 				if imgui.Begin('FancyChat - GuideMe (experimental)', fcw[1].GuideMeOpened, windowFlags) then
-					
+				
 					if imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) then ResetAutoHideTimer() end
 					local response, status, headers;
 					
@@ -1647,7 +1723,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 								
 				if imgui.Begin('FancyChat - Notes (experimental)', fcw[1].NotepadOpened, windowFlags) then
 					if imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) then ResetAutoHideTimer() end
-					imgui.PushItemWidth(imgui.GetWindowWidth()-290);
+					AddTooltip('Save up to 10 Notes!\n- Use the textbox to manually add a note.\n- Use Shitf+Click on any message in chat to save it directly as a note.',0);	imgui.SameLine() imgui.SetCursorPosY(imgui.GetCursorPosY()-4)
+					imgui.PushItemWidth(imgui.GetWindowWidth()-316);
 					if imgui.InputText('##NoteInput', fcw[1].Note, 300, bit.bor(ImGuiInputTextFlags_AutoSelectAll)) then
 					end imgui.SameLine()
 					if imgui.Button('Add Note', {100,0}) then
@@ -1826,20 +1903,20 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						--SaveSettings();
 					end
 					imgui.Dummy({0,5});
-					imgui.Text('^');
+					imgui.TextColored({1.0,0.2,0.2,1.0},'^');
 					cposY = imgui.GetCursorPosY();
 					imgui.SetCursorPosY(cposY-20);
 					
-					imgui.Text('|');
+					imgui.TextColored({1.0,0.2,0.2,1.0},'|');
 					cposY = imgui.GetCursorPosY();
 					imgui.SetCursorPosY(cposY-20);
 					cposX = imgui.GetCursorPosX();
 					imgui.SetCursorPosX(cposX+15);
-					imgui.Text('These changes require an addon restart');
+					imgui.TextColored({1.0,0.2,0.2,1.0},'Changes to all settings above require an addon restart');
 					-- if (fcw[1].TextureIDInfo ~= nil ) then
 						-- imgui.GetWindowDrawList():AddImage(fcw[1].TextureIDInfo, {0,0},{10,10}, {0,0}, {1,1}, imgui.GetColorU32({ 1.0, 1.0, 1.0, 0.75 }));
 					-- end
-					AddTooltip('The changes to options above won\'t take effect until the addon is restarted',1);
+					AddTooltip('The changes to options above won\'t take effect until the addon is restarted',1,1);
 					if imgui.Button('Restart & apply') then
 						fcw[1].Closing = true;
 						if not set_SecondChat[1] then
@@ -1931,6 +2008,17 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					imgui.Dummy({0,20});
 					if (imgui.Checkbox('Lock Windows Positions (disables dragging)##WindowLock',{allSettings.LockWindowPos[1]})) then 
 						allSettings.LockWindowPos[1] = not allSettings.LockWindowPos[1];
+						SaveSettings();
+					end
+					imgui.Dummy({0,5});
+					if (imgui.Checkbox('Compact tabs in the bottom-left corner##ComapctBL',{allSettings.CompactTabsBL[1]})) then 
+						allSettings.CompactTabsBL[1] = not allSettings.CompactTabsBL[1];
+						SaveSettings();
+					end
+					imgui.Dummy({0,5});
+					if (imgui.Checkbox('Gampad Chat Navigation##GamepadNav',{allSettings.GamepadNav[1]})) then 
+						allSettings.GamepadNav[1] = not allSettings.GamepadNav[1];
+						SaveSettings();
 					end
 					imgui.Dummy({0,5});
 					if (imgui.Checkbox('Enable Auto-Hide window',{allSettings.AutoHideWindow[1]})) then 
@@ -1963,6 +2051,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					imgui.Dummy({0,5});
 					if (imgui.Checkbox('Prevent obstructing FFXI UI',{allSettings.EnabledChatMove[1]})) then 
 						allSettings.EnabledChatMove[1] = not allSettings.EnabledChatMove[1];
+						SaveSettings();
 					end
 					imgui.Dummy({1,0}); imgui.SameLine(); imgui.Text('|  Set what happens to the 2nd chat')
 					local csmodes = {{'Nothing', 1},{'Hide 2nd', 2},{'Shift along', 3}}
@@ -1979,6 +2068,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					imgui.Dummy({1,0}); imgui.SameLine(); imgui.Text('| ');	imgui.SameLine();
 					if (imgui.Checkbox('Prevent obstructing Auto-Translate menu as well',{allSettings.MoveChatATMenu[1]})) then 
 						allSettings.MoveChatATMenu[1] = not allSettings.MoveChatATMenu[1];
+						SaveSettings();
 					end
 					imgui.Dummy({3,0}); imgui.SameLine(); imgui.Text('L');
 					imgui.SetCursorPosY(imgui.GetCursorPosY()-18);
@@ -1991,7 +2081,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				
 				
 				if (imgui.BeginTabItem('Font Colors', nil)) then
-					imguiWrap.BeginChild('leftpane', { ((setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3)*0.4,setsizey*2.7/3-60 }, true);
+					imguiWrap.BeginChild('leftpane', { ((setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3)*set_colorTextW,setsizey*2.7/3-60 }, true);
 
 					local keys = {}
 					local tmpcolor = {}
@@ -2000,17 +2090,22 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					end
 					table.sort(keys)
 					local skip = {'combat','combatspell','cexi'}
+					set_colorTextW = 0
 					for _, key in ipairs(keys) do
+						 
 						if not utils.FindInStringTable(key, skip, 0) then
-							AddSetColor(key, allSettings.colors[key], tmpcolor)
+							set_colorTextW = math.max(AddSetColor(key, allSettings.colors[key], tmpcolor), set_colorTextW)
+							
 						end
 					end
-
+					set_colorTextW = set_colorTextW/(setsizex-((12*(1-(setsizex*3.8/1920)))-3*2))
+					--print(textW)
+			
 					imgui.EndChild();
 
 					imgui.SameLine();
 					
-					imguiWrap.BeginChild('righttpane', { ((setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3)*0.59, setsizey*2.7/3-60 }, true);
+					imguiWrap.BeginChild('righttpane', { ((setsizex*3.8/3.9)-(12*(1-(setsizex*3.8/1920)))-3)*(1-(set_colorTextW+0.01)), setsizey*2.7/3-60 }, true);
 					--imguiWrap.BeginChild('righttpane', { 100, 100}, true);
 					
 					imgui.Text('Color Picker');
@@ -2018,10 +2113,11 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					--AddTooltip('Pick a color on the color picker, then click the arrow buttons on the left pane to assignt the color to the desired chat mode.',0)
 					imgui.TextWrapped('Pick a color and click an arrow button on the left pane to assign it.')
 					if tmpcolor[1] then set_PickedColor = utils.cloneTable(tmpcolor[1]) end
+					imgui.PushItemWidth(dsize.x/(set_colorTextW*25));
 					if imgui.ColorPicker3('Preview', set_PickedColor) then
 						
 					end
-				
+					imgui.PopItemWidth();
 					imgui.EndChild();
 					
 					if imgui.Button('Reset Colors') then
@@ -2234,6 +2330,10 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					imgui.Text('/fancychat ts');
 					imgui.Dummy({23,0}); imgui.SameLine();
 					imgui.Text('[Prints a timestamp of the current time]');
+					imgui.Dummy({0,5});imgui.Dummy({3,0}); imgui.SameLine();
+					imgui.Text('/fancychat savelogs');
+					imgui.Dummy({23,0}); imgui.SameLine();
+					imgui.Text('[Saves chat logs in the addon folder]');
 					
 					-- imgui.Dummy({0,5});imgui.Dummy({3,0}); imgui.SameLine();
 					-- imgui.Text('/fancychat dumpchat');
@@ -2405,6 +2505,13 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 						end
 					imgui.EndCombo();
 					end
+					imgui.Dummy({0,5});
+					imgui.Dummy({5,0}); imgui.SameLine();
+					if (imgui.Checkbox('Warning messages on R0s',{allSettings.R0warning[1]})) then 
+						allSettings.R0warning[1] = not allSettings.R0warning[1];
+						SaveSettings();
+					end
+					AddTooltip('Shows a warning messagee in chat when you R0 (possible disconnection happening).',4)
 					imgui.Dummy({0,5});
 					imgui.Dummy({5,0}); imgui.SameLine();
 					if (imgui.Checkbox('Precise TOD Timestamps',{allSettings.PreciseTS[1]})) then 
@@ -2728,7 +2835,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				imgui.EndTabBar();
 			end
 			imgui.End();
-		PopWindowStyle();
+			PopWindowStyle();
 		else
 			set_SecondChat[1] = allSettings.SecondChat[1];
 			set_ChatLineMaxL = allSettings.chatLineMaxL;
@@ -2877,8 +2984,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 			if (not uiw.LegacyChatOpen and not fcw[1].HideChat and not fcw[1].Closing and fcw[1].autoHideFade < 1 and not fcw[3].BigMode) then
 				
 				
-				imgui.SetNextWindowSize({ fcw[2].BG_W, ro_RectBG[2].settings.height+16 }, ImGuiCond_Once);
-				imgui.SetNextWindowSizeConstraints({ fcw[2].BG_W, ro_RectBG[2].settings.height+16 }, { FLT_MAX, FLT_MAX, }, ImGuiCond_Once);
+				imgui.SetNextWindowSize({ fcw[2].BG_W, ro_RectBG[2].settings.height+16 } );
+				imgui.SetNextWindowSizeConstraints({ fcw[2].BG_W, ro_RectBG[2].settings.height+16 }, { FLT_MAX, FLT_MAX, } );
 				
 				--if allSettings.LockWindowPos[1] then fcw[1].windowFlagsChatBG = bit.bor(fcw[1].windowFlagsChatBG,ImGuiWindowFlags_NoMove); end
 				imgui.Begin('FancyChat_ChatBG2_'+fcw[1].PlayerName, true, bit.bor(fcw[1].windowFlagsChatBG, allSettings.LockWindowPos[1] and ImGuiWindowFlags_NoMove or 0));
@@ -2991,7 +3098,7 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 									--Debug(tostring(b_ChatBuffer[b_ChatBufferMode][2].url[ChatHoverIdx]), 2, false);
 									if imgui.IsMouseClicked(ImGuiMouseButton_Left) then
 									local urlText = utils.stringsplit(b_ChatBuffer[b_ChatBufferMode[2]][2].url[ChatHoverIdx],'|')
-									ashita.misc.open_url(string.find(urlText[2], 'https://') and urlText[2] or 'https://'..urlText[2]);
+									ashita.misc.open_url((string.find(urlText[2], 'https://') or string.find(urlText[2], 'http://localhost:')) and urlText[2] or 'https://'..urlText[2]);
 								end
 								end
 								fcw[2].HoverLine = -1;
@@ -3071,7 +3178,10 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 							if imgui.GetIO().KeyShift then
 								if #allSettings.Notes < 10 and #copyBufferText > 0 then
 									table.insert(allSettings.Notes, copyBufferText)
-									SaveSettings()
+									print('Message saved in the Notepad ['..#allSettings.Notes..'/10]')
+									SaveSettings();
+								else
+									print('Notepad notes full [10/10]')
 								end
 							else
 								utils.SetClipboardText(utils.RevertShiftJIS(copyBufferText))
@@ -3086,10 +3196,8 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				local scrollOffset= (fcw[2].BG_H/120);
 
 				--if (mouseX > fcw[1].Anchor_X and mouseX < fcw[1].Anchor_X+fcw[1].BG_W and
-				if (mouseX > fcw[2].Anchor_X and mouseX < fcw[2].Anchor_X+fcw[2].BG_W and
-				mouseY > positionStartY+scrollOffset and mouseY < positionStartY+scrollOffset+allSettings.fontSettings.font_height*(allSettings.ChatLines+1)
-				and imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) and not fcw[1].BufferBusy
-				)
+				if (imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) or gamepadButtons.enabled) and not fcw[1].BufferBusy
+				
 				then
 					if (
 						fcw[2].ScrollDelta > 0
@@ -3153,7 +3261,14 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 				
 						fcw[2].compactSize = { tabsW/#tab_Tabs+(tabsH-(allSettings.fontSettings.font_height/1.2)+3), ro_RectBG[2].settings.height/8 };
 					end
-					imgui.SetNextWindowPos(fcw[2].compactPos)
+					if not allSettings.CompactTabsBL[1] then
+						imgui.SetNextWindowPos(fcw[2].compactPos);
+					else
+						if fcw[2].PosChanged or not fcw[2].TabsPos then
+							fcw[2].TabsPos = {math.floor(fcw[2].Anchor_X-(allSettings.fontSettings.font_height*2/allSettings.fontSettings.font_height)-((allSettings.fontSettings.font_height*5)/allSettings.fontSettings.font_height)),math.floor(fcw[2].Anchor_Y+tabsH-2)+math.floor(allSettings.fontSettings.font_height/25)}
+						end
+						imgui.SetNextWindowPos(fcw[2].TabsPos);
+					end
 					imgui.SetNextWindowSize(fcw[2].compactSize)
 						
 				end
@@ -3199,8 +3314,13 @@ ashita.events.register('d3d_present', 'present_cb', function ()
 					if button_length[1] > length_ref then button_length[1] = length_ref; button_length[2] = tabsW/#tab_Tabs - length_ref end
 					
 					for T_i = 1, utils.GetTableLen(tab_Tabs) do
-					if (tab_Tabs[T_i] == allSettings.SelectedTab) then
-							imgui.SetCursorPos({button_length[2],0});
+					if (tab_Tabs[T_i] == allSettings.SelectedTab2) then
+							if allSettings.CompactTabsBL[1] then
+								imgui.SetCursorPos({0,0});
+							else
+								imgui.SetCursorPos({button_length[2],0});
+							end
+							--imgui.SetCursorPos({button_length[2],0});
 							if imgui.Button(tab_Tabs[T_i]:gsub('Alt','##Alt'),{button_length[1],tabsH-6}) then
 							--if imgui.Button(tab_Tabs[T_i]:gsub('Alt','##Alt'),{tabsW/#tab_Tabs,tabsH-6}) then
 								if T_i+1 <= #tab_Tabs then tab_NextTab2 = tab_Tabs[T_i+1]; else  tab_NextTab2 = tab_Tabs[1] end
@@ -3487,6 +3607,18 @@ end);
 	
 --end);
 
+-- ashita.events.register('text_out', 'text_out_callback1', function (e)
+
+    -- if (not e.injected) then
+		-- table.insert(fcw[1].LastCommands[1], 1, e.message)
+		-- if #fcw[1].LastCommands[1] > 20 then
+			-- table.remove(fcw[1].LastCommands[1], #fcw[1].LastCommands[1])
+		-- end		
+    -- end
+
+-- end);
+
+
 ashita.events.register('text_in', 'text_in_cb', function (e)
 	
 	if par_dumping then return end
@@ -3543,9 +3675,7 @@ ashita.events.register('text_in', 'text_in_cb', function (e)
 		e_message = e.message;
 	end
 	
-	if mode_pre == par_emojiChannel then
-		e_message = utils.parseEmoji(e_message)
-	end
+	
 	
 	local e_messages = {}
 	local nextEi = 1;
@@ -3631,11 +3761,13 @@ ashita.events.register('load', 'load_cb', function ()
 	
 	--print(bit.tohex(dw_testPTR+0x54));
 	
+	local patternAddr = ashita.memory.find('FFxiMain.dll', 0, '8935????????81C6????????56E8',0,0);
+	local pGlobalNowZoneAddr = ashita.memory.read_uint32(patternAddr+0x02)
+	local Offset = ashita.memory.read_uint32(patternAddr+0x08)
+	local pGlobalNowZone = ashita.memory.read_uint32(pGlobalNowZoneAddr)
+	uiw.NetStatObj[1] = pGlobalNowZone+Offset
 	
-	
-	
-	
-	
+
 	--uiw.InputWinOpenPtr = ashita.memory.find('FFXiMain.dll', 0, 'B9????????E9????????909090909090A1????????8B15', 0, 0);
 	--local uiw.RefInputWinOpenPtr = ashita.memory.read_uint32(uiw.InputWinOpenPtr+0x01);
 	
@@ -3751,7 +3883,12 @@ ashita.events.register('load', 'load_cb', function ()
 		end
 	end
 	
-	allSerrings = utils.RepairSettings(allSettingsOG, allSettings)
+	if not allSettings.ver or allSettings.ver ~= ver then
+		allSettings = utils.RepairSettings(allSettingsOG, allSettings)
+		allSettings.ver = ver
+		SaveSettings()
+		print('Version change detected('..ver..'): Settings table restored')
+	end
 	
 	ResetAutoHideTimer()
 	set_alertList = utils.stringsplit(allSettings.alertwords, ',')
@@ -3986,7 +4123,9 @@ end);
 -- end
 
 ashita.events.register('unload', 'unload_cb', function ()
-	DumpChat()
+	if allSettings.autoDumpChat[1] then
+		DumpChat()
+	end
 	fcw[1].Closing = true;
 	gdi:destroy_interface();
 	SaveSettings();
@@ -4177,8 +4316,13 @@ ashita.events.register('command', 'command_cb', function (e)
 		--AshitaCore:GetChatManager():AddChatMessage(121,false,'\129\159 Quest Completed')
 		--AshitaCore:GetChatManager():AddChatMessage(21,false,' earns a merit point (Total: 4).')
 		
-	
-		
+		--AshitaCore:GetChatManager():AddChatMessage(214, false, '[2]<eleanor> :red_heart:')
+		--print('hello'..utf8.char(0x2764))
+		--local msg = 'hello'
+		-- if AshitaCore:GetChatManager():IsInputOpen() == 0x11 then
+		-- AshitaCore:GetChatManager():SetInputText(msg)
+		--AshitaCore:GetChatManager():QueueCommand(-1, "/sendkey space down")
+
 	end
 	if (#args == 2 and args[2] == 'helpdebug') then
 		
@@ -4228,48 +4372,197 @@ ashita.events.register('command', 'command_cb', function (e)
 	
 end);
 
+ashita.events.register('xinput_button', 'xinput_button_callback1', function (e)
+	--print(button8)
+	
+	if allSettings.GamepadNav[1] then
+		
+		gamepadButtons.buttonsCDready =  os.clock() - gamepadButtons.buttonsCD > 0.15
+		gamepadButtons.analogCDready =  os.clock() - gamepadButtons.analogCD > 0.02
+		if gamepadButtons.pressedEnter and gamepadButtons.buttonsCDready then
+			gamepadButtons.pressedEnter = false
+			AshitaCore:GetChatManager():QueueCommand(1, "/sendkey enter up")
+		end
+		--print(gamepadButtons.analogCDready)
+		if e.button == 8 then
+			if e.state == 1 then
+				ResetAutoHideTimer()
+				gamepadButtons.enabled = true
+				e.blocked = true
+			else
+				gamepadButtons.enabled = false
+			end
+			
+			return
+		end
+		
+		if gamepadButtons.enabled then
+			if
+				not (e.button == 18 and e.state == 0) and
+				not (e.button == 19 and e.state == 0) and
+				not (e.button == 20 and e.state == 0) and
+				not (e.button == 21 and e.state == 0) 
+			then
+				e.blocked = true
+			end
+			
+			-- if e.state ~= 0 then
+				-- print(e.button)
+			-- end
+			
+			if e.button == 9 and not fcw[1].BufferBusy and gamepadButtons.buttonsCDready then
+
+				local tab_id = utils.FindInTable(tab_Tabs, allSettings.SelectedTab);
+
+				if (tab_id) then
+					if (tab_id == utils.GetTableLen(tab_Tabs)) then
+						tab_NextTab = tab_Tabs[1];
+					else
+						tab_NextTab = tab_Tabs[tab_id+1];
+					end
+				end
+				gamepadButtons.buttonsCD = os.clock()
+				return
+			end
+			
+			if allSettings.SecondChat[1] and e.button == 17 and not fcw[1].BufferBusy and gamepadButtons.buttonsCDready then
+				local tab_id = utils.FindInTable(tab_Tabs, allSettings.SelectedTab2);
+
+				if (tab_id) then
+					if (tab_id == utils.GetTableLen(tab_Tabs)) then
+						tab_NextTab2 = tab_Tabs[1];
+					else
+						tab_NextTab2 = tab_Tabs[tab_id+1];
+					end
+				end
+				gamepadButtons.buttonsCD = os.clock()
+				return
+			end
+
+			
+			if e.button == 19 then
+				if e.state ~= 0 then
+					gamepadButtons.scroll1 = (e.state/math.abs(e.state))
+				else
+					gamepadButtons.scroll1 = 0
+				end
+			end
+			if e.button == 21 then
+				if e.state ~= 0 then
+					gamepadButtons.scroll2 = (e.state/math.abs(e.state))
+				else
+					gamepadButtons.scroll2 = 0
+				end
+			end
+			
+			if gamepadButtons.scroll1 ~= 0 and gamepadButtons.analogCDready then--
+				--print(gamepadButtons.scroll1)
+				--print(gamepadButtons.scroll1)
+				fcw[1].ScrollDelta = gamepadButtons.scroll1
+				fcw[3].ScrollDelta = gamepadButtons.scroll1
+				gamepadButtons.analogCD = os.clock()
+				return
+			end
+			if gamepadButtons.scroll2 ~= 0 and gamepadButtons.analogCDready then
+				--print(gamepadButtons.scroll1)
+				fcw[2].ScrollDelta = gamepadButtons.scroll2
+				gamepadButtons.analogCD = os.clock()
+				return
+			end
+			if e.button == 13 and e.state == 1 then
+				if fcw[1].ScrolledBack > 0 then
+					ResetScrolling(1);
+				end
+				if fcw[2].ScrolledBack > 0 then
+					ResetScrolling(2);
+				end
+				if fcw[3].ScrolledBack > 0 then
+					ResetScrolling(3, fcw[3].ChatLines);
+				end
+				return
+			end
+			if e.button == 15 and e.state == 1 and gamepadButtons.buttonsCDready then
+				fcw[3].BigMode = not fcw[3].BigMode;
+				gamepadButtons.buttonsCD = os.clock()
+				return
+			end
+			if e.button == 14 and e.state == 1 and AshitaCore:GetChatManager():IsInputOpen() == 0x00 and gamepadButtons.buttonsCDready then
+				AshitaCore:GetChatManager():QueueCommand(-1, "/sendkey space down")
+				AshitaCore:GetChatManager():QueueCommand(-1, "/sendkey space up")
+				gamepadButtons.buttonsCD = os.clock()
+				return
+			end
+			if e.button == 12 and e.state == 1 and AshitaCore:GetChatManager():IsInputOpen() == 0x11 and gamepadButtons.buttonsCDready then
+				AshitaCore:GetChatManager():QueueCommand(-1, "/sendkey enter down")
+				local cmd = AshitaCore:GetChatManager():GetInputTextRaw()
+				if #cmd > 0 and not cmd:find('^%s*$') then 
+					updateCommandList(cmd)
+				end
+				gamepadButtons.pressedEnter = true
+				gamepadButtons.buttonsCD = os.clock()
+				return
+			end
+			if #fcw[1].LastCommands[1] > 0 then
+				if e.button == 0 and e.state == 1 and AshitaCore:GetChatManager():IsInputOpen() == 0x11 and gamepadButtons.buttonsCDready then
+					local nextCommandIdx = fcw[1].LastCommands[2] + 1
+					if nextCommandIdx > #fcw[1].LastCommands[1] then nextCommandIdx = 1 end
+					if not fcw[1].LastCommands[1][nextCommandIdx] then nextCommandIdx = 1 fcw[1].LastCommands[2] = 1 end
+					AshitaCore:GetChatManager():SetInputText(fcw[1].LastCommands[1][nextCommandIdx])
+					fcw[1].LastCommands[2] = nextCommandIdx
+					gamepadButtons.buttonsCD = os.clock()
+					return
+				end
+				if e.button == 1 and e.state == 1 and AshitaCore:GetChatManager():IsInputOpen() == 0x11 and gamepadButtons.buttonsCDready then
+					local nextCommandIdx = fcw[1].LastCommands[2] - 1
+					if nextCommandIdx < 1 then nextCommandIdx = #fcw[1].LastCommands[1] end
+					if not fcw[1].LastCommands[1][nextCommandIdx] then nextCommandIdx = 1 fcw[1].LastCommands[2] = 1 end
+					AshitaCore:GetChatManager():SetInputText(fcw[1].LastCommands[1][nextCommandIdx])
+					fcw[1].LastCommands[2] = nextCommandIdx
+					gamepadButtons.buttonsCD = os.clock()
+					return
+				end
+			end
+			if e.button == 3 and e.state == 1 and AshitaCore:GetChatManager():IsInputOpen() == 0x11 and gamepadButtons.buttonsCDready then
+				local nextCommandIdx = fcw[1].LastCommands[4] + 1
+				if nextCommandIdx > #fcw[1].LastCommands[3] then nextCommandIdx = 1 end
+				--if not fcw[1].LastCommands[1][nextCommandIdx] then nextCommandIdx = 1 fcw[1].LastCommands[2] = 1 end
+				AshitaCore:GetChatManager():SetInputText(fcw[1].LastCommands[3][nextCommandIdx])
+				fcw[1].LastCommands[4] = nextCommandIdx
+				gamepadButtons.buttonsCD = os.clock()
+				return
+			end
+			if e.button == 2 and e.state == 1 and AshitaCore:GetChatManager():IsInputOpen() == 0x11 and gamepadButtons.buttonsCDready then
+				local nextCommandIdx = fcw[1].LastCommands[4] - 1
+				if nextCommandIdx < 1 then nextCommandIdx = #fcw[1].LastCommands[3] end
+				--if not fcw[1].LastCommands[1][nextCommandIdx] then nextCommandIdx = 1 fcw[1].LastCommands[2] = 1 end
+				AshitaCore:GetChatManager():SetInputText(fcw[1].LastCommands[3][nextCommandIdx])
+				fcw[1].LastCommands[4] = nextCommandIdx
+				gamepadButtons.buttonsCD = os.clock()
+				return
+			end
+			-- if AshitaCore:GetChatManager():IsInputOpen() == 0x11 then
+			-- AshitaCore:GetChatManager():SetInputText(msg)
+			--AshitaCore:GetChatManager():QueueCommand(-1, "/sendkey space down")
+		end
+	end
+end)
+
 
 
 ashita.events.register('key_state', 'key_state_callback1', function (e)
-
+	
+	if gamepadButtons.enabled then return end
+	
+	
     local keyptr = ffi.cast('uint8_t*', e.data_raw);
 	
-	--print(tostring(keyptr[30]));
-	--local uiw.RefInputWinOpenPtr = ashita.memory.read_uint32(uiw.InputWinOpenPtr+0x01);
-	--uiw.InputWinOpen = ashita.memory.read_uint32(uiw.InputWinOpenPtr+0x74) == 1 and true or false;
-	--print(keyptr[42]);
-	-- if allSettings.EnableFastScroll[1] and keyptr[42]~= 0  then
-		-- if fcw[1].ChatShift == allSettings.fontSettings.font_height then
-			-- if (fcw[1].PrevKeyptr[1] == 0 or os.clock()-fcw[1].PrevKeyptr[3] > 0.8) and keyptr[203] ~= 0 and fcw[1].Scrolling and IsRectHovered(ro_RectBG[1].settings, 0) then
-				-- --GoToLine(1,math.max(b_ChatBufferIdx[1]-(fcw[1].ScrolledBack+5), allSettings.ChatLines));
-				-- local currentIdx = #b_ChatBuffer[b_ChatBufferMode[1]][2].text - (b_ChatBufferN[1]-b_ChatBufferIdx[1]) - 1
-				-- GoToLine(1,math.max(currentIdx-(fcw[1].ScrolledBack+5), allSettings.ChatLines), currentIdx);
-				-- if fcw[1].PrevKeyptr[1] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
-			-- elseif (fcw[1].PrevKeyptr[2] == 0 or os.clock()-fcw[1].PrevKeyptr[3] > 0.8) and keyptr[205] ~= 0 and fcw[1].Scrolling and IsRectHovered(ro_RectBG[1].settings, 0) then
-				-- --GoToLine(1,math.min(b_ChatBufferIdx[1]-(fcw[1].ScrolledBack-5), b_ChatBufferIdx[1]-1));
-				-- local currentIdx = #b_ChatBuffer[b_ChatBufferMode[1]][2].text - (b_ChatBufferN[1]-b_ChatBufferIdx[1]) - 1
-				-- GoToLine(1,math.min(currentIdx-(fcw[1].ScrolledBack-5), currentIdx-1), currentIdx);
-				-- if fcw[1].PrevKeyptr[2] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
-			-- end
-			-- ResetAutoHideTimer()
-		-- end
-		-- if fcw[2].ChatShift == allSettings.fontSettings.font_height then
-			-- if (fcw[1].PrevKeyptr[1] == 0 or os.clock()-fcw[1].PrevKeyptr[3] > 0.8) and keyptr[203] ~= 0 and fcw[2].Scrolling and IsRectHovered(ro_RectBG[2].settings, 0) then
-				-- --GoToLine(2,math.max(b_ChatBufferIdx[2]-(fcw[2].ScrolledBack+5), allSettings.ChatLines));
-				-- local currentIdx = #b_ChatBuffer[b_ChatBufferMode[2]][2].text - (b_ChatBufferN[2]-b_ChatBufferIdx[2]) - 1
-				-- GoToLine(2,math.max(currentIdx-(fcw[2].ScrolledBack+5), allSettings.ChatLines), currentIdx);
-				-- if fcw[1].PrevKeyptr[1] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
-			-- elseif (fcw[1].PrevKeyptr[2] == 0 or os.clock()-fcw[1].PrevKeyptr[3] > 0.8) and keyptr[205] ~= 0 and fcw[2].Scrolling and IsRectHovered(ro_RectBG[2].settings, 0) then
-				-- --GoToLine(2,math.min(b_ChatBufferIdx[2]-(fcw[2].ScrolledBack-5), b_ChatBufferIdx[2]-1));
-				-- local currentIdx = #b_ChatBuffer[b_ChatBufferMode[2]][2].text - (b_ChatBufferN[2]-b_ChatBufferIdx[2]) - 1
-				-- GoToLine(2,math.min(currentIdx-(fcw[2].ScrolledBack-5), currentIdx-1), currentIdx);
-				-- if fcw[1].PrevKeyptr[2] == 0 then fcw[1].PrevKeyptr[3] = os.clock(); else fcw[1].PrevKeyptr[3] = os.clock()-0.7; end
-			-- end
-			-- ResetAutoHideTimer()
-		-- end
-		-- fcw[1].PrevKeyptr[1] = keyptr[203];
-		-- fcw[1].PrevKeyptr[2] = keyptr[205];
-	-- end
+	if  AshitaCore:GetChatManager():IsInputOpen() == 0x11 and (keyptr[28] ~= 0 or keyptr[156] ~= 0) then
+	--	print(AshitaCore:GetChatManager():GetInputTextRaw())
+		local cmd = AshitaCore:GetChatManager():GetInputTextRaw()
+		if #cmd > 0 and not cmd:find('^%s*$') then 
+			updateCommandList(cmd)
+		end
+	end
 	
     if (allSettings.shortcutHideEnabled[1] and keyptr[allSettings.shortcutHide] ~= 0 and keyptr[allSettings.shortcutHideS] ~= 0 and not fcw[1].Keydown and AshitaCore:GetChatManager():IsInputOpen() == 0x00) then
 		fcw[1].HideChat = not fcw[1].HideChat;
@@ -4292,39 +4585,39 @@ ashita.events.register('key_state', 'key_state_callback1', function (e)
     end
 	
 	if not fcw[1].BufferBusy then
-	if (allSettings.shortcutTabEnabled[1] and keyptr[allSettings.shortcutTab] ~= 0 and keyptr[allSettings.shortcutTabS] ~= 0 and not fcw[1].Keydown2 and AshitaCore:GetChatManager():IsInputOpen() == 0x00) then
-		local tab_id = utils.FindInTable(tab_Tabs, allSettings.SelectedTab);
-		fcw[1].Keydown2 = true;
-		if (tab_id) then
-			if (tab_id == utils.GetTableLen(tab_Tabs)) then
-				tab_NextTab = tab_Tabs[1];
-			else
-				tab_NextTab = tab_Tabs[tab_id+1];
-			end
-			ResetAutoHideTimer()
-		end
-	else if (keyptr[allSettings.shortcutTab] == 0) then
-			fcw[1].Keydown2 = false;
-		end
-    end 
-	
-	if allSettings.SecondChat[1] then
-		if (allSettings.shortcutTab2Enabled[1] and keyptr[allSettings.shortcutTab2] ~= 0 and keyptr[allSettings.shortcutTab2S] ~= 0 and not fcw[1].Keydown3 and AshitaCore:GetChatManager():IsInputOpen() == 0x00) then
-			local tab_id = utils.FindInTable(tab_Tabs, allSettings.SelectedTab2);
-			fcw[1].Keydown3 = true;
+		if (allSettings.shortcutTabEnabled[1] and keyptr[allSettings.shortcutTab] ~= 0 and keyptr[allSettings.shortcutTabS] ~= 0 and not fcw[1].Keydown2 and AshitaCore:GetChatManager():IsInputOpen() == 0x00) then
+			local tab_id = utils.FindInTable(tab_Tabs, allSettings.SelectedTab);
+			fcw[1].Keydown2 = true;
 			if (tab_id) then
 				if (tab_id == utils.GetTableLen(tab_Tabs)) then
-					tab_NextTab2 = tab_Tabs[1];
+					tab_NextTab = tab_Tabs[1];
 				else
-					tab_NextTab2 = tab_Tabs[tab_id+1];
+					tab_NextTab = tab_Tabs[tab_id+1];
 				end
 				ResetAutoHideTimer()
 			end
-		else if (keyptr[allSettings.shortcutTab2] == 0) then
-				fcw[1].Keydown3 = false;
+		else if (keyptr[allSettings.shortcutTab] == 0) then
+				fcw[1].Keydown2 = false;
+			end
+		end 
+		
+		if allSettings.SecondChat[1] then
+			if (allSettings.shortcutTab2Enabled[1] and keyptr[allSettings.shortcutTab2] ~= 0 and keyptr[allSettings.shortcutTab2S] ~= 0 and not fcw[1].Keydown3 and AshitaCore:GetChatManager():IsInputOpen() == 0x00) then
+				local tab_id = utils.FindInTable(tab_Tabs, allSettings.SelectedTab2);
+				fcw[1].Keydown3 = true;
+				if (tab_id) then
+					if (tab_id == utils.GetTableLen(tab_Tabs)) then
+						tab_NextTab2 = tab_Tabs[1];
+					else
+						tab_NextTab2 = tab_Tabs[tab_id+1];
+					end
+					ResetAutoHideTimer()
+				end
+			else if (keyptr[allSettings.shortcutTab2] == 0) then
+					fcw[1].Keydown3 = false;
+				end
 			end
 		end
-	end
 	end
 end);
 
@@ -4344,6 +4637,14 @@ ashita.events.register('mouse', 'mouse_callback1', function (e)
 	]]--
 end);
 
+function updateCommandList(text)
+	table.insert(fcw[1].LastCommands[1], 1, text)
+	if #fcw[1].LastCommands[1] > 20 then
+		table.remove(fcw[1].LastCommands[1], #fcw[1].LastCommands[1])
+	end
+	
+	--print(#fcw[1].LastCommands[1])
+end
 
 function DebugWindow()
 	--dw_WindowW, dw_WindowH = imgui.GetWindowSize();
@@ -4526,8 +4827,10 @@ function Init()
 	fcw[3].BG_W = allSettings.chatLineMaxL*allSettings.fontSettings.font_height*0.58;
 	fcw[3].BG_H = math.floor(dsize.y*0.8);
 	fcw[3].ChatLines = math.floor((fcw[3].BG_H)/allSettings.fontSettings.font_height)
-	fcw[3].BG_H = math.floor(allSettings.fontSettings.font_height*fcw[3].ChatLines*fcw[1].BGScale)
 	fcw[3].HLeft = fcw[3].BG_H - (fcw[3].ChatLines*allSettings.fontSettings.font_height)
+	fcw[3].BG_H = math.floor(allSettings.fontSettings.font_height*fcw[3].ChatLines*fcw[1].BGScale)
+	
+	Debug(fcw[3].HLeft,1,true)
 	local last_fo = allSettings.SecondChat[1] and 2 or 1;
 	if fo_Aux[last_fo] ~= nil then
 		fcw[1].InitDone = true;
@@ -4722,6 +5025,14 @@ function GoToLine(fo_id, line, currentIdx, ChatLines)
 end
 
 function ScrollLines(fo_id, message, color, auxMessage, auxColor, mode, ChatLines)
+	if not message then
+		if ChatLines then
+			ResetLines(fo_id, ChatLines)
+		else
+			ResetLines(fo_id)
+		end
+		return
+	end
 	if fcw[1].BufferBusy or tab_NextTab ~= allSettings.SelectedTab then return end
 	fcw[1].BufferBusy = true;
 	if not ChatLines then ChatLines = allSettings.ChatLines end
@@ -5000,6 +5311,8 @@ function DrawBigMode()
 	
 	fcw[3].Anchor_X = fcw[1].Anchor_X
 	fcw[3].Anchor_Y = fcw[1].Anchor_Y
+	fcw[3].Anchor_X = dsize.x * 0.1
+	fcw[3].Anchor_Y = dsize.y * 0.9
 	
 	---local buff_idx = 1;
 	--b_ChatBufferIdx[1] =
@@ -5052,19 +5365,23 @@ function DrawBigMode()
 	ro_BigMode:set_width(allSettings.chatLineMaxL*allSettings.fontSettings.font_height*0.58);
 	--ro_BigMode:set_height(dsize.y*0.8 + allSettings.fontSettings.font_height + (allSettings.fontSettings.font_height/5));
 	ro_BigMode:set_height(allSettings.fontSettings.font_height*(ChatLines+1) + (allSettings.fontSettings.font_height/5));
-	ro_BigMode:set_position_x(fcw[3].Anchor_X-fcw[1].RoRectBaseX)
-	ro_BigMode:set_position_y(fcw[3].Anchor_Y- fcw[3].RoRectBaseY)
 	
-	fo_BigMode:set_position_x(fcw[3].Anchor_X-fcw[1].RoRectBaseX)
-	fo_BigMode:set_position_y(fcw[3].Anchor_Y- fcw[3].RoRectBaseY - 2)
+	--adjust = 88/dsize.y
+	ro_BigMode:set_position_x(fcw[3].Anchor_X)
+	ro_BigMode:set_position_y(dsize.y- fcw[3].Anchor_Y + allSettings.fontSettings.font_height-(allSettings.fontSettings.font_height-fcw[3].HLeft))
+	
+	fo_BigMode:set_position_x(fcw[3].Anchor_X)
+	fo_BigMode:set_position_y(dsize.y- fcw[3].Anchor_Y + allSettings.fontSettings.font_height-(allSettings.fontSettings.font_height-fcw[3].HLeft))
 	fo_BigMode:set_text('Big Mode: ['..allSettings.SelectedTab:gsub('AllAlt','All')..']')
 
 	imgui.SetNextWindowSize({ fcw[3].BG_W, ro_BigMode.settings.height+16 }, ImGuiCond_None);
 	
 	--imgui.SetNextWindowPos({ fcw[3].Anchor_X, fcw[3].Anchor_Y-fcw[3].BG_H -16 }, ImGuiCond_None);
 	
-	imgui.SetNextWindowPos({ fcw[1].Chat1WindowPosX, fcw[1].Chat1WindowPosY + 16 - ((ChatLines - allSettings.ChatLines+1)*allSettings.fontSettings.font_height) }, ImGuiCond_None);
-	imgui.SetNextWindowSizeConstraints({ fcw[3].BG_W, ro_BigMode.settings.height+16 }, { FLT_MAX, FLT_MAX, }, ImGuiCond_None);
+	--imgui.SetNextWindowPos({ fcw[1].Chat1WindowPosX, fcw[1].Chat1WindowPosY + 16 - ((ChatLines - allSettings.ChatLines+1)*allSettings.fontSettings.font_height) }, ImGuiCond_None);
+	local adjust = dsize.y/88
+	imgui.SetNextWindowPos({ fcw[3].Anchor_X-2, fcw[3].Anchor_Y - adjust - ((ChatLines )*allSettings.fontSettings.font_height) }, ImGuiCond_None);
+	--imgui.SetNextWindowSizeConstraints({ fcw[3].BG_W, ro_BigMode.settings.height+16 }, { FLT_MAX, FLT_MAX, }, ImGuiCond_None);
 	
 	if imgui.Begin('FancyChat_BigModeBG_'+fcw[1].PlayerName, true, bit.bor(fcw[1].windowFlagsChatBG, ImGuiWindowFlags_NoMove)) then
 	--if imgui.Begin('FancyChat_BigModeBG_'+fcw[1].PlayerName, true, 0) then
@@ -5072,8 +5389,8 @@ function DrawBigMode()
 		
 		
 		local positionStartX, positionStartY = imgui.GetCursorScreenPos();
-		positionStartX = positionStartX + allSettings.WindowPosOffset[1];
-		positionStartY = positionStartY + allSettings.WindowPosOffset[2];
+		--positionStartX = positionStartX + allSettings.WindowPosOffset[1];
+		--positionStartY = positionStartY + allSettings.WindowPosOffset[2];
 		
 		
 
@@ -5096,6 +5413,7 @@ function DrawBigMode()
 				local lineOffset= lineOffsetBase+HL_i*allSettings.fontSettings.font_height;
 				local highlight_alpha = 0;
 				local targetLine = ChatLines-HL_i+fcw[3].ChatHead-1; if targetLine > ChatLines then targetLine = targetLine - ChatLines end
+				--Debug(targetLine,1,false)
 				if (fo_Aux[3][targetLine].settings.visible and fo_Aux[3][targetLine].settings.text == '[link]' and
 					fo_Chat[3][targetLine].rect ~= nil and fo_Aux[3][targetLine].rect~= nil and 
 					mouseX >  fo_Aux[3][targetLine].settings.position_x and mouseX < fo_Aux[3][targetLine].settings.position_x + fo_Aux[3][targetLine].rect.right and
@@ -5218,10 +5536,7 @@ function DrawBigMode()
 		--LINESCROLLS
 		
 		
-		if (mouseX > fcw[3].Anchor_X and mouseX < fcw[3].Anchor_X+fcw[3].BG_W and
-		mouseY > positionStartY+scrollOffset and mouseY < positionStartY+scrollOffset+allSettings.fontSettings.font_height*(ChatLines+1)
-		and imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) and not fcw[1].BufferBusy
-		)
+		if (imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly) or gamepadButtons.enabled) and not fcw[1].BufferBusy
 		then
 			--if fcw[3].ScrollDelta > 0 then print('scroll!') end
 			--if fcw[3].ScrollDelta > 0 then print(b_ChatBufferIdx[3]) end
@@ -6645,8 +6960,9 @@ function AddTooltip(message, offset, critical)
 	else imguiWrap.Image(fcw[1].TextureIDInfo,{15,15},{0,0},{1,1},{0.937, 0.349, 0.290 ,1}) end
 	if (imgui.IsItemHovered(0)) then
 		imgui.BeginTooltip()
-		message = utils.breakLine(message, imgui.GetWindowWidth()*2.5)
-		imgui.SetTooltip(message)
+		local text = utils.breakLine(message, 40)
+		---message = utils.breakLine(message, imgui.GetWindowWidth()*2.5)
+		imgui.SetTooltip(text)
 		imgui.EndTooltip()
 		
 	end
@@ -6715,9 +7031,10 @@ function AddSetColor(buttonname,colorhex, tmpcolor)
 	end
 	imgui.SameLine();
 	imgui.Text(colorDesc[buttonname][1]);
-
+	
 	AddTooltip(colorDesc[buttonname][2], 4);
-
+	
+	return imgui.CalcTextSize(colorDesc[buttonname][1] )+ 48 + 32 + 32 + 16
 end
 
 function PushWindowStyle()
@@ -6876,6 +7193,27 @@ parseThis = function(e, e_message)
 	
 	
 	local newText = CleanText(msg, par_LastMode);
+	
+	local isDiscordText = false
+	
+	if set_isCEXI then
+		if utils.IsInTable(par_emojiChannels, par_MessageMode) then
+			for i = 1, #newText do
+				local first_letter = newText:sub(i, i)
+				if first_letter:match("%a") then       -- first letter found
+					if first_letter >= "a" and first_letter <= "z" then
+						--newText = utils.parseEmoji(newText:gsub('(<)(.-)(>)', '@%2:', 1))
+						newText = utils.parseEmoji(newText:gsub('<', '{', 1):gsub('>', '}', 1))
+						isDiscordText = true
+						break
+					else
+						break
+					end
+				end
+			end
+		end
+	end
+	
 	if newText:match('^%s*\n?$') then par_LastMode = 'empty' return end
 	
 	if allSettings.Alert[1] and (
@@ -6917,7 +7255,7 @@ parseThis = function(e, e_message)
 	if (playerTarget ~= nil) then
 		local targetIndex = playerTarget:GetTargetIndex(0);
 		local targetEntity = GetEntity(targetIndex);
-		if targetEntity then
+		if targetEntity and bit.band(targetEntity.SpawnFlags, 0x10) ~= 0 then
 			t_name = targetEntity.Name:gsub('^\171','')
 		end
 	end
@@ -6954,7 +7292,7 @@ parseThis = function(e, e_message)
 	local isParty = false;
 	local isAlliance = false;
 	local isOthers = false;
-	if string.find(par_LastMode, 'combat') then
+	if par_LastMode:find('combat',1,true) then
 		if string.find(par_LastMode,'_y',1,true) then isYou = true; col = col_y;
 		elseif string.find(par_LastMode,'_p',1,true) then isParty = true; col = col_p;
 		elseif string.find(par_LastMode,'_n',1,true) then
@@ -6995,20 +7333,24 @@ parseThis = function(e, e_message)
 			end
 		end
 		if par_MessageMode == par_allowed[1] and par_allowed[2] > 0 then par_allowed[2] = par_allowed[2] - 1; isYou = true; isOthers = false; isAlliance = false end
+		if 	(allSettings.hideAlliance[1] and isAlliance) or
+			(allSettings.hideNonParty[1] and isOthers) or
+			(allSettings.hideNonYou[1] and not isYou)
+		then
+			par_LastMode = 'filtered'; return;
+		end
+		local scope = '_z'
+		if isYou then scope = '_y' elseif isYou or isParty then scope = '_p' end
+		--  elseif isTarget then scope = '_t' and newText == fcw[1].PlayerName 
+		
+		if allSettings.CustomFilters[1] then
+			if utils.FindInStringTableFilters(newText, par_customFilters, scope) then
+				par_LastMode = 'filtered'
+				return
+			end
+		end
 	end
-	if 	(allSettings.hideAlliance[1] and isAlliance) or
-		(allSettings.hideNonParty[1] and isOthers) or
-		(allSettings.hideNonYou[1] and not isYou)
-	then
-		par_LastMode = 'filtered'; return;
-	end
-	local scope = '_z'
-	if isYou then scope = '_y' elseif isYou or isParty then scope = '_p' end
-	--  elseif isTarget then scope = '_t' and newText == fcw[1].PlayerName 
 	
-	if allSettings.CustomFilters[1] then
-		if par_LastMode:find('combat',1,true) and utils.FindInStringTableFilters(newText, par_customFilters, scope) then par_LastMode = 'filtered' return end
-	end
 	
 	table.insert(par_party_names, player_name)
 	--if (par_LastMode == 'combat') then Debug(tostring(isParty), 2, false); end
@@ -7278,6 +7620,7 @@ parseThis = function(e, e_message)
 				par_MessageMode == 151 or
 				par_MessageMode == 121 or
 				par_MessageMode == 131 or
+				par_MessageMode == 138 or
 				par_MessageMode == 127 or
 				par_MessageMode == 90 or
 				par_MessageMode == 85 
@@ -7440,7 +7783,8 @@ parseThis = function(e, e_message)
 				b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text] = utils.MCCheck(mctext)
 					--Debug(b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text], 1, true)
 			end
-			if par_LastMode == 'party_out' then
+			
+			if set_isCEXI and isDiscordText then
 				
 				local mctext = b_ChatBuffer[1][2].text[#b_ChatBuffer[1][2].text]
 				mctext = utils.emojiCols(mctext)
@@ -7673,7 +8017,7 @@ end
 
 function CheckSpecial(newText, col, cutIdx)
 	
-	if par_MessageMode == 9 then
+	if set_isCEXI and par_MessageMode == 9 then
 		if newText:find('Now accumulating linkshell points for ') or par_checkAgain[2] == 'CE-acc' then
 			return HandleSpecial(newText, 'CE-acc', 'Now accumulating linkshell points for ', '%.', cutIdx, allSettings.colors.cexi[1])
 		end
@@ -7694,17 +8038,25 @@ function CheckSpecial(newText, col, cutIdx)
 	
 	if par_MessageMode == 121 then
 		if newText:find('You find') or par_checkAgain[2] == 'youfind' then
-			if par_checkAgain[2] == '' then newText = newText:gsub('You find', 'Found'):gsub(' on ', utils.icons.LOOT..' on ') end
+			if par_checkAgain[2] == '' then
+				newText = newText:gsub('You find', 'Found'):gsub(' on ', utils.icons.LOOT..' on ')
+				if newText:find(' on the %.') then newText = newText:gsub('%.','{?}.'); cutIdx = cutIdx+3 end
+			end
 			return HandleSpecial(newText, 'youfind', 'Found', ' on ', cutIdx, allSettings.colors.found[1])
 		end
-		if newText:find('Defeat Mobs') or par_checkAgain[2] == 'CE-DM' then
-			return HandleSpecial(newText, 'CE-DM', 'Defeat Mobs ', ' %(', cutIdx,allSettings.colors.cexi[1])
-		end
-		if newText:find('Quest Completed:') or par_checkAgain[2] == 'CE-QC2' then
-			return HandleSpecial(newText, 'CE-QC2', nil, utf8.char(0x25C6)..' Quest Completed:', cutIdx,allSettings.colors.cexi[1])
-		end
-		if newText:find('Quest Completed') or par_checkAgain[2] == 'CE-QC' then
-			return HandleSpecial(newText, 'CE-QC', nil, utf8.char(0x25C6)..' Quest Completed', cutIdx,allSettings.colors.cexi[1])
+		if set_isCEXI then
+			if newText:find('Defeat Mobs') or par_checkAgain[2] == 'CE-DM' then
+				return HandleSpecial(newText, 'CE-DM', 'Defeat Mobs ', ' %(', cutIdx,allSettings.colors.cexi[1])
+			end
+			if newText:find('Quest Accepted:') or par_checkAgain[2] == 'CE-QA' then
+				return HandleSpecial(newText, 'CE-QA', nil, utf8.char(0x25C7)..' Quest Accepted:', cutIdx,allSettings.colors.cexi[1])
+			end
+			if newText:find('Quest Completed:') or par_checkAgain[2] == 'CE-QC2' then
+				return HandleSpecial(newText, 'CE-QC2', nil, utf8.char(0x25C6)..' Quest Completed:', cutIdx,allSettings.colors.cexi[1])
+			end
+			if newText:find('Quest Completed') or par_checkAgain[2] == 'CE-QC' then
+				return HandleSpecial(newText, 'CE-QC', nil, utf8.char(0x25C6)..' Quest Completed', cutIdx,allSettings.colors.cexi[1])
+			end
 		end
 		if newText:find(' synthesized ') or par_checkAgain[2] == 'synth' then
 			return HandleSpecial(newText, 'synth',  'You synthesized ', '%.', cutIdx,allSettings.colors.obtained[1])
@@ -7788,11 +8140,13 @@ function CheckSpecial(newText, col, cutIdx)
 			return HandleSpecial(newText, 'use', ' uses ', '%.', cutIdx, allSettings.colors.useitem[1])
 		end
 	end
-	-- if par_MessageMode == then
-		-- if newText:find() or par_checkAgain[2] == then
-			-- return HandleSpecial(newText, , , , cutIdx, )
-		-- end
-	-- end
+
+	if par_MessageMode == 138 then
+		if newText:find(' bought ') or par_checkAgain[2] == 'bazaar' then
+			return HandleSpecial(newText, 'bazaar', ' bought ', '%.', cutIdx, allSettings.colors.obtained[1])
+		end
+	end
+
 end
 
 SetBufferN = function(tab)
@@ -8091,6 +8445,7 @@ function DrawInfoWin(maxh, idx, name, text, icon)
 	--local textwW, TextwH = font:CalcTextSizeA(imgui.GetFontSize(), FLT_MAX, W-16, text[1])
 	--local textW, TextH = imgui.CalcTextSize(text)
 	local H = maxh
+	--print(H)
 	--print(textW..textwW)
 	
 	imgui.SetNextWindowPos({ro_RectBG[1].settings.position_x+(W*(idx-1)),ro_RectBG[1].settings.position_y-H});
@@ -8134,16 +8489,20 @@ function DrawInfo(text)
 	
 	local ATstart = 1
 	while ATstart < #text do
+		
 		local s, e = string.find(text, utf8.char(0x276e), ATstart, true)
 		if s and e then
 			local s2, e2 = string.find(text, utf8.char(0x276f), e+1, true)
 			if s2 and e2 then
-				table.insert(info, text:sub(e+1,s2-1))
+				local subtext = text:sub(e+1,s2-1)
+				subtext = subtext:gsub("([%l%d%.])(%u)", "%1 %2"):gsub('  ',' ')
+				table.insert(info, subtext)
 				ATstart = e2 + 1
 			end
 			ATstart = e + 1
 		else
-			ATstart = ATstart + 1
+			break
+			--ATstart = ATstart + 1
 		end
 	end
 	
@@ -8161,18 +8520,25 @@ function DrawInfo(text)
 	end
 	
 	while update_idx <= #info do
+		--Debug(tostring(fcw[1].itemInfo[update_idx])..'-'..tostring(info[update_idx]),1,true)
 		if fcw[1].itemInfo[update_idx] ~= info[update_idx] then
+			
 			updated = true
-			info[update_idx] = info[update_idx]:gsub("([%l%d%.])(%u)", "%1 %2"):gsub('  ',' ')
+			--info[update_idx] = info[update_idx]
 			fcw[1].itemInfo[update_idx] = info[update_idx]
 		end
 		update_idx = update_idx + 1
 	end
+	
+	--print('updated: '..tostring(updated))
+	--Debug('---',1,true)
 	--updated = true
 
 	--updated = true
 	local idx = 1
 	for i = 1, #info do
+		
+		
 		if idx > 4 then break end
 		--if info[i] and info[i] then
 		if info[i] then
@@ -8180,7 +8546,8 @@ function DrawInfo(text)
 			local item
 			local ability
 			local spell
-			--if fcw[1].itemIcons[idx] and fcw[1].itemIcons[idx][3] and info[i] == fcw[1].itemIcons[idx][3] then	
+			--if fcw[1].itemIcons[idx] and fcw[1].itemIcons[idx][3] and info[i] == fcw[1].itemIcons[idx][3] then
+			--Debug(tostring(updated),1,true)
 			if not updated then
 				if info[i] == fcw[1].itemIcons[idx][3] then
 					if fcw[1].itemIcons[idx][5] == 1 then
@@ -8195,7 +8562,7 @@ function DrawInfo(text)
 				local RM = AshitaCore:GetResourceManager()
 				if not item then
 					item = RM:GetItemByName(info[i], 0);
-					--print('updated item')
+					--print('updated item '..tostring(item))
 				end
 				if not item then
 					ability = RM:GetAbilityByName(info[i], 0);
@@ -8205,7 +8572,9 @@ function DrawInfo(text)
 				end
 			end
 			--and (item.Type == 1 or item.Type == 4 or item.Type == 5 or item.Type == 7)
-			if (item ~= nil ) then
+			--print(item.Description)
+			if item and item.Description and item.Description[1] then
+				
 				--idx = idx + 1
 				--if fcw[1].itemIcons[idx][1] and item.Id ~= fcw[1].itemIcons[idx][1] then 
 				--if not fcw[1].itemTexture[idx] then
@@ -8234,7 +8603,11 @@ function DrawInfo(text)
 				--inf = inf..item.Id..'\n'
 				--inf = inf..item.Type..'\n'
 				-- misc= 1, weapon= 4, armor = 5, consumable = 7
-
+				-- print('idx: '..tostring(i))
+				-- print('info: '..tostring(info[i]))
+				-- print('desc: '..tostring(item.Description))
+				-- print(item.Description[1]) end
+				-- print('---')
 				local desc = item.Description[1]
 				if desc then
 					desc = desc:replace('\x81\x60', '~'):replace('\xEF\x1F', 'Fire'):replace('\xEF\x20', 'Ice'):replace('\xEF\x21', 'Wind'):replace('\xEF\x22', 'Earth'):replace('\xEF\x23', 'Lgtn'):replace('\xEF\x24', 'Water'):replace('\xEF\x25', 'Light'):replace('\xEF\x26', 'Dark'):replace('%', '%%'):replace('\n',' ')
@@ -8254,11 +8627,12 @@ function DrawInfo(text)
 					--H = math.max(H, TextH * ((textW/((fcw[1].BG_W/4)-16))+2))
 					H = math.max(H, ((imgui.GetFontSize()*1)*(utils.CalcRows(inf, ((allSettings.UseHalfLength[1] and fcw[1].BG_W/2 or fcw[1].BG_W)/4)-32,imgui.CalcTextSize('H'))+1)+28+40))--+(#flags>0 and 1 or 0)
 					table.insert(drawcalls, {idx, info[i], inf, fcw[1].itemTexture[idx][2]})
+					
 					--DrawInfoWin(idx,info[i],fcw[1].itemIcons[idx][2], fcw[1].itemTexture[idx][2])
 					idx = idx + 1
 				end
 				
-			elseif ability then
+			elseif ability and ability.Description and ability.Description[1] then
 				--idx = idx + 1
 				--fcw[1].itemIcons[idx][1] = nil
 				if fcw[1].itemTexture[idx] then
@@ -8288,7 +8662,7 @@ function DrawInfo(text)
 					idx = idx + 1
 					--idx = idx + 1
 				end
-			elseif spell then
+			elseif spell and spell.Description and spell.Description[1]then
 				--idx = idx + 1
 				
 				--fcw[1].itemIcons[idx][1] = nil
@@ -8335,6 +8709,7 @@ function DrawInfo(text)
 	end
 	
 	for d = 1, #drawcalls do
+		--print(d)
 		if drawcalls[d][4] then
 			DrawInfoWin(H, drawcalls[d][1],drawcalls[d][2],drawcalls[d][3],drawcalls[d][4])
 		else
