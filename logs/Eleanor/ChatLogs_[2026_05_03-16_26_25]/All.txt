@@ -1,0 +1,529 @@
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
+[16:26] [FC:DrawInfo TYPES] type(cw)=number tostring(cw)=9 | 
+type(W)=number tostring(W)=218.56 | type(inf)=string 
+[16:26] [FC:DrawInfo ITEM] r1=10 r2=9 fs=18.000 cw=9.00000 W=218.56000 
+cil=24 BG_W=1002.240 half=false bytes=115 nl=3 sp=14 hash=2042589 
+upd=false name=Argute M.board 
+[16:26] [FC:DrawInfo ITEM] head=`[Rare][Ex]|[Head] |DEF:16 HP+10 MP+10 
+MND+5 Elemental magic ` 
+[16:26] [FC:DrawInfo ITEM] tail=`agic skill +7 Grimoire: Reduces 
+spellcasting time|Lv: 75 SCH` 
