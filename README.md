@@ -31,6 +31,10 @@ This add-on hooks into the game's `text_in` event to intercept every incoming ch
 Go over the <a href="https://github.com/ariel-logos/Fancychat/releases" target="_blank">Releases</a> page, download the latest version and unpack it in the add-on folder in your Ashita installation folder. You should now have among the other add-on folders the "fancychat" one!
 <br></br>
 
+### Disclaimer
+The current release is compatible with **both Ashita 4.30 and earlier versions** of Ashita. Going forward, however, future releases of Fancychat are likely to target **Ashita 4.30 only** — meaning users on older Ashita versions may need to update their Ashita install to keep receiving updates. If you're running an older Ashita and you'd rather stay on a stable build, pin to the most recent release that explicitly notes Ashita-pre-4.30 support in the release notes.
+<br></br>
+
 ### 📖 Documentation
 For long-form, cross-linked reference docs see the [`docs/` folder](docs/Home.md). Each Settings tab, every command, and every customisation knob has its own page. The in-game equivalent is `/fchat manual`.
 <br></br>
