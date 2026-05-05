@@ -12,11 +12,11 @@ This add-on hooks into the game's `text_in` event to intercept every incoming ch
 
 ### Main features
 - **8 chat tabs** to organize messages: All, AllAlt, Combat, Linkshell, Party, Tell, Shout, Custom
-- **Compact combat log** — rewrites combat messages into tight icon-based lines (e.g. `Eleanor ⚔ Treant Sapling → 23 DMG`)
+- **Compact combat log** — rewrites combat messages into tight icon-based lines (icons are rendered from the bundled `gameicons.ttf` font, so they'll appear in-game even if the equivalent emoji wouldn't display correctly)
 - **Actor name coloring** — you, party members, alliance, enemies, and NPCs each get a distinct color
 - **Emoji support** — ~2000+ emoji available via `:name:` substitution (`:grinning:` → 😀)
 - **Timestamps** — per-line `[HH:MM:SS]`, `[HH:MM]`, or hourly banner dividers
-- **Auto-hide** — chat fades out on inactivity and wakes up on new messages, hover, or typing
+- **Auto-hide** — chat fades out on inactivity and wakes up on new messages on the active tab, mouse-wheel scrolling, configured keyboard shortcuts, opening the chat input, or NPC dialog events (mouse hover alone does NOT wake it — that's intentional)
 - ${\textsf{\color{cyan}{BigMode}}}$ — full-screen chat history overlay showing 30+ lines at once
 - **Hover previews** — hovering auto-translate text shows item descriptions, ability costs, and spell properties
 - **Click to copy** — click any line to copy it to clipboard; Shift+click to save it to the Notepad panel
@@ -31,8 +31,14 @@ This add-on hooks into the game's `text_in` event to intercept every incoming ch
 Go over the <a href="https://github.com/ariel-logos/Fancychat/releases" target="_blank">Releases</a> page, download the latest version and unpack it in the add-on folder in your Ashita installation folder. You should now have among the other add-on folders the "fancychat" one!
 <br></br>
 
-### Compatibility Issues
-No compatibility issues found so far.
+### 📖 Documentation
+For long-form, cross-linked reference docs see the [`docs/` folder](docs/Home.md). Each Settings tab, every command, and every customisation knob has its own page. The in-game equivalent is `/fchat manual`.
+<br></br>
+
+### Compatibility
+Fancychat is **not designed** to run alongside other addons that modify, reformat, or recolour incoming chat messages. Combat-log enhancers such as `simplelog`, alternative chat replacements, or anything that rewrites the chat stream are **not supported**. Running two chat-handling addons at the same time will produce visual conflicts (duplicated lines, broken colours, mangled formatting, missing spaces) that Fancychat does not try to recover from.
+
+If you want to use Fancychat, unload other chat-modifying addons first (`/addon unload <name>`). If you prefer a different chat addon, unload Fancychat instead.
 
 ### Functionalities
 
@@ -83,7 +89,7 @@ Tabs can be used as a full tab bar or switched to compact mode (`/fchat compact`
 #### Compact Combat Log
 When enabled, incoming combat messages are rewritten into a condensed, icon-based format to reduce visual noise while keeping all relevant information at a glance. Actor names are colored by role, and damage numbers are highlighted.
 
-Icons used in compact mode:
+Icons used in compact mode (the emoji below are GitHub-rendered approximations; in-game these are drawn as custom glyphs from the bundled `gameicons.ttf`):
 <ul>
   <li>${\textsf{\color{white}{⚔}}}$ — melee attack</li>
   <li>${\textsf{\color{white}{🏹}}}$ — ranged attack</li>
@@ -95,13 +101,13 @@ Icons used in compact mode:
 
 A ${\textsf{\color{orange}{colorblind mode}}}$ is available in Settings under **Extra**, which swaps the red-green color palette used for actor names.
 
-Custom combat filters can be configured by editing `custom_combat_filters.txt` directly or through the **CL Filters** tab in the Settings panel. Each line in the file is a keyword or Lua pattern. Appending `_y` to a filter restricts it to your own actions only; appending `_p` restricts it to you and your party.
+Custom combat filters live in the `combatfilters/` subfolder of the addon as plain-text `.txt` files. You can keep multiple filter files there (e.g. one for raids, one for solo play) and switch between them using the **Active filter file** dropdown in the **CL Filters** tab. The selected file is remembered between sessions. Each line in a filter file is a keyword to match against the original FFXI message text. Appending `_y` to a line restricts it to your own actions only; appending `_p` restricts it to you and your party. Use the **Edit Selected Filter** button to open the active file in your default text editor, **Reload Selected Filter** to pick up edits without restarting, and **Open Folder** to manage the files in Explorer.
 <br></br>
 
 #### BigMode
 BigMode is a full-screen overlay that displays the same chat buffer as the primary window but with many more visible lines (30+). It is useful for reviewing recent chat history without scrolling.
 
-Toggle BigMode with `/fchat bigmode` or the configured keyboard shortcut (default: Page Down). BigMode uses its own independent scroll cursor so switching back to the primary window does not disrupt your scroll position there.
+Toggle BigMode with `/fchat bigmode` or by configuring a keyboard shortcut in **Settings → Shortcuts**. All four shortcuts (Hide, BigMode, Tab cycle window 1, Tab cycle window 2) are **disabled by default** — tick the Enabled checkbox and pick a key combo (e.g. Shift+G) to activate them. BigMode uses its own independent scroll cursor so switching back to the primary window does not disrupt your scroll position there.
 <br></br>
 
 #### Settings Panel
@@ -109,10 +115,10 @@ Open the Settings panel with `/fchat settings`. It contains six tabs:
 
 <ol>
   <li><b>Chat Window</b>: font size, chat width, line count, plate background alpha, second chat window, custom tab message types, position offsets, window locks, compact mode, half-length toggle, anti-obstruction (auto-slide when FFXI UI opens), auto-hide delay, gamepad navigation.</li>
-  <li><b>Font Colors</b>: per-message-mode color editor. Supports color picker UI and import/export of full color schemes per character.</li>
-  <li><b>Shortcuts</b>: configure 2-key combos for: hide chat, BigMode, tab cycle (primary window), tab cycle (secondary window).</li>
-  <li><b>Extra</b>: combat filter toggles, timestamp format, precise timestamp mode, tell alert sounds, item/ability/spell hover previews, auto-restore on reload, colorblind mode, fast scroll (Shift+arrows), docked second window, heart emoji toggle.</li>
-  <li><b>CL Filters</b>: edit custom combat log filters inline with a reload button. Supports keywords, Lua patterns, and <code>_y</code> / <code>_p</code> modifiers.</li>
+  <li><b>Font Colors</b>: per-message-mode color editor. Color picker UI plus Import/Export — exported color schemes are written to <code>chatcolors/colorset_&lt;character&gt;</code> as plain-text key,value files (folder is auto-created on first export). One file per character; copy and rename to share a palette across characters or with another player.</li>
+  <li><b>Shortcuts</b>: configure 2-key combos (modifier + main key) for: hide chat, BigMode, tab cycle (primary window), tab cycle (secondary window). All four default to disabled — tick the <b>Enabled</b> checkbox per row to activate one.</li>
+  <li><b>Extra</b>: legacy-chat blocking toggles, combat-log filtering toggles, timestamp format and timestamp-as-line interval, precise timestamp mode, tell alert sounds, item/ability/spell hover previews, auto-restore on reload, colorblind mode, fast scroll (Shift + mouse wheel), docked second window, heart emoji toggle.</li>
+  <li><b>CL Filters</b>: <b>Active filter file</b> dropdown to pick which <code>.txt</code> in the <code>combatfilters/</code> folder is used as the active filter list, with <b>Refresh</b> / <b>Edit Selected Filter</b> / <b>Reload Selected Filter</b> / <b>Open Folder</b> buttons. Supports keywords with <code>_y</code> / <code>_p</code> scope modifiers.</li>
   <li><b>Tools</b>: save chat logs, open the logs folder, open the in-game manual, restore legacy chat (DumpChat).</li>
 </ol>
 <br></br>
@@ -139,4 +145,4 @@ logs/
         └── Custom.txt
 ```
 
-Logs are saved automatically when the add-on unloads, or manually via `/fchat savelogs` or the **Tools** tab in Settings.
+Logs are written to disk **on demand** — either via `/fchat savelogs` or the **Save Chat Logs** button in the Tools tab. They are *not* auto-saved on unload (the unload handler only persists settings and optionally re-injects the buffer into the legacy chat if **Auto-Dump Chat** is enabled).
