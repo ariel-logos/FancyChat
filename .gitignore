@@ -1,0 +1,20 @@
+# In-game data — generated at runtime, per-character, not source
+logs/
+
+# Per-character color set exports (created on demand by Settings → Export Colors)
+chatcolors/
+
+# Backup files left by editing tools
+*.bak_*
+*.preMod_*
+*.preStrip_*
+*.preRender_*
+*.preCleanNew_*
+*.preOpt_*
+*.temp_*
+
+# Workflow / tooling state
+.claude/
+
+# Palette-extraction artefact (developer-only)
+extracted_palette.txt
