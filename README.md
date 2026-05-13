@@ -11,7 +11,7 @@ It replaces FFXI's native chat with a customizable in-game chat overlay: message
 <br></br>
 
 <p align="center">
-  <video src="https://github.com/user-attachments/assets/34fbe493-6b8f-465c-a0b8-181f6f5fb6e0" controls width="720" height="385" preload="metadata"></video>
+  <video src="https://github.com/user-attachments/assets/34fbe493-6b8f-465c-a0b8-181f6f5fb6e0" poster="snapshot.png" controls width="720" height="385" preload="none"></video>
 </p>
 <br></br>
 
