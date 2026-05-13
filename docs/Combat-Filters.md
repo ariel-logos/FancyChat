@@ -8,7 +8,7 @@ Filter files are plain `.txt` lists in the addon's `combatfilters/` subfolder. Y
 
 ```
 addons/fancychat/combatfilters/
-├── custom_combat_filters.txt   ← shipped default
+├── example.txt                 ← shipped default (used if you've never picked one)
 ├── raid_filters.txt
 ├── solo_filters.txt
 └── trial_filters.txt
@@ -31,45 +31,49 @@ The active selection persists between sessions in `settings.json`.
 
 One filter per line. Comments start with `##`. Blank lines are ignored.
 
-A filter is a Lua-pattern fragment matched **case-insensitively** against the original FFXI message text — *not* against any reformatting Fancychat does.
+Each filter is a word or short phrase. If it appears anywhere in the original FFXI message text (case-insensitive), that message is hidden. The match is against the **raw** FFXI message text — *not* against the icon-based Compact Combat Log version of it.
+
+Advanced users can also use Lua pattern syntax (`%s`, `%d`, `.`, `.-`, etc.) — handy for matching variable bits like numbers. If you don't know what that means, just type plain words and it'll work fine.
 
 ### Scope suffixes
 
-Append an underscore + scope suffix to a filter to restrict where it applies:
+Add a space and a suffix at the end of a line to control who the filter applies to:
 
-| Suffix | Scope |
+| Suffix | Effect |
 |---|---|
-| (none) or `_z` | All messages |
-| `_y` | Apply to all messages **except your own** actions |
-| `_p` | Apply to all messages **except you and your party** |
+| (none) | Filter applies to **everyone**, including you |
+| ` _y` | Filter applies to **everyone except you** — your own actions still show |
+| ` _p` | Filter applies to **everyone except you and your party** — yours and party show |
 
 So a line like:
 
 ```
-wears off_y
+wears off _y
 ```
 
-hides "wears off" messages **unless** they're about your own status effects.
+hides "wears off" messages from everyone else but still shows them for your own status effects.
 
 ### Examples
 
 ```
-## Hide common status spam
-wears off_p
-no effect
-hits, but does no damage_z
+## Hide effect-wearing-off spam from non-party members
+wears off _p
 
-## Hide alliance-only spam
-gains the effect of_y
+## Hide damage-resist lines from everyone
+no effect
+hits, but does no damage
+
+## Hide "gains the effect of ..." from non-you actors
+gains the effect of _y
 ```
 
 ## Performance note
 
-Every combat line is scanned against every filter. Very long lists (hundreds of patterns) can affect performance — keep your active file lean.
+Every combat line is scanned against every filter in the active file. Very long lists (hundreds of patterns) can affect performance — keep your active file lean.
 
 ## Compatibility
 
-Fancychat's combat filters operate before any other Fancychat formatting. They will *not* match against text rewritten by another chat-modifying addon — but you shouldn't be running another chat-modifying addon anyway. See [Compatibility](Compatibility.md).
+Fancychat's combat filters look at the **original** FFXI message text before Fancychat does anything to it. They will not match against text that has already been rewritten by another chat-modifying add-on — but you shouldn't be running another chat-modifying add-on alongside Fancychat anyway. See [Compatibility](Compatibility.md).
 
 ## See also
 

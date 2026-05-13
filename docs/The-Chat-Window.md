@@ -1,6 +1,6 @@
 # The Chat Window
 
-Fancychat replaces FFXI's native chat plate with an ImGui overlay rendered via the bundled GDI-font texture pipeline. The legacy chat keeps running underneath unless you tell it not to (Settings → Extra → "Block legacy chat messages").
+Fancychat replaces FFXI's native chat plate with its own in-game chat overlay. The legacy chat keeps running underneath unless you tell it not to (Settings → Extra → "Block legacy chat messages").
 
 ## Anatomy
 
@@ -20,7 +20,7 @@ Most of the addon's state — settings, color palette, custom filters, notepad e
 
 ## Tabs
 
-The tab bar exposes 7 tabs: **All**, **Combat**, **Linkshell**, **Party**, **Tell**, **Shout**, **Custom**. Click a tab heading or use a keyboard shortcut to cycle.
+The tab bar shows up to 7 tabs: **All** (or **AllAlt**), **Combat**, **Linkshell**, **Party**, **Tell**, **Shout**, **Custom**. Click a tab heading or use a keyboard shortcut to cycle.
 
 - **All** shows every message by default. Enable Settings → Extra → "Hide combat and custom logs from 'All' tab." to drop combat lines from it — the tab is renamed **AllAlt**.
 - **Custom** is configurable. Pick which categories funnel into it from Settings → Chat Window → Custom Tab Modes (NPC, Tell, Party, Linkshell, Shout — any combination).
@@ -37,7 +37,7 @@ The tab bar exposes 7 tabs: **All**, **Combat**, **Linkshell**, **Party**, **Tel
 
 - **Click any chat line** to copy its full text to the system clipboard. Multi-line messages copy as one unit. A confirmation echo appears: *"Text successfully copied to clipboard!"*
 - **Shift + click** saves the line to the [Notepad](Companion-Panels.md#notepad) instead of the clipboard.
-- **Click the `[link]` aux marker** next to a line that contains a URL — opens the URL in your default browser via `ashita.misc.open_url`. (Clicking the message text itself still copies normally.)
+- **Click the `[link]` marker** next to a line that contains a URL — opens the URL in your default browser. (Clicking the message text itself still copies normally.)
 
 ## Hover previews
 

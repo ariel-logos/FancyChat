@@ -19,7 +19,7 @@ Visual appearance and behaviour of the chat plate.
 - **Position Offsets** — fine-tune each plate's X/Y offset relative to its anchor. Save / Reset buttons provided.
 - **Lock Windows Positions (disables dragging)** — prevents accidental drag.
 - **Compact tabs in the bottom-left corner** — relocates the tab buttons to a small corner cluster.
-- **Gampad Chat Navigation** *(typo in UI: "Gampad")* — controller-friendly tab switching and history scroll.
+- **Gampad Chat Navigation** — controller-friendly tab switching and history scroll.
 - **Enable Auto-Hide window** — fade the chat out after idle. Slider sets the delay (5–60 s). See [The Chat Window → Auto-hide](The-Chat-Window.md#auto-hide).
 - **Use half window length for docked UI elements** — companion panels (GuideMe, Notepad) use half the chat width when docked.
 - **Prevent obstructing FFXI UI** — auto-slide when an FFXI menu opens.

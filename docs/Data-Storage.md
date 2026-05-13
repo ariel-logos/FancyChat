@@ -10,7 +10,7 @@ Ashita/
 │   ├── chatcolors/
 │   │   └── colorset_<character>            ← exported color palette, one per character
 │   ├── combatfilters/
-│   │   ├── custom_combat_filters.txt       ← shipped default filter set
+│   │   ├── example.txt                      ← shipped default filter set
 │   │   └── *.txt                            ← user-managed extra filter files
 │   ├── logs/
 │   │   └── <character>/
@@ -27,9 +27,8 @@ Ashita/
 │   │   ├── notification_2.wav
 │   │   └── ...                              ← drop your own .wav files here
 │   ├── gdifonts/
-│   │   ├── gameicons.ttf                    ← custom-glyph font for compact combat log
-│   │   └── gdifonttexture.dll               ← native rendering DLL
-│   ├── lib/                                 ← source modules
+│   │   ├── gameicons.ttf                    ← custom-icon font for compact combat log
+│   │   └── gdifonttexture.dll               ← icon-rendering helper
 │   ├── images/                              ← UI textures
 │   └── ...
 └── config/addons/fancychat/
@@ -39,18 +38,18 @@ Ashita/
 
 ## settings.json
 
-Settings are persisted automatically every time you change anything in the Settings panel. The file holds:
+Settings are saved automatically every time you change anything in the Settings panel. The file holds:
 
-- Tab choices (`SelectedTab`, `SelectedTab2`)
-- Font sizes, chat width, chat-line count
-- Plate background alpha, position offsets
-- Shortcut keys + Enabled flags
-- Color blind mode, custom-tab modes, alert words
-- Notepad contents (`Notes` array)
-- Picker selections: `SelectedCombatFilter`, `selectedNotification`, `selectedAlert`
-- Per-toggle booleans (every checkbox in the Settings UI)
+- Which tab each chat window is currently showing
+- Font size, chat width, number of chat lines
+- Plate background opacity, position offsets
+- Keyboard shortcut combos and their enabled / disabled state
+- Colorblind mode, custom-tab message types, chat-word alert list
+- Your Notepad notes
+- The currently selected combat-filter file, notification sound, and alert sound
+- The on/off state of every checkbox in the Settings panel
 
-If you lose / corrupt your settings, deleting the file makes Fancychat fall back to defaults on next load. You will not lose any chat history — that lives in memory only — but you will lose Notepad entries.
+If your settings get into a bad state, deleting this file makes Fancychat fall back to defaults on next load. You will not lose any chat history — that lives in memory only — but you will lose your Notepad notes.
 
 ## Color sets
 

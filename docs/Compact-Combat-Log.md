@@ -1,6 +1,6 @@
 # Compact Combat Log
 
-When **Settings → Extra → "Compact Combat Log"** is enabled, Fancychat reformats every combat message into a tighter layout that uses custom-font glyphs (rendered via the bundled `gameicons.ttf`) for the action type and a configurable separator between actor and damage.
+When **Settings → Extra → "Compact Combat Log"** is enabled, Fancychat reformats every combat message into a tighter layout that uses custom icons (from the bundled `gameicons.ttf`) for the action type and a configurable separator between actor and damage.
 
 ## Format
 
@@ -11,41 +11,41 @@ Eleanor [sword-icon] Treant Sapling > 23 DMG
 ```
 
 Where:
-- `[sword-icon]` is a custom font glyph from `gameicons.ttf` (NOT a Unicode emoji)
-- `>` is the configurable separator (Settings → Chat Window → "Combat Split Char" — defaults to `>`)
-- `Eleanor` and `Treant Sapling` are coloured according to the actor classification (see below)
+- `[sword-icon]` is a custom icon from the bundled `gameicons.ttf` font (not a regular emoji)
+- `>` is the separator between actor and damage (Settings → Chat Window → "Combat Split Char" — defaults to `>`)
+- `Eleanor` and `Treant Sapling` are coloured according to who they are (see below)
 
 ## Action icons
 
-Each attack type uses a distinct custom-font glyph:
+Each attack type has its own icon:
 
-| Action | Internal name | Notes |
-|---|---|---|
-| Melee attack | `ATK` | Sword glyph |
-| Ranged attack | `RA` | Bow glyph |
-| Spell cast | `SPELL` | Magic glyph |
-| Cast in progress | `CAST` | Casting indicator |
-| Critical hit | `SC` | Critical-hit marker |
-| Heal | `HEAL` | Healing indicator |
-| Loot / item drop | `LOOT` | Drop marker |
-| Gil obtained | `GIL` | Currency marker |
-| EXP gained | `EXP` | XP marker |
-| Level up | `LVLUP` | Level-up marker |
-| Key item | `KEY` | Key-item marker |
-| Utsusemi shadow | `UTSU` | Shadow marker |
-| Roll (COR) | `ROLL` | Roll indicator |
+| Action | Icon |
+|---|---|
+| Melee attack | Sword |
+| Ranged attack | Bow |
+| Spell cast | Magic burst |
+| Cast in progress | Casting indicator |
+| Critical hit | Star |
+| Heal | Heart / cross |
+| Loot / item drop | Bag |
+| Gil obtained | Coin |
+| EXP gained | Up arrow |
+| Level up | Level-up marker |
+| Key item | Key |
+| Utsusemi shadow | Shadow |
+| Corsair Roll | Die |
 
-The glyph codepoints are PUA (private-use area) entries in `gameicons.ttf`; they only render correctly inside Fancychat where the font is loaded. They will appear as boxes / unknown glyphs anywhere outside the addon (legacy chat, copied-to-clipboard text, etc.).
+The icons come from the bundled `gameicons.ttf`, which is loaded automatically when Fancychat starts. They only render correctly inside Fancychat — they will appear as boxes or unknown characters anywhere else (legacy chat, text you copy out of the addon, etc.).
 
 ## Actor name colouring
 
 Actor names are coloured by their relationship to you:
 
-- **You** — `you` color (Font Colors tab)
-- **Party member** — `actor1` (friend entity)
-- **Alliance member** — `actor1` with alliance tint
-- **Foe / monster** — `actor2` (foe entity)
-- **Unrelated player / pet** — falls back to `combat` base color
+- **You** — your "you" colour (Font Colors tab)
+- **Party member** — friend colour
+- **Alliance member** — friend colour with an alliance tint
+- **Foe / monster** — foe colour
+- **Unrelated player / pet** — falls back to the base combat colour
 
 Configure each in Settings → Font Colors. See [Color Palettes](Color-Palettes.md) for managing the full palette.
 

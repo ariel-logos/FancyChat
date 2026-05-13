@@ -1,8 +1,6 @@
 # Fancychat Documentation
 
-Fancychat is an add-on for the Ashita FFXI loader that replaces the native chat window with a fully-featured ImGui overlay. This `docs/` folder is the long-form companion to the in-game `/fchat manual`.
-
-> Browsing on github.com? Every link below resolves to the corresponding page in this folder. Cloning the repo? Open the `.md` files directly with any markdown viewer.
+Fancychat is an add-on for the Ashita FFXI loader that replaces the native chat window with a fully-featured in-game overlay. This `docs/` folder is the long-form companion to the in-game `/fchat manual` — read it on github.com or open the `.md` files directly with any markdown viewer.
 
 ## Getting started
 
@@ -32,7 +30,7 @@ Fancychat is an add-on for the Ashita FFXI loader that replaces the native chat 
 
 > **About this documentation**
 >
-> Pages are organized to match the in-game manual sections (`/fchat manual`). Where the in-game manual is terse and live, the docs here are longer-form, cross-linked, and version-controlled with the source. The README at the repo root is the project landing page; this folder is the reference manual.
+> Pages are organized to match the in-game manual sections (`/fchat manual`). The in-game manual is terse and live; the pages here are longer-form and cross-linked. The README at the repo root is the project landing page; this folder is the reference manual.
 
 ---
 

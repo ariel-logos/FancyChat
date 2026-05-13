@@ -15,8 +15,6 @@ All commands accept either `/fancychat` or the shorter `/fchat` as the prefix.
 | `/fchat ts` | Print the current time once to chat (formatted as the long-format timestamp) |
 | `/fchat savelogs` | Save every chat tab's current contents to `addons/fancychat/logs/<character>/ChatLogs_<timestamp>/` |
 | `/fchat bigmode` | Toggle the [BigMode](BigMode.md) full-screen overlay |
-| `/fchat debug` | Open the developer diagnostic window (mostly useful for bug reports) |
-| `/fchat test <mode> <text>` | Inject a synthetic chat line at the given mode number (developer / testing) |
 
 ## Keyboard shortcuts
 

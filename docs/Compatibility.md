@@ -7,10 +7,10 @@
 Combat-log enhancers and chat replacements that intercept or rewrite the chat stream are explicitly **unsupported**:
 
 - `simplelog` — combat-line reformatter
-- Alternative chat replacement addons
-- Anything that calls `AddChatMessage` to inject reformatted lines, or that filters / modifies the `text_in` event
+- Alternative chat-replacement add-ons
+- Anything else that reformats, colourises, or otherwise rewrites incoming chat messages before you see them
 
-Running two chat-handling addons at the same time produces visual conflicts:
+Running two chat-handling add-ons at the same time produces visual conflicts:
 
 - Duplicated lines (each addon adds its own copy)
 - Broken colours (palette escapes from one addon get overwritten by the other)
