@@ -18,3 +18,7 @@ chatcolors/
 
 # Palette-extraction artefact (developer-only)
 extracted_palette.txt
+
+# Map downloader artefacts (generated each run; not source)
+maps/_summary.txt
+maps/__pycache__/

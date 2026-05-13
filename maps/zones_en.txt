@@ -1,0 +1,250 @@
+Phanauet Channel
+Manaclipper
+Bibiki Bay
+Uleguerand Range
+Bearclaw Pinnacle
+Attohwa Chasm
+Boneyard Gully
+The Shrouded Maw
+Oldton Movalpolos
+Newton Movalpolos
+Mine Shaft #2716
+Hall of Transference
+Abyssea - Konschtat
+Promyvion - Holla
+Spire of Holla
+Promyvion - Dem
+Spire of Dem
+Promyvion - Mea
+Spire of Mea
+Promyvion - Vahzl
+Spire of Vahzl
+Lufaise Meadows
+Misareaux Coast
+Tavnazian Safehold
+Phomiuna Aqueducts
+Sacrarium
+Riverne - Site #B01
+Riverne - Site #A01
+Monarch Linn
+Empyreal Paradox
+Temenos
+Apollyon
+Dynamis - Valkurm
+Dynamis - Buburimu
+Dynamis - Qufim
+Dynamis - Tavnazia
+Diorama Abdhaljs-Ghelsba
+Abdhaljs Isle-Purgonorgo
+Abyssea - Tahrongi
+Open sea route to Al Zahbi
+Open sea route to Mhaura
+Al Zahbi
+Aht Urhgan Whitegate
+Wajaom Woodlands
+Bhaflau Thickets
+Nashmau
+Arrapago Reef
+Ilrusi Atoll
+Periqia
+Talacca Cove
+Silver Sea route to Nashmau
+Silver Sea route to Al Zahbi
+The Ashu Talif
+Mount Zhayolm
+Halvung
+Lebros Cavern
+Navukgo Execution Chamber
+Mamook
+Mamool Ja Training Grounds
+Jade Sepulcher
+Aydeewa Subterrane
+Leujaoam Sanctum
+Chocobo Circuit
+The Colosseum
+Alzadaal Undersea Ruins
+Zhayolm Remnants
+Arrapago Remnants
+Bhaflau Remnants
+Silver Sea Remnants
+Nyzul Isle
+Hazhalm Testing Grounds
+Caedarva Mire
+East Ronfaure [S]
+Jugner Forest [S]
+Vunkerl Inlet [S]
+Batallia Downs [S]
+La Vaule [S]
+Everbloom Hollow
+Bastok Markets [S]
+North Gustaberg [S]
+Grauberg [S]
+Pashhow Marshlands [S]
+Rolanberry Fields [S]
+Beadeaux [S]
+Ruhotz Silvermines
+Windurst Waters [S]
+West Sarutabaruta [S]
+Fort Karugo-Narugo [S]
+Meriphataud Mountains [S]
+Sauromugue Champaign [S]
+Castle Oztroja [S]
+West Ronfaure
+East Ronfaure
+La Theine Plateau
+Valkurm Dunes
+Jugner Forest
+Batallia Downs
+North Gustaberg
+South Gustaberg
+Konschtat Highlands
+Pashhow Marshlands
+Rolanberry Fields
+Beaucedine Glacier
+Xarcabard
+Cape Teriggan
+Eastern Altepa Desert
+West Sarutabaruta
+East Sarutabaruta
+Tahrongi Canyon
+Buburimu Peninsula
+Meriphataud Mountains
+Sauromugue Champaign
+Yuhtunga Jungle
+Yhoator Jungle
+Western Altepa Desert
+Qufim Island
+Valley of Sorrows
+Mordion Gaol
+Abyssea - La Theine
+Dynamis - Beaucedine
+Dynamis - Xarcabard
+Beaucedine Glacier [S]
+Xarcabard [S]
+Castle Zvahl Baileys [S]
+Horlais Peak
+Ghelsba Outpost
+Fort Ghelsba
+Yughott Grotto
+Palborough Mines
+Waughroon Shrine
+Giddeus
+Beadeaux
+Qulun Dome
+Davoi
+Monastic Cavern
+Castle Oztroja
+Altar Room
+The Boyahda Tree
+Castle Zvahl Keep [S]
+Throne Room [S]
+Temple of Uggalepih
+Den of Rancor
+Castle Zvahl Baileys
+Castle Zvahl Keep
+Sacrificial Chamber
+Garlaige Citadel [S]
+Throne Room
+Ranguemont Pass
+Bostaunieux Oubliette
+Chamber of Oracles
+Toraimarai Canal
+Full Moon Fountain
+Zeruhn Mines
+Korroloka Tunnel
+Kuftal Tunnel
+The Eldieme Necropolis [S]
+Sea Serpent Grotto
+Stellar Fulcrum
+The Celestial Nexus
+Walk of Echoes
+Maquette Abdhaljs-LegionA
+Dynamis - Bastok
+Dynamis - Windurst
+Dynamis - Jeuno
+Dangruf Wadi
+Inner Horutoto Ruins
+Outer Horutoto Ruins
+The Eldieme Necropolis
+Gusgen Mines
+Maze of Shakhrami
+Garlaige Citadel
+Cloister of Gales
+Cloister of Storms
+Cloister of Frost
+Cloister of Flames
+Quicksand Caves
+Cloister of Tremors
+Cloister of Tides
+Gustav Tunnel
+Labyrinth of Onzozo
+Abyssea - Attohwa
+Abyssea - Misareaux
+Abyssea - Vunkerl
+Abyssea - Altepa
+Ship bound for Selbina
+Ship bound for Mhaura
+Provenance
+Bastok-Jeuno Airship
+Windurst-Jeuno Airship
+Kazham-Jeuno Airship
+Ship bound for Selbina
+Ship bound for Mhaura
+Throne Room [V]
+Bastok Mines
+Bastok Markets
+Port Bastok
+Metalworks
+Windurst Waters
+Windurst Walls
+Port Windurst
+Windurst Woods
+Heavens Tower
+Upper Jeuno
+Lower Jeuno
+Port Jeuno
+Rabao
+Selbina
+Mhaura
+Kazham
+Hall of the Gods
+Norg
+Abyssea - Uleguerand
+Abyssea - Grauberg
+Abyssea - Empyreal Paradox
+Western Adoulin
+Eastern Adoulin
+Rala Waterways
+Rala Waterways [U]
+Yahse Hunting Grounds
+Ceizak Battlegrounds
+Foret de Hennetiel
+Yorcia Weald
+Yorcia Weald [U]
+Morimar Basalt Fields
+Marjami Ravine
+Kamihr Drifts
+Sih Gates
+Moh Gates
+Cirdas Caverns
+Cirdas Caverns [U]
+Dho Gates
+Woh Gates
+Gwora - Corridor
+Walk of Echoes [P2]
+Mog Garden
+Leafallia
+Mount Kamihr
+Silver Knife
+Celennia Memorial Library
+Feretory
+Maquette Abdhaljs-LegionB
+Desuetia - Empyreal Paradox
+Reisenjima
+Reisenjima Henge
+Reisenjima Sanctorium
+Dynamis - Bastok [D]
+Dynamis - Windurst [D]
+Dynamis - Jeuno [D]
+Walk of Echoes [P1]
+Gwora - Throne Room
