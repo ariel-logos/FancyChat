@@ -10,21 +10,10 @@ Fancychat is an add-on for FFXI's third-party loader and hook Ashita (https://ww
 It replaces FFXI's native chat with a customizable in-game chat overlay: messages are sorted into tabs, combat lines can be compacted into icon-based rows, timestamps are supported, links are clickable, the chat window can be themed and resized to taste, and there's a bundled set of FFXI zone maps you can pull up by Ctrl+clicking any chat line that mentions a zone name.
 <br></br>
 
-<!--
-DEMO VIDEO PLACEHOLDER — to activate when the recording is ready:
-
-  1. Open a new draft Issue on this repo (no need to submit it).
-  2. Drag-drop your demo .mp4 / .mov / .webm into the comment textarea.
-  3. GitHub uploads the file and gives you a URL like
-       https://user-images.githubusercontent.com/<NN>/<id>.mp4
-  4. Replace PASTE_VIDEO_URL_HERE below with that URL.
-  5. Delete THIS comment-open marker and the closing one further down.
-
 <p align="center">
-  <video src="PASTE_VIDEO_URL_HERE.mp4" controls width="720"></video>
+  <video src="https://github.com/user-attachments/assets/34fbe493-6b8f-465c-a0b8-181f6f5fb6e0" controls width="720"></video>
 </p>
 <br></br>
--->
 
 ### Main features
 - **7 chat tabs** to organize messages: All (renamed AllAlt if combat is hidden from it), Combat, Linkshell, Party, Tell, Shout, Custom
