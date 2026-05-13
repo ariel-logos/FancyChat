@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="fancychatlogo.png" width="250" alt="Fancychat logo">
+</p>
+
 # Fancychat
 
 ### What is it?
