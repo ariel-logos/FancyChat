@@ -115,6 +115,34 @@ While hovering the chat plate:
 There's also a small info-icon hover button in the top-left of the primary chat window that pops up a built-in quick-reference of these interactions; hide it from **Settings → Chat Window → "Show help (i) hover button on the first chat window"** if you don't want it.
 <br></br>
 
+#### Gamepad navigation
+Enable in **Settings → Chat Window → "Gampad Chat Navigation"** (off by default). Once on, **hold the ${\textsf{\color{orange}{Left Bumper (LB)}}}$** at any time to enter Fancychat's gamepad navigation mode — every other binding below only fires while LB is held. Release LB to return your controller to normal FFXI use.
+
+<p align="center">
+  <img src="images/gamepad-bindings.png" alt="Xbox controller binding map" width="650">
+</p>
+
+<!-- Drop the annotated Xbox controller diagram at images/gamepad-bindings.png -->
+
+| Action | Xbox button | When it works |
+|---|---|---|
+| Enter Fancychat navigation mode | Hold ${\textsf{\color{orange}{LB}}}$ | Always |
+| Cycle primary chat tab | **RB** | While LB held, chat input closed |
+| Cycle secondary chat tab | **RT** | While LB held, chat input closed, secondary window enabled |
+| Scroll primary chat history | **Left stick ↑/↓** | While LB held |
+| Scroll secondary chat history | **Right stick ↑/↓** | While LB held |
+| Snap every chat window to the most recent line | **B** | While LB held |
+| Toggle ${\textsf{\color{cyan}{BigMode}}}$ | **Y** | While LB held |
+| Open the FFXI chat input box | **X** | While LB held, chat input closed |
+| Send the typed text (same as Enter) | **A** | While LB held, chat input open |
+| Previous command in your typed history | **D-pad ↓** | While LB held, chat input open |
+| Next command in your typed history | **D-pad ↑** | While LB held, chat input open |
+| Previous preset command (`!mog`, `!chef`, …) | **D-pad ←** | While LB held, chat input open |
+| Next preset command | **D-pad →** | While LB held, chat input open |
+
+> Bindings activate immediately after enabling the setting — no addon restart needed. If a binding seems unresponsive, double-check whether the chat input box is open or closed: several actions are state-specific (see the column above).
+<br></br>
+
 #### Chat Tabs
 The tab bar at the top of the chat window lets you switch between up to 7 tabs:
 
