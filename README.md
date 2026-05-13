@@ -215,6 +215,7 @@ Two independent sound features:
 - **Chat word alert** — plays a sound whenever any word from a configurable list appears in chat. Per-channel toggles let you choose which channels trigger the alert (so you can alert on `your name` mentions in shout but not in combat, for example).
 
 Both pull from `addons/fancychat/notifications/`. The two dropdowns each show six fixed slots: `notification_1` through `notification_6`. To use your own sounds, **replace** the shipped `.wav` files of the same name (don't add new ones — extra filenames are not picked up by the dropdowns). For the **Volume Boost** option you also need to provide the matching boosted variant: each base file `notification_<n>.wav` has a sibling `notification_<n>B.wav` that the addon plays when Volume Boost is ticked.
+<br></br>
 
 #### R0 Detection
 A **Warning messages on R0s** toggle (also in Extra) prints a chat warning when an R0 connection error occurs, so you can see a hiccup at a glance.
