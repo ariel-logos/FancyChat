@@ -8,16 +8,16 @@ It replaces FFXI's native chat with a customizable in-game chat overlay: message
 
 ### Main features
 - **7 chat tabs** to organize messages: All (renamed AllAlt if combat is hidden from it), Combat, Linkshell, Party, Tell, Shout, Custom
-- **Compact combat log** — rewrites combat messages into tight icon-based lines (icons are drawn from the bundled `gameicons.ttf` font, so they always render in-game even when the equivalent emoji wouldn't)
+- ${\textsf{\color{cyan}{Compact Combat Log}}}$ — rewrites combat messages into tight icon-based lines (icons are drawn from the bundled `gameicons.ttf` font, so they always render in-game even when the equivalent emoji wouldn't)
 - **Actor name coloring** — you, party members, alliance, enemies, and NPCs each get a distinct color
 - **Emoji support** — ~2000+ emoji available via `:name:` substitution (`:grinning:` → 😀)
 - **Timestamps** — per-line `[HH:MM:SS]` (long) or `[HH:MM]` (short), or a periodic horizontal banner line every 1 / 5 / 10 / 30 / 60 minutes
-- **Auto-hide** — chat fades out on inactivity and wakes back up on new messages on the active tab, mouse-wheel scrolling, a configured keyboard shortcut, opening the chat input, or NPC dialog events (mouse hover alone does **not** wake it — that's intentional)
+- ${\textsf{\color{cyan}{Auto-Hide}}}$ — chat fades out on inactivity and wakes back up on new messages on the active tab, mouse-wheel scrolling, a configured keyboard shortcut, opening the chat input, or NPC dialog events (mouse hover alone does **not** wake it — that's intentional)
 - ${\textsf{\color{cyan}{BigMode}}}$ — full-screen chat history overlay showing 30+ lines at once
 - **Hover previews** — hovering an auto-translate item, ability, or spell name shows a tooltip with its description / cost / properties
 - **Click / Shift+click / Ctrl+click** — copy a line to the clipboard, save it to the Notepad, or pop a Zone Search panel for any zone name on the line
 - **Clickable URLs** — links in chat get a `[link]` marker; clicking it opens the URL in your default browser
-- **Zone Search & Maps** — Ctrl+left-click a chat line that mentions a zone to bring up a pop-out with `/sea`, FFXIclopedia and bg-wiki shortcuts, and a browser for the bundled maps (base maps, treasure-coffer maps, fishing maps, weather-spawn maps, and Notorious Monster maps)
+- ${\textsf{\color{cyan}{Zone Search}}}$ & Maps — Ctrl+left-click a chat line that mentions a zone to bring up a pop-out with `/sea`, FFXIclopedia and bg-wiki shortcuts, and a browser for the bundled maps (base maps, treasure-coffer maps, fishing maps, weather-spawn maps, and Notorious Monster maps)
 - **Chat logging** — save every tab to disk on demand, organized by character and timestamp
 - **Sound notifications** — incoming /tell alert plus a configurable chat-word alert (per-channel toggles)
 - **Custom combat filters** — hide combat lines by keyword
@@ -36,7 +36,7 @@ The current release is compatible with **both ${\textsf{\color{orange}{Ashita 4.
 
 A few small things worth knowing up front:
 - Some features assume a 16:9-ish screen ratio. On very wide / narrow resolutions you may need to nudge things back into place via **Settings → Chat Window → Position Offsets**.
-- A few settings are labelled *experimental* — they work, but may behave imperfectly in edge cases.
+- A few settings are labelled ${\textsf{\color{orange}{experimental}}}$ — they work, but may behave imperfectly in edge cases.
 <br></br>
 
 ### 📖 Documentation
@@ -107,7 +107,7 @@ Tabs can be shown as a full tab bar or switched to compact mode (`/fchat compact
 <br></br>
 
 #### Compact Combat Log
-Toggle in **Settings → Extra → "Compact Combat Log"**. When on, incoming combat messages are rewritten into a condensed, icon-based format to reduce visual noise while keeping every relevant detail visible at a glance. Actor names are coloured by role and damage numbers are highlighted.
+${\textsf{\color{cyan}{Compact Combat Log}}}$ is toggled in **Settings → Extra**. When on, incoming combat messages are rewritten into a condensed, icon-based format to reduce visual noise while keeping every relevant detail visible at a glance. Actor names are coloured by role and damage numbers are highlighted.
 
 Icons used in compact mode (the emoji below are GitHub-rendered approximations; in-game they are drawn as custom glyphs from the bundled `gameicons.ttf`):
 <ul>
@@ -131,7 +131,7 @@ For more surgical control, use combat filter files (`combatfilters/*.txt`). Pick
 <br></br>
 
 #### Zone Search & Maps
-Ctrl + left-click any chat line that mentions a zone name to bring up a small action popup at the cursor. For each zone detected on the line, the popup shows:
+${\textsf{\color{cyan}{Zone Search}}}$ & Maps is triggered by Ctrl + left-clicking any chat line that mentions a zone name — a small action popup opens at the cursor. For each zone detected on the line, the popup shows:
 
 - ${\textsf{\color{white}{/sea \"Zone Name\"}}}$ — runs the standard FFXI zone-search command for that zone (quoted, so multi-word zones like `Rolanberry Fields` work)
 - **Open Zone on FFXIclopedia** — opens the zone's FFXIclopedia page in your browser
@@ -149,9 +149,9 @@ The maps live in `addons/fancychat/maps/<Zone Name>/<Section>/` as PNG / JPEG fi
 <br></br>
 
 #### BigMode
-BigMode is a full-screen overlay that shows the same chat buffer as the primary window but with many more visible lines (30+). Useful for reviewing recent chat history without scrolling.
+${\textsf{\color{cyan}{BigMode}}}$ is a full-screen overlay that shows the same chat buffer as the primary window but with many more visible lines (30+). Useful for reviewing recent chat history without scrolling.
 
-Toggle BigMode with `/fchat bigmode` or by configuring a keyboard shortcut in **Settings → Shortcuts**. All four shortcuts (Hide, BigMode, Tab cycle window 1, Tab cycle window 2) are **disabled by default** — tick the Enabled checkbox and pick a key combo (e.g. Shift+G) to activate them. BigMode uses its own independent scroll cursor so switching back to the primary window does not disrupt your scroll position there.
+Toggle BigMode with `/fchat bigmode` or by configuring a keyboard shortcut in **Settings → Shortcuts**. All four shortcuts (Hide, BigMode, Tab cycle window 1, Tab cycle window 2) are ${\textsf{\color{orange}{disabled by default}}}$ — tick the Enabled checkbox and pick a key combo (e.g. Shift+G) to activate them. BigMode uses its own independent scroll cursor so switching back to the primary window does not disrupt your scroll position there.
 <br></br>
 
 #### Sound notifications & alerts
@@ -179,9 +179,9 @@ Open the Settings panel with `/fchat settings`. It contains six tabs:
 <br></br>
 
 #### GuideMe & Notepad
-The **GuideMe** panel (`/fchat guideme`) is a built-in viewer for FFXICLOPEDIA and BG-Wiki pages, displayed as wrapped text directly in-game — no alt-tabbing required. Paste a URL into the field at the top of the panel and press Load.
+The ${\textsf{\color{cyan}{GuideMe}}}$ panel (`/fchat guideme`) is a built-in viewer for FFXICLOPEDIA and BG-Wiki pages, displayed as wrapped text directly in-game — no alt-tabbing required. Paste a URL into the field at the top of the panel and press Load.
 
-The **Notepad** panel (`/fchat notes`) is a per-character note keeper. Shift-clicking any chat line saves it to the Notepad (up to 10 entries). Each saved note has a small **C** button to copy it to the clipboard and an **X** to delete it. Notes persist between sessions.
+The ${\textsf{\color{cyan}{Notepad}}}$ panel (`/fchat notes`) is a per-character note keeper. Shift-clicking any chat line saves it to the Notepad (up to 10 entries). Each saved note has a small **C** button to copy it to the clipboard and an **X** to delete it. Notes persist between sessions.
 
 Both panels can be docked above the primary chat window (the default) or undocked into a movable window with the Dock/Undock button. When the second chat window is enabled, you can dock them there instead via **Settings → Extra → "Dock GuideMe/Notes on the second chat window"**.
 <br></br>
