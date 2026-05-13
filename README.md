@@ -119,10 +119,8 @@ There's also a small info-icon hover button in the top-left of the primary chat 
 Enable in **Settings → Chat Window → "Gampad Chat Navigation"** (off by default). Once on, **hold the ${\textsf{\color{orange}{Left Bumper (LB)}}}$** at any time to enter Fancychat's gamepad navigation mode — every other binding below only fires while LB is held. Release LB to return your controller to normal FFXI use.
 
 <p align="center">
-  <img src="images/gamepad-bindings.png" alt="Xbox controller binding map" width="650">
+  <img src="gamepadbindings.png" alt="Xbox controller binding map" width="650">
 </p>
-
-<!-- Drop the annotated Xbox controller diagram at images/gamepad-bindings.png -->
 
 | Action | Xbox button | When it works |
 |---|---|---|
