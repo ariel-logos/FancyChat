@@ -1,42 +1,6 @@
---[[
-	lib/ui_helpers.lua
-
-	Small ImGui helper functions used across the addon.  All exposed
-	as globals via `_G.X = M.X` so existing call sites in
-	fancychat.lua's d3d_present render loop, ui_settings, ui_panels,
-	bigmode, etc. continue to work without further changes.
-
-	Two flavours:
-
-	  Style-stack helpers
-	    PushColorStyles(styles)  /  PopColorStyles(styles)
-	      Generic per-element ImGui color push/pop (used by tab buttons).
-	    PushWindowStyle()        /  PopWindowStyle()
-	      Pushes the 16 fixed colors that give every FancyChat window
-	      its translucent dark theme.
-
-	  Widgets / overlays
-	    AddTooltip(message, offset, critical)
-	      Draws the (i) info icon and shows `message` on hover,
-	      wrapped at 40 chars.  `critical` paints the icon red.
-	    AddWarning(message, y, flag, x, title)
-	      Modal-ish centered popup with an OK button.  Uses
-	      `set.Popup` as the close-flag (cleared by parent code).
-	    AddSetColor(buttonname, colorhex, tmpcolor)
-	      Per-color row in the Settings -> Font Colors tab.  Returns
-	      the row's pixel width so the caller can lay out columns.
-	    DrawInfoWin(maxh, idx, name, text, icon)
-	      Single per-item tooltip pane drawn above the chat.
-	    DrawInfo(text)
-	      Scans `text` for `<...>` auto-translate name pairs, looks
-	      each up via the resource manager (item / ability / spell)
-	      and renders up to 4 stacked DrawInfoWin previews.
-
-	The check `if check == false then return end` at the top of
-	AddWarning is preserved verbatim from the original; `check` is
-	an undefined global so it's always nil and the early-return
-	never fires.  Likely a leftover from an older guard.
-]]
+-- lib/ui_helpers.lua — small ImGui helpers (style-stack push/pop,
+-- AddTooltip, AddWarning, AddSetColor, DrawInfoWin, DrawInfo).
+-- All exposed as globals via _G.X = M.X.
 
 require('common')
 local imgui     = require('imgui')

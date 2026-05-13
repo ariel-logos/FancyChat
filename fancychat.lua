@@ -4,7 +4,7 @@ addon.author    = 'Arielfy';
 addon.desc      = 'Fancy Chat!';
 addon.link      = '';
 
-local ver = '0.9.260228'
+local ver = '0.9.260513'
 addon.version = ver
 
 --[[
@@ -48,7 +48,11 @@ require('lib.ui_settings')
 local lifecycle = require('lib.lifecycle')
 local input     = require('lib.input')
 require('lib.bigmode')
-require('lib.debug_window')
+-- Debug window disabled.  Uncomment to re-enable; also un-comment the
+-- Debug() / DebugWindow() / updateCommandList() call sites flagged
+-- below in render.lua, input.lua and commands.lua, and the related
+-- /fchat debug/savedebug/printdebug/helpdebug command bodies.
+--require('lib.debug_window')
 local render    = require('lib.render')
 
 lifecycle.register()

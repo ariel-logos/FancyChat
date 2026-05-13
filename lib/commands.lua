@@ -1,24 +1,4 @@
---[[
-	lib/commands.lua
-
-	Handles the /fancychat (alias /fchat) slash-command surface.
-	Subcommands:
-
-	  debug       Toggle debug-window visibility.
-	  bigmode     Toggle BigMode chat overlay.
-	  savelogs    Snapshot every tab's chat buffer to logs/<player>/.
-	  savedebug   Flush the debug LogBuffer to disk and clear it.
-	  test M ...  Inject a synthetic message in chat-mode M (0-255).
-	  printdebug  Print the welcome blurb.
-	  helpdebug   Dump help.foundParent introspection.
-	  guideme     Toggle GuideMe panel.
-	  settings    Toggle settings panel and persist.
-	  compact     Toggle compact tab bar and persist.
-	  manual      Toggle the in-game manual window.
-	  notes       Toggle Notepad panel.
-	  tod         Toggle precise-timestamp mode and persist.
-	  ts          Print current time using the active timestamp format.
-]]
+-- lib/commands.lua — /fancychat (alias /fchat) slash-command handler.
 
 require('common')
 local utils = require('utils')
@@ -42,10 +22,12 @@ function M.register()
 
 		e.blocked = true
 
+		--[[  debug_window disabled
 		if (#args == 2 and args[2] == 'debug') then
 			dw.WindowOpened[1] = not dw.WindowOpened[1]
 			return
 		end
+		--]]
 		if (#args == 2 and args[2] == 'bigmode') then
 			fcw[3].BigMode = not fcw[3].BigMode
 			return
@@ -62,6 +44,7 @@ function M.register()
 			return
 		end
 
+		--[[  debug_window disabled
 		if (#args == 2 and args[2] == 'savedebug') then
 			local ts = os.date('[%Y_%m_%d-%H_%M_%S]', os.time())
 			if utils.SaveLogs(b.LogBuffer, nil, 'DEBUG', fcw[1].PlayerName, addon.path, ts) then
@@ -69,7 +52,9 @@ function M.register()
 			end
 			return
 		end
+		--]]
 
+		--[[  debug_window disabled
 		if (#args > 3 and args[2] == 'test' and tonumber(args[3]) >= 0 and tonumber(args[3]) <= 255) then
 			local test_string = ''
 			local test_i = 4
@@ -80,12 +65,14 @@ function M.register()
 			AshitaCore:GetChatManager():AddChatMessage(tonumber(args[3]), false, test_string:trimex()..'\127\49')
 			return
 		end
+		--]]
 
+		--[[  debug_window disabled
 		if (#args == 2 and args[2] == 'printdebug') then
 			-- Dump every legacy palette slot to chat with its index as
 			-- the visible label.  Each label is wrapped in its own
 			-- colour escape so FFXI's native chat renderer paints it
-			-- in that palette colour — letting us read the actual RGB
+			-- in that palette colour - letting us read the actual RGB
 			-- off a screenshot for any slot the chat.colors table
 			-- doesn't document.
 			--
@@ -94,7 +81,7 @@ function M.register()
 			--   Body:   \x1F\NN<NN> repeated, with trailing reset.
 			--
 			-- View in the LEGACY FFXI chat (set blockAll OFF in
-			-- Settings → Extra) — that's where FFXI itself renders
+			-- Settings -> Extra) - that's where FFXI itself renders
 			-- the colours; FancyChat's own renderer doesn't speak the
 			-- legacy palette.
 			local function dump_palette(lead_byte, label)
@@ -125,6 +112,7 @@ function M.register()
 			print(tostring(help.foundAnything))
 			print(table.concat(help.foundParent, ','))
 		end
+		--]]
 
 		if not fcw[1].Closing and fcw[1].InitDone and fcw[1].LoggedIn then
 			if (#args == 2 and args[2] == 'guideme') then

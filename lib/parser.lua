@@ -196,6 +196,26 @@ _G.CleanTextFunctionNew = M.CleanTextFunctionNew
 function M.HandleSpecial(newText, category, prefix, suffix, cutIdx, color, replacements)
 	local text_b, text_e, color_b, color_e, MCTable
 
+	if not prefix and par.checkAgain[2] == category then
+		local span_start = par.checkAgain[1] or 0
+		local end_pos
+		local re_arm = true
+		if suffix then
+			local suf_start = utils_FindLastOfString(newText, suffix)
+			if suf_start then
+				end_pos = suf_start - 1 + #suffix
+				re_arm  = false
+			else
+				end_pos = #newText
+			end
+		else
+			end_pos = #newText
+			re_arm  = false
+		end
+		par.checkAgain = re_arm and {0, category} or {0, ''}
+		return {newText, {span_start, end_pos, color}, cutIdx}
+	end
+	
 	if prefix then
 		text_b, text_e = string_find(newText, prefix)
 	else
@@ -275,76 +295,45 @@ _G.HandleSpecial = M.HandleSpecial
 -- ===================================================================
 function M.CheckSpecial(newText, col, cutIdx)
 
-	if set.isCEXI and (par.MessageMode == 9 or par.MessageMode == 127) then
-		if newText:find('Now accumulating linkshell points for ') or par.checkAgain[2] == 'CE-acc' then
-			return HandleSpecial(newText, 'CE-acc', 'Now accumulating linkshell points for ', '%.', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('Activity Points: ') or par.checkAgain[2] == 'CE-AP' then
-			return HandleSpecial(newText, 'CE-AP', 'Activity Points: ', '%.', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('Summit Objective:') or par.checkAgain[2] == 'CE-SO' then
-			return HandleSpecial(newText, 'CE-SO', 'Summit Objective:', '%.', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find(' activity points%.') or par.checkAgain[2] == 'CE-AP2' then
-			return HandleSpecial(newText, 'CE-AP2', 'gains', '%.', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('Point Accumulation:') or par.checkAgain[2] == 'CE-PA' then
-			return HandleSpecial(newText, 'CE-PA', 'Point Accumulation:', '%.', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('PartyFinder') or par.checkAgain[2] == 'CE-PF' then
-			return HandleSpecial(newText, 'CE-PF', nil, '%[PartyFinder', cutIdx, allSettings.colors.cexi[1])
-		end
-	end
+	
 
 	if par.MessageMode == 121 then
 		if newText:find('You find') or par.checkAgain[2] == 'youfind' then
 			if par.checkAgain[2] == '' then
 				if allSettings.EnableFCColorMarking[1] then
-					newText = newText:gsub('You find', 'Found'):gsub(' on ', icons.LOOT..' on ')
+				--	newText = newText:gsub('You find', 'Found'):gsub(' on ', icons.LOOT..' on ')
+					newText = newText:gsub(' on ', icons.LOOT..' on ')
 				else
-					newText = newText:gsub('You find', 'Found'):gsub(' on  ', icons.LOOT..' on ')
+				--	newText = newText:gsub('You find', 'Found'):gsub(' on  ', icons.LOOT..' on ')
+					newText = newText:gsub(' on  ', icons.LOOT..' on ')
 				end
 				if newText:find(' on the %.') then newText = newText:gsub('%.', '{?}.'); cutIdx = cutIdx + 3 end
 			end
-			return HandleSpecial(newText, 'youfind', 'Found', ' on ', cutIdx, allSettings.colors.found[1])
-		end
-		if set.isCEXI then
-			if newText:find('Defeat Mobs') or par.checkAgain[2] == 'CE-DM' then
-				return HandleSpecial(newText, 'CE-DM', 'Defeat Mobs ', ' %(', cutIdx, allSettings.colors.cexi[1])
-			end
-			if newText:find('Quest Accepted:') or par.checkAgain[2] == 'CE-QA' then
-				return HandleSpecial(newText, 'CE-QA', nil, utf8.char(0x25C7)..' Quest Accepted:', cutIdx, allSettings.colors.cexi[1])
-			end
-			if newText:find('Quest Completed:') or par.checkAgain[2] == 'CE-QC2' then
-				return HandleSpecial(newText, 'CE-QC2', nil, utf8.char(0x25C6)..' Quest Completed:', cutIdx, allSettings.colors.cexi[1])
-			end
-			if newText:find('Quest Completed') or par.checkAgain[2] == 'CE-QC' then
-				return HandleSpecial(newText, 'CE-QC', nil, utf8.char(0x25C6)..' Quest Completed', cutIdx, allSettings.colors.cexi[1])
-			end
-		end
-		if newText:find(' synthesized ') or par.checkAgain[2] == 'synth' then
+			cutIdx = cutIdx + 3
+			return HandleSpecial(newText, 'youfind', 'find ', ' on ', cutIdx, allSettings.colors.found[1])
+		elseif newText:find(' synthesized ') or par.checkAgain[2] == 'synth' then
 			return HandleSpecial(newText, 'synth', 'You synthesized ', '%.', cutIdx, allSettings.colors.obtained[1])
-		end
-		if newText:find('You throw away ') or par.checkAgain[2] == 'throw' then
+		elseif newText:find('You throw away ') or par.checkAgain[2] == 'throw' then
 			return HandleSpecial(newText, 'throw', 'You throw away ', '%.', cutIdx, allSettings.colors.negative[1])
-		end
-		if newText:find(' attains level [%d]+!') or par.checkAgain[2] == 'attain' then
+		elseif newText:find(' attains level [%d]+!') or par.checkAgain[2] == 'attain' then
 			if par.checkAgain[2] == '' then
 				newText = newText:gsub('%sl', string.upper):gsub('!', ' '..icons.LVLUP)
 				cutIdx = cutIdx + 3
 			end
 			return HandleSpecial(newText, 'attain', ' attains ', nil, cutIdx, allSettings.colors.attain[1])
-		end
-		if newText:find(' caught ') or par.checkAgain[2] == 'caught2' then
-			return HandleSpecial(newText, 'caught2', fcw[1].PlayerName, '%!', cutIdx, allSettings.colors.obtained[1])
-		end
-		if newText:find(' learns ') or par.checkAgain[2] == 'learn' then
+		
+		--if newText:find(' caught ') or par.checkAgain[2] == 'caught2' then
+		--	return HandleSpecial(newText, 'caught2', fcw[1].PlayerName, '%!', cutIdx, allSettings.colors.obtained[1])
+		--end
+		elseif newText:find(' learns ') or par.checkAgain[2] == 'learn' then
 			return HandleSpecial(newText, 'learn', fcw[1].PlayerName, '%.', cutIdx, allSettings.colors.learn[1])
-		end
-		if newText:find(' lot for ') or par.checkAgain[2] == 'lot' then
+		elseif newText:find(' lot for ') or par.checkAgain[2] == 'lot' then
 			par.tabmode = -1
 			par.LastMode = 'lot'
 			return HandleSpecial(newText, 'lot', ' lot for ', '%.', cutIdx, allSettings.colors.lot[1])
-		end
-		if newText:find('You sell ') or par.checkAgain[2] == 'sell' then
+		elseif newText:find('You sell ') or par.checkAgain[2] == 'sell' then
 			return HandleSpecial(newText, 'sell', 'You sell ', ' to ', cutIdx, allSettings.colors.obtained[1])
-		end
-		if newText:find('You buy ') or par.checkAgain[2] == 'buy' then
+		elseif newText:find('You buy ') or par.checkAgain[2] == 'buy' then
 			return HandleSpecial(newText, 'buy', 'You buy ', ' from ', cutIdx, allSettings.colors.obtained[1])
 		end
 	end
@@ -352,17 +341,32 @@ function M.CheckSpecial(newText, col, cutIdx)
 	if par.MessageMode == 142 or par.MessageMode == 151 then
 		if newText:find('You obtain.*%.') or par.checkAgain[2] == 'obtain1' then
 			return HandleSpecial(newText, 'obtain1', 'You obtain', '%.', cutIdx, allSettings.colors.obtained[1])
-		end
-		if newText:find('Obtained:') or par.checkAgain[2] == 'obtain2' then
+		elseif newText:find('Obtained:') or par.checkAgain[2] == 'obtain2' then
 			return HandleSpecial(newText, 'obtain2', 'Obtained:', '%.', cutIdx, allSettings.colors.obtained[1])
-		end
-		if newText:find(fcw[1].PlayerName..' caught') or par.checkAgain[2] == 'caught' then
-			return HandleSpecial(newText, 'caught', fcw[1].PlayerName..' caught ', '%!', cutIdx, allSettings.colors.found[1])
-		end
-		if newText:find(' obtains ') or par.checkAgain[2] == 'obtain3' then
+		--if newText:find(fcw[1].PlayerName..' caught') or par.checkAgain[2] == 'caught' then
+		--	return HandleSpecial(newText, 'caught', fcw[1].PlayerName..' caught ', '%!', cutIdx, allSettings.colors.found[1])
+		--end
+		elseif newText:find(' obtains ') or par.checkAgain[2] == 'obtain3' then
 			return HandleSpecial(newText, 'obtain3', ' obtains ', '%.', cutIdx, allSettings.colors.obtained[1])
-		end
-		if newText:find('Obtained key item: ') or par.checkAgain[2] == 'KI' then
+		elseif newText:find('You have a good feeling about') or par.checkAgain[2] == 'fshg' then
+			return HandleSpecial(newText, 'fshg', 'You have a ', 'feeling about', cutIdx, 0xFF96FF5C)
+		elseif newText:find('something pulling') or par.checkAgain[2] == 'fshi' then
+			return HandleSpecial(newText, 'fshi', 'feel ', 'pulling', cutIdx, 0xFFFFCD19)
+		elseif newText:find('Something caught the hook') or par.checkAgain[2] == 'fshf' then
+			return HandleSpecial(newText, 'fshf', nil, 'Something', cutIdx, 0xFF96FF5C)
+		elseif newText:find('have enough skill') or par.checkAgain[2] == 'fshs' then
+			return HandleSpecial(newText, 'fshs', 'have', 'to', cutIdx, 0xFFFFCD19)
+		elseif newText:find('This strength') or par.checkAgain[2] == 'fshr' then
+			return HandleSpecial(newText, 'fshr', nil, 'This', cutIdx, 0xFFFFCD19)
+		elseif newText:find('have a bad feeling about') or par.checkAgain[2] == 'fshb' then
+			return HandleSpecial(newText, 'fshb', 'have ', 'feeling', cutIdx, 0xFFFF391F)
+		elseif newText:find('have a terrible feeling') or par.checkAgain[2] == 'fsht' then
+			return HandleSpecial(newText, 'fsht', 'have ', 'feeling', cutIdx,  0xFFFF391F)
+		elseif newText:find('your skill level is too low to catch') or par.checkAgain[2] == 'fshl' then
+			return HandleSpecial(newText, 'fshl', 'your skill level is ', 'to', cutIdx,  0xFFFF391F)
+		elseif newText:find('Something clamps onto your line ferociously') or par.checkAgain[2] == 'fshm' then
+			return HandleSpecial(newText, 'fshm', nil, 'Something', cutIdx,  0xFFFF391F)
+		elseif newText:find('Obtained key item: ') or par.checkAgain[2] == 'KI' then
 			return HandleSpecial(newText, 'KI', 'Obtained key item: ', '%.', cutIdx, allSettings.colors.keyitem[1])
 		end
 	end
@@ -378,14 +382,11 @@ function M.CheckSpecial(newText, col, cutIdx)
 			else
 				return HandleSpecial(newText, 'obtain4', ' obtains ', '%.', cutIdx, allSettings.colors.obtained[1])
 			end
-		end
-		if newText:find('You obtain.*!') or par.checkAgain[2] == 'obtain5' then
+		elseif newText:find('You obtain.*!') or par.checkAgain[2] == 'obtain5' then
 			return HandleSpecial(newText, 'obtain5', 'You obtain ', '!', cutIdx, allSettings.colors.obtained[1])
-		end
-		if newText:find('Records of Eminence') or par.checkAgain[2] == 'roe' then
+		elseif newText:find('Records of Eminence') or par.checkAgain[2] == 'roe' then
 			return HandleSpecial(newText, 'roe', 'Records of Eminence: ', '%.', cutIdx, allSettings.colors.roe[1])
-		end
-		if newText:find('Progress: [0-9]*/[0-9]*') or par.checkAgain[2] == 'roep' then
+		elseif newText:find('Progress: [0-9]*/[0-9]*') or par.checkAgain[2] == 'roep' then
 			return HandleSpecial(newText, 'roep', 'Progress: ', '%.', cutIdx, allSettings.colors.roe[1])
 		end
 	end
@@ -399,8 +400,7 @@ function M.CheckSpecial(newText, col, cutIdx)
 			par.tabmode = 3
 			par.LastMode = 'combat'
 			return HandleSpecial(newText, 'exp', ' gains ', nil, cutIdx, allSettings.colors.obtained[1])
-		end
-		if (newText:find(' gains ') and newText:find('lim')) or par.checkAgain[2] == 'limit' then
+		elseif (newText:find(' gains ') and newText:find('lim')) or par.checkAgain[2] == 'limit' then
 			if par.checkAgain[2] == '' then
 				newText = newText:gsub('points%.', 'points'..icons.EXP)
 				cutIdx = cutIdx + 2
@@ -422,6 +422,37 @@ function M.CheckSpecial(newText, col, cutIdx)
 			return HandleSpecial(newText, 'bazaar', ' bought ', '%.', cutIdx, allSettings.colors.obtained[1])
 		end
 	end
+	
+	if set.isCEXI and (par.MessageMode == 9 or par.MessageMode == 127 or par.MessageMode == 121) then
+		if newText:find('Now accumulating linkshell points for ') or par.checkAgain[2] == 'CE-acc' then
+			return HandleSpecial(newText, 'CE-acc', 'Now accumulating linkshell points for ', '%.', cutIdx, allSettings.colors.cexi[1])
+		elseif newText:find('Activity Points: ') or par.checkAgain[2] == 'CE-AP' then
+			return HandleSpecial(newText, 'CE-AP', 'Activity Points: ', '%.', cutIdx, allSettings.colors.cexi[1])
+		elseif newText:find('Summit Objective:') or par.checkAgain[2] == 'CE-SO' then
+			return HandleSpecial(newText, 'CE-SO', 'Summit Objective:', '%.', cutIdx, allSettings.colors.cexi[1])
+		elseif newText:find('Summit Bonus:') or par.checkAgain[2] == 'CE-SB' then
+			return HandleSpecial(newText, 'CE-SB', 'Summit Bonus:', nil, cutIdx, allSettings.colors.cexi[1])
+		elseif newText:find('Summit of the Stars perk') or par.checkAgain[2] == 'CE-SP' then
+			return HandleSpecial(newText, 'CE-SP', 'now active:', nil, cutIdx, allSettings.colors.cexi[1])
+		elseif newText:find(' activity points%.') or par.checkAgain[2] == 'CE-AP2' then
+			return HandleSpecial(newText, 'CE-AP2', 'gains', '%.', cutIdx, allSettings.colors.cexi[1])
+		elseif newText:find('Point Accumulation:') or par.checkAgain[2] == 'CE-PA' then
+			return HandleSpecial(newText, 'CE-PA', 'Point Accumulation:', '%.', cutIdx, allSettings.colors.cexi[1])
+		elseif newText:find('PartyFinder') or par.checkAgain[2] == 'CE-PF' then
+			return HandleSpecial(newText, 'CE-PF', nil, '%[PartyFinder', cutIdx, allSettings.colors.cexi[1])
+		elseif newText:find('completed a special venture') or par.checkAgain[2] == 'CE-venC' then
+			return HandleSpecial(newText, 'CE-venC', nil, 'You have completed a special venture objective%. %(Progress: [0-9]*/[0-9]*%)', cutIdx, 0xFFFFD500)
+		elseif newText:find('Defeat Mobs') or par.checkAgain[2] == 'CE-DM' then
+			return HandleSpecial(newText, 'CE-DM', 'Defeat Mobs ', ' %(', cutIdx, allSettings.colors.cexi[1])
+		elseif newText:find('Quest Accepted:') or par.checkAgain[2] == 'CE-QA' then
+			return HandleSpecial(newText, 'CE-QA', nil, utf8.char(0x25C7)..' Quest Accepted:', cutIdx, allSettings.colors.cexi[1])
+		elseif newText:find('Quest Completed:') or par.checkAgain[2] == 'CE-QC2' then
+			return HandleSpecial(newText, 'CE-QC2', nil, utf8.char(0x25C6)..' Quest Completed:', cutIdx, allSettings.colors.cexi[1])
+		elseif newText:find('Quest Completed') or par.checkAgain[2] == 'CE-QC' then
+			return HandleSpecial(newText, 'CE-QC', nil, utf8.char(0x25C6)..' Quest Completed', cutIdx, allSettings.colors.cexi[1])
+		end
+	end
+	
 end
 _G.CheckSpecial = M.CheckSpecial
 
@@ -726,6 +757,11 @@ parseThis = function(e, e_message)
 	elseif string_sub(lm, 1,  4) == 'tell'         then col = colors.tell[1]
 	elseif string_sub(lm, 1,  5) == 'shout'        then col = colors.shout[1]
 	elseif string_sub(lm, 1,  5) == 'emote'        then col = colors.emote[1]
+	-- Longer prefix first: 'error1' must be tested before 'error' or
+	-- string_sub(lm, 1, 5) == 'error' would also match mode 123's
+	-- 'error1' name and route it to the wrong palette slot.
+	elseif string_sub(lm, 1,  6) == 'error1'       then col = colors.error1[1]
+	elseif string_sub(lm, 1,  5) == 'error'        then col = colors.error[1]
 	end
 
 	if allSettings.tellNotification[1] and par.LastMode == 'tell_in' then
@@ -755,11 +791,14 @@ parseThis = function(e, e_message)
 	-- the LastMode descriptor is a placeholder ("_?"), so the user
 	-- knows to file a bug with the channel number.
 	if string_find(par.LastMode, '%_%?') then
-		col = 0xFF000FFF
-		msg = msg..' (chn: '..tostring(par.MessageMode)..')'
-		if true then
-			ashita.misc.play_sound(string.format('%s\\notifications\\%s%s.wav', addon.path, 'notification_4', ''))
+		col = 0xFFFFFFFF
+		if utils.FindInStringTable(msg, utils.combatwords, 0) then
+			par.LastMode = 'combat_y'
 		end
+		--msg = msg..' (chn: '..tostring(par.MessageMode)..')'
+		--if true then
+		--	ashita.misc.play_sound(string.format('%s\\notifications\\%s%s.wav', addon.path, 'notification_4', ''))
+		--end
 	end
 
 	if original_msg == ''
@@ -1011,7 +1050,7 @@ parseThis = function(e, e_message)
 				end
 			end
 		end
-
+		
 		-- Line-wrap and per-line emit loop.
 		local n_lines = math_floor(string_len(newText) / allSettings.chatLineMaxL)
 		if math_fmod(string_len(newText), allSettings.chatLineMaxL) ~= 0 then n_lines = n_lines + 1 end
@@ -1517,6 +1556,16 @@ function M.register()
 			return
 		end
 		if mode_pre == 191 and string_find(e.message, 'version') then
+			-- /servmes injection used to live here, gated on the
+			-- "Loaded addon: fancychat" message arriving via mode 191.
+			-- Moved to render.lua because the message is too early —
+			-- it lands the moment Ashita finishes loading us, while
+			-- the server may still be wrapping up its session
+			-- handshake and silently drops the command.  render.lua's
+			-- gate now waits for 30 non-injected packets (counted by
+			-- lifecycle.lua's packet_in handler) PLUS a settle timer
+			-- before firing, which is a much more reliable "the
+			-- server is ready" signal than this single console line.
 			AshitaCore:GetChatManager():AddChatMessage(0, false, e.message)
 			return
 		end

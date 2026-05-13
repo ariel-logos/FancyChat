@@ -1,32 +1,7 @@
---[[
-	lib/combat.lua
-
-	Combat- and spell-line transformers.  Pure-ish functions: each
-	takes a raw FFXI combat message string and returns a reformatted
-	one with FancyChat's iconography (arrows, swords, sparkles,
-	utsusemi marker, etc.) substituted in.  They DO mutate parser
-	state (`par.actor1/2/P/E`, `par.action1`, `par.DamageDone/Got`,
-	`par.isDamage`, `par.CombatCutIdx`, `par.LastMode`) so the
-	post-transform colorisation pass in parseThis can pick up which
-	parts of the line refer to whom, but they touch nothing else.
-
-	Two functions, both exposed as globals so parseThis (still in
-	fancychat.lua, soon to move to lib/parser.lua) can keep calling
-	them by name:
-
-	  CombatText(msg, chn)       Melee, ranged, item-use, parry,
-	                             counter, miss, defeat, additional-
-	                             effect, ability-ready, skillchain,
-	                             plain "X takes N damage", utsusemi
-	                             shadow absorption.
-
-	  CombatSpellText(msg, chn)  Spell-cast, drain, recovery, status
-	                             effect application, generic
-	                             ability-on-target.
-
-	`combatCP` is the per-iconography character map used by both
-	functions — entirely private to this module.
-]]
+-- lib/combat.lua — combat / spell line transformers.  CombatText and
+-- CombatSpellText reformat raw FFXI messages with FancyChat icons
+-- and update par.actor* / par.DamageDone/Got so parseThis can
+-- colorise the line afterwards.  Both exposed as globals.
 
 require('common')
 local utils = require('utils')

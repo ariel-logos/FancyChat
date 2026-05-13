@@ -33,6 +33,23 @@ ffi.cdef[[
     static const unsigned int CF_TEXT = 1;
     static const unsigned int GMEM_MOVEABLE = 0x0002;
     static const unsigned int GMEM_ZEROINIT = 0x0040;
+
+    // D3DXGetImageInfoFromFileInMemory + struct used to read back the
+    // decoded image's dimensions when loading a remote image (zone
+    // map fetch in lib/render.lua).  D3DXCreateTextureFromFileInMemoryEx
+    // accepts a D3DXIMAGE_INFO* in its 14th arg and fills it as a
+    // side effect; we use that instead of GetLevelDesc on the
+    // resulting texture so we don't need to reach into the
+    // IDirect3DTexture8 vtable from Lua.
+    typedef struct {
+        unsigned int Width;
+        unsigned int Height;
+        unsigned int Depth;
+        unsigned int MipLevels;
+        unsigned int Format;
+        unsigned int ResourceType;
+        unsigned int ImageFileFormat;
+    } D3DXIMAGE_INFO;
 ]]
 
 local utils = {
@@ -166,7 +183,7 @@ local utils = {
 		{120, '_?',             0xFFFFFFFF},
 		{121, 'craft',          0xFFFAFFDB},  -- Lot here too (same as craft)
 		{122, 'combat_x',       0xFFDCF1FC},  -- "You/PC/Enemy" can't attack/cast (e.g. too far away, paralyzed, intimidated, ability CD)
-		{123, 'error',          0xFFFF0090},
+		{123, 'error1',         0xFFFF0090},
 		{124, '_?',             0xFFFFFFFF},
 		{125, '_?',             0xFFFFFFFF},
 		{126, '_?',             0xFFFFFFFF},
@@ -352,6 +369,8 @@ local utils = {
 		{'Alt',   56},
 		{'Ctrl',  29},
 	},
+	
+	combatwords = T{'hit', 'damage', 'points', 'readies', 'heal'},
 
 	-- Forward-prompt sentinel byte sequences (used to recognise a
 	-- "press [BTN] to continue" line in dialog text).
@@ -610,6 +629,255 @@ utils.ItemIconRelease = function(ptr)
 	end
 end
 
+-- ================================================================
+-- Wiki URL helpers + filename-display utility for the /sea popup.
+-- ================================================================
+local FFXIC_BASE  = 'https://ffxiclopedia.fandom.com'
+local BGWIKI_BASE = 'https://www.bg-wiki.com'
+
+utils.GetZoneWikiUrl = function(zoneName)
+	if not zoneName then return nil end
+	return FFXIC_BASE..'/wiki/'..zoneName:gsub(' ', '_')
+end
+
+utils.GetBgWikiZoneUrl = function(zoneName)
+	if not zoneName then return nil end
+	return BGWIKI_BASE..'/wiki/'..zoneName:gsub(' ', '_')
+end
+
+-- Underscores/hyphens -> spaces; split CamelCase + letter|digit boundaries.
+local function prettifyFilenameStem(stem)
+	local s = stem:gsub('_', ' '):gsub('%-', ' ')
+	s = s:gsub('(%l)(%u)', '%1 %2')
+	s = s:gsub('(%a)(%d)', '%1 %2')
+	s = s:gsub('%s+', ' ')
+	return (s:match('^%s*(.-)%s*$'))
+end
+
+
+-- ----------------------------------------------------------------
+-- Local zone-map browser.
+--
+-- The maps/ folder under the addon root holds one subfolder per zone
+-- (built by maps/download_all_maps.py).  Each zone subfolder contains
+-- one or more "section" subfolders — Maps, Treasure, Fishing,
+-- Weather, Notorious_Monsters — each with PNG/GIF/JPEG image files.
+--
+--   maps/
+--     The Boyahda Tree/
+--       Maps/                  Boyahda-tree_1.png  ...  Boyahda-tree_4.png
+--       Fishing/               TheBoyahdaTreeFishing1.gif  ...
+--       Notorious_Monsters/    Boyahda-tree_1_NM.png  ...
+--       Treasure/       BoyahdaTreeCoffers.png
+--       Weather/               TheBoyahdaTreeElementals1.png  ...
+--
+-- The /sea zone-tip popup (lib/render.lua) renders these as a
+-- collapsible section list (accordion).
+-- ----------------------------------------------------------------
+
+-- Mirror the Python downloader's folder_safe(): only '/' is illegal in
+-- a Windows folder name; brackets, parens, apostrophes, '#', spaces
+-- etc. are preserved as-is.
+local function localMapFolderName(zoneName)
+	return (zoneName or ''):gsub('/', '_')
+end
+
+-- Section ordering for the popup.  User-specified:
+--   Maps -> Treasure -> Fishing -> Mining/Excavating/Logging/Harvesting/
+--   Digging/Gathering -> [other unknown sections] -> Weather ->
+--   Notorious_Monsters.
+-- The 500-gap is for any future section folder we don't know about; it
+-- sorts alphabetically among itself between Gathering and Weather.
+local LOCAL_SECTION_ORDER = {
+	['Maps']              = 1,
+	['Treasure']          = 2,
+	['Fishing']           = 3,
+	['Mining']            = 4,
+	['Excavating']        = 5,
+	['Logging']           = 6,
+	['Harvesting']        = 7,
+	['Digging']           = 8,
+	['Gathering']         = 9,
+	['Weather']           = 1000,
+	['Notorious_Monsters']= 1001,
+}
+
+-- Folder-name -> human display name for the section header.  Anything
+-- not listed here gets its underscores turned into spaces.
+local function sectionDisplayName(folder)
+	if folder == 'Maps'               then return 'Maps' end
+	if folder == 'Treasure'           then return 'Treasure' end
+	if folder == 'Fishing'            then return 'Fishing' end
+	if folder == 'Weather'            then return 'Weather' end
+	if folder == 'Notorious_Monsters' then return 'Notorious Monsters' end
+	return (folder:gsub('_', ' '))
+end
+
+-- Scan addon.path/maps/<zoneName>/ and return an ordered list of
+-- sections, each with its file entries.  Returns nil if the zone has
+-- no folder OR every section folder is empty (caller treats either
+-- case as "no local maps").
+--
+-- Return shape:
+--   {
+--     { folder='Maps', display='Maps', entries={
+--       {filename='Boyahda-tree_1.png', path='F:/.../Maps/Boyahda-tree_1.png',
+--        display='Boyahda Tree 1'},
+--       ...
+--     }},
+--     { folder='Fishing', display='Fishing', entries={...} },
+--     ...
+--   }
+utils.GetLocalZoneMaps = function(zoneName)
+	if not zoneName or zoneName == '' then return nil end
+	local folder  = localMapFolderName(zoneName)
+	local zoneDir = addon.path..'/maps/'..folder
+
+	-- Enumerate immediate subdirectories.  /b = bare names, /ad =
+	-- directories only.  2>nul swallows "file not found" if the
+	-- zone folder doesn't exist on disk.
+	local sections = {}
+	local p = io.popen('dir /b /ad "'..zoneDir..'" 2>nul')
+	if not p then return nil end
+	for line in p:lines() do
+		line = line:gsub('%s+$', '')
+		if line ~= '' then sections[#sections+1] = line end
+	end
+	p:close()
+	if #sections == 0 then return nil end
+
+	table.sort(sections, function(a, b)
+		local oa = LOCAL_SECTION_ORDER[a] or 500
+		local ob = LOCAL_SECTION_ORDER[b] or 500
+		if oa ~= ob then return oa < ob end
+		return a < b
+	end)
+
+	local out = {}
+	for _, sec in ipairs(sections) do
+		local entries = {}
+		local fp = io.popen('dir /b /a-d "'..zoneDir..'/'..sec..'" 2>nul')
+		if fp then
+			for fname in fp:lines() do
+				fname = fname:gsub('%s+$', '')
+				local ext = fname:match('%.(%w+)$')
+				if ext then
+					ext = ext:lower()
+					if ext == 'png' or ext == 'gif'
+					   or ext == 'jpg' or ext == 'jpeg' then
+						local stem = fname:gsub('%.[^.]+$', '')
+						entries[#entries+1] = {
+							filename = fname,
+							path     = zoneDir..'/'..sec..'/'..fname,
+							display  = prettifyFilenameStem(stem),
+						}
+					end
+				end
+			end
+			fp:close()
+		end
+		if #entries > 0 then
+			-- For Notorious_Monsters, look for the sidecar
+			-- _nm_index.lua written by the bulk-download script.  When
+			-- present, expand each map file into one entry per NM that
+			-- spawns on it (some files cover multiple NMs — e.g. on
+			-- The Boyahda Tree, Boyahda-tree_1_NM.png is shared by
+			-- Aquarius, Ellyllon, and Unut).  The texture-cache key
+			-- stays the file path so all three NM entries share one
+			-- decoded texture.
+			--
+			-- Files that don't appear in the manifest fall through to
+			-- the default prettified-filename display so a partial
+			-- manifest doesn't lose entries.
+			if sec == 'Notorious_Monsters' then
+				local index_path = zoneDir..'/'..sec..'/_nm_index.lua'
+				local f = io.open(index_path, 'r')
+				if f then
+					f:close()
+					local fn, _ = loadfile(index_path)
+					if fn then
+						local ok, idx = pcall(fn)
+						if ok and type(idx) == 'table' then
+							-- Case-insensitive key lookup so an
+							-- inconsistently-cased wiki entry still
+							-- resolves to the on-disk file (the wiki
+							-- treats file titles case-insensitively
+							-- but stores wikitext verbatim).
+							local lower_idx = {}
+							for k, v in pairs(idx) do
+								lower_idx[k:lower()] = v
+							end
+							local expanded = {}
+							for _, entry in ipairs(entries) do
+								local nms = lower_idx[entry.filename:lower()]
+								if type(nms) == 'table' and #nms > 0 then
+									for _, nm in ipairs(nms) do
+										expanded[#expanded+1] = {
+											filename = entry.filename,
+											path     = entry.path,
+											display  = nm,
+										}
+									end
+								else
+									expanded[#expanded+1] = entry
+								end
+							end
+							entries = expanded
+						end
+					end
+				end
+				-- NM list is sorted alphabetically by display name
+				-- (NM name, post-expansion) rather than by filename.
+				table.sort(entries, function(a, b)
+					return a.display:lower() < b.display:lower()
+				end)
+			else
+				table.sort(entries, function(a, b)
+					return a.filename < b.filename
+				end)
+			end
+			out[#out+1] = {
+				folder  = sec,
+				display = sectionDisplayName(sec),
+				entries = entries,
+			}
+		end
+	end
+	if #out == 0 then return nil end
+	return out
+end
+
+-- Mirror of LoadTextureFromUrl that reads from a local file.  Same
+-- D3DX entry-point (D3DXCreateTextureFromFileInMemoryEx) so PNG/GIF/
+-- JPEG all decode through the same path and the caller treats the
+-- resulting texture identically.
+utils.LoadTextureFromFile = function(path)
+	if not path or path == '' then return nil, 'no path' end
+	local f = io.open(path, 'rb')
+	if not f then return nil, 'file not found' end
+	local body = f:read('*a')
+	f:close()
+	if not body or #body == 0 then return nil, 'empty file' end
+
+	local size      = #body
+	local info      = ffi.new('D3DXIMAGE_INFO[1]')
+	local texPtrPtr = ffi.new('IDirect3DTexture8*[1]')
+	local hr = C.D3DXCreateTextureFromFileInMemoryEx(
+		d3d8dev, body, size,
+		0xFFFFFFFF, 0xFFFFFFFF,
+		1, 0,
+		C.D3DFMT_A8R8G8B8, C.D3DPOOL_MANAGED,
+		0xFFFFFFFF, 0xFFFFFFFF,
+		0,
+		info, nil, texPtrPtr)
+	if hr ~= C.S_OK then
+		return nil, ('decode failed: %08X'):format(hr)
+	end
+	local tex = ffi.cast('IDirect3DTexture8*', texPtrPtr[0])
+	d3d.gc_safe_release(tex)
+	return tex, tonumber(info[0].Width), tonumber(info[0].Height)
+end
+
 utils.LoadTextures = function()
 	local textures = T{}
 	LoadTexture(textures, 'border')
@@ -623,6 +891,7 @@ utils.LoadTextures = function()
 	LoadTexture(textures, 'info');
 	LoadTexture(textures, 'notepad')
 	LoadTexture(textures, 'dumpchat')
+	LoadTexture(textures, 'logo')
 	return textures
 end
 
@@ -784,6 +1053,56 @@ utils.IsInTable = function(t, x)
 	return nil
 end
 
+-- Scan a chat-line string for ALL FFXI zone names mentioned in it.
+-- `zoneNames` is the lookup table built at addon init by
+-- lifecycle.M.Init: keys are the lowercased zone names, values are
+-- the canonical (display) names.  Returns an array of canonical
+-- names in order of first appearance, deduplicated, with any hit
+-- that is fully contained within a longer overlapping hit dropped
+-- (so "Sky" inside "Sky-Cloud Pyramid" doesn't show twice).  Names
+-- shorter than 4 chars are skipped to reduce false positives.
+utils.FindZonesInText = function(text, zoneNames)
+	if not text or text == '' or not zoneNames then return {} end
+	local lower = text:lower()
+	local hits = {}
+	for lname, cname in pairs(zoneNames) do
+		if #lname >= 4 then
+			local pos = lower:find(lname, 1, true)
+			if pos then
+				table.insert(hits, {pos = pos, lname = lname, cname = cname})
+			end
+		end
+	end
+	-- Drop hits subsumed by a longer overlapping hit.
+	local kept = {}
+	for i, h in ipairs(hits) do
+		local subsumed = false
+		for j, other in ipairs(hits) do
+			if i ~= j and #other.lname > #h.lname then
+				local oEnd = other.pos + #other.lname
+				local hEnd = h.pos + #h.lname
+				if other.pos <= h.pos and oEnd >= hEnd then
+					subsumed = true
+					break
+				end
+			end
+		end
+		if not subsumed then
+			table.insert(kept, h)
+		end
+	end
+	table.sort(kept, function(a, b) return a.pos < b.pos end)
+	-- Dedupe by canonical name (same zone name twice in one line → one row).
+	local seen, out = {}, {}
+	for _, h in ipairs(kept) do
+		if not seen[h.cname] then
+			seen[h.cname] = true
+			table.insert(out, h.cname)
+		end
+	end
+	return out
+end
+
 utils.StringFindTable = function(s, t, m, e)
 	if not m then m = true else m = false end
 	if #t == 0 then return nil end
@@ -829,41 +1148,66 @@ end
 -- Color set import / export
 -- ================================================================
 
--- Colorset files live in a `chatcolors/` subfolder so the addon root
--- stays tidy.  ExportColors creates the folder on first use (mkdir is
--- a no-op if the folder already exists; the `2>nul` redirect silences
--- the "already exists" message).
-utils.ExportColors = function(addonpath, charname, colors)
+-- Colorset files live in a `chatcolors/` subfolder.  The Export/Import
+-- popups (lib/ui_settings.lua) drive these by explicit filename now;
+-- the player chooses the name on Export and picks from a list on Import.
+
+-- Bare-name listing of every regular file in chatcolors/.
+utils.ListColorsetFiles = function(addonpath)
+	local out = {}
+	local p = io.popen('dir /b /a-d "'..addonpath..'\\chatcolors\\" 2>nul')
+	if not p then return out end
+	for line in p:lines() do
+		line = line:gsub('%s+$', '')
+		if line ~= '' then out[#out+1] = line end
+	end
+	p:close()
+	table.sort(out)
+	return out
+end
+
+-- Suggest the next-available colorset filename for the given player:
+-- `colorset_<player>_<N>` where N is one more than the largest N
+-- already in use (scanning ONLY files of that prefix).
+utils.NextColorsetName = function(addonpath, charname)
+	local prefix  = 'colorset_'..charname..'_'
+	local highest = 0
+	for _, name in ipairs(utils.ListColorsetFiles(addonpath)) do
+		local n = name:match('^'..prefix:gsub('([%-%.])', '%%%1')..'(%d+)$')
+		if n then
+			local num = tonumber(n)
+			if num and num > highest then highest = num end
+		end
+	end
+	return prefix..(highest + 1)
+end
+
+utils.ExportColors = function(addonpath, filename, colors)
 	local folder   = addonpath..'\\chatcolors'
-	local filepath = folder..'\\colorset_'..charname
+	local filepath = folder..'\\'..filename
 	os.execute('mkdir "'..folder..'" 2>nul')
 	local f = assert(io.open(filepath, 'w'))
 	for k, v in pairs(colors) do
 		f:write(string.format('%s,%#x\n', k, v[1]))
 	end
 	f:close()
-	local msg = 'Exported colorset to: '..filepath
-	print((msg:gsub('\\\\', '\\')))
+	print((('Exported colorset to: '..filepath):gsub('\\\\', '\\')))
 end
 
-utils.ImportColors = function(addonpath, charname, colors)
+utils.ImportColors = function(addonpath, filename, colors)
 	local cols = {}
-	for k, v in pairs(colors) do
-		cols[k] = v
-	end
-	local filepath = addonpath..'\\chatcolors\\colorset_'..charname
+	for k, v in pairs(colors) do cols[k] = v end
+	local filepath = addonpath..'\\chatcolors\\'..filename
 	local f = io.open(filepath, 'r')
 	if not f then
-		print('colorset file not found')
+		print('colorset file not found: '..filepath)
 		return cols
 	end
 	for line in f:lines() do
 		local key, val = line:match('([^,]+),([^,]+)')
 		if key and val then
 			local num = tonumber(val)
-			if num and cols[key] then
-				cols[key][1] = num
-			end
+			if num and cols[key] then cols[key][1] = num end
 		end
 	end
 	f:close()
@@ -925,8 +1269,12 @@ end
 -- ================================================================
 
 utils.SaveLogs = function(ChatBuffer1, ChatBuffer2, ChatName, PlayerName, AddonPath, TimeStamp)
-	local logs_folder = AddonPath..'logs\\'..PlayerName
-	os.execute('mkdir '..logs_folder)
+	-- Logs now live under <install>/config/addons/<addon.name>/logs/<player>/
+	-- alongside the per-character settings folders.  AddonPath is kept in
+	-- the signature for backward-compat with old callers but is ignored.
+	local logs_folder = AshitaCore:GetInstallPath()
+		..'\\config\\addons\\'..addon.name..'\\logs\\'..PlayerName
+	os.execute('mkdir "'..logs_folder..'" 2>nul')
 
 	local folder_name = logs_folder..'\\ChatLogs_'..TimeStamp
 	os.execute('mkdir '..folder_name)
@@ -2037,6 +2385,18 @@ utils.ListCombatFilters = function()
 	return filters
 end
 
+-- Cheap existence check for the active filter file.  Used by the CL
+-- Filters tab + lifecycle init to detect "active filter was deleted
+-- behind our back" and react gracefully (red warning + auto-disable
+-- the master toggle so filtering doesn't silently no-op).
+utils.CombatFilterExists = function(filename)
+	if filename == nil or filename == '' then return false end
+	local f = io.open(addon.path..'/combatfilters/'..filename, 'rb')
+	if f == nil then return false end
+	f:close()
+	return true
+end
+
 -- Load and parse a single filter file from combatfilters/.  `filename`
 -- defaults to the legacy 'custom_combat_filters.txt' so older settings
 -- without a SelectedCombatFilter slot still work.  Missing files are
@@ -2045,7 +2405,7 @@ end
 -- the Settings UI).
 utils.LoadCustomFilters = function(filename)
 	local custmFilters = T{}
-	filename = filename or 'custom_combat_filters.txt'
+	filename = filename or 'example.txt'
 
 	local f = io.open(addon.path..'/combatfilters/'..filename, 'rb')
 	if f == nil then
@@ -2249,6 +2609,22 @@ utils.RepairSettings = function(t1, t2, seen)
 	s[t1] = true
 	seen[t2] = s
 
+	-- Empty-default early-out: when the defaults table for this slot
+	-- has no keys (e.g. `Notes = T{}` in defaults.lua), the loaded
+	-- table carries no schema to enforce - everything in `t2` is
+	-- legitimate user data and must NOT be stripped.  Without this
+	-- guard the strip-loop below removes all numbered keys from
+	-- list-like slots populated at runtime (Notes was the visible
+	-- symptom: every saved note got deleted on next load).
+	local t1_has_keys = false
+	for _ in pairs(t1) do
+		t1_has_keys = true
+		break
+	end
+	if not t1_has_keys then
+		return t2
+	end
+
 	-- Collect keys to remove (safer than deleting during iteration).
 	local remove = nil
 	for k, _ in pairs(t2) do
@@ -2264,11 +2640,27 @@ utils.RepairSettings = function(t1, t2, seen)
 		end
 	end
 
-	-- Recurse into subtables when both sides are tables.
+	-- Recurse into subtables, AND fix type mismatches.  Without the
+	-- mismatch repair, a key that was a plain number/string in an
+	-- older version of the addon but is now a table (or vice versa)
+	-- in defaults will survive in t2 with its old type.  Sugar's
+	-- table.merge then crashes during character-switch with
+	-- `rawget(number, k)` because it tries to recurse into the
+	-- number expecting a table — see the logout traceback.  Fixing
+	-- the mismatch by replacing t2's value with a clone of the
+	-- default keeps the file readable by the next merge.
 	for k, v1 in pairs(t1) do
 		local v2 = t2[k]
-		if type(v1) == 'table' and type(v2) == 'table' then
-			utils.RepairSettings(v1, v2, seen)
+		if type(v1) == 'table' then
+			if type(v2) == 'table' then
+				utils.RepairSettings(v1, v2, seen)
+			elseif v2 ~= nil then
+				t2[k] = utils.cloneTable(v1)
+			end
+		elseif v2 ~= nil and type(v2) == 'table' then
+			-- Reverse mismatch: defaults expect a plain value but
+			-- saved data has a table.  Restore the default.
+			t2[k] = v1
 		end
 	end
 

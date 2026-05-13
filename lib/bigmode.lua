@@ -1,38 +1,6 @@
---[[
-	lib/bigmode.lua
-
-	The "Big Mode" full-screen chat-history overlay.  Big Mode is NOT a
-	separate chat buffer — it's a second VIEW of the same b.ChatBuffer
-	that fcw[1] shows, rendered with many more visible lines so the
-	user can scroll back and review history comfortably.  It's intended
-	for review, not active reading; the original code carries a hidden
-	"this feature is not optimized" warning it never actually shows.
-
-	The window's own scroll cursor lives at b.ChatBufferIdx[3] and
-	fcw[3].ScrolledBack.  All chat-buffer reads still come from the
-	primary b.ChatBufferMode[1] channel.
-
-	Three functions, all exposed as globals so existing call sites in
-	fancychat.lua's d3d_present render loop continue to work:
-
-	  ShowBigMode(show)  Visibility flip on every GDI handle that
-	                     belongs to fcw[3].
-	  DrawBigMode()      Per-frame work invoked when fcw[3].BigMode is
-	                     true: lazy-creates fcw[3]'s font objects on
-	                     first call, anchors+sizes the window, runs
-	                     the same hover/click/scroll behaviour as the
-	                     normal chat (URL click, click-to-clipboard,
-	                     Shift+click-to-notes, wheel scroll, right-
-	                     click reset), then advances UpdateLines.
-	  DestroyBigMode()   Drops references to fcw[3]'s font handles.
-	                     Currently unreferenced; kept in case a
-	                     later reset path needs it.
-
-	Calls a handful of GLOBAL helpers still defined in fancychat.lua:
-	IsRectHovered, ScrollLines, UpdateLines, GoToLine, ResetScrolling,
-	ResetLines, SaveSettings, ResetAutoHideTimer.  Resolved at call
-	time via the global namespace.
-]]
+-- lib/bigmode.lua — full-screen chat-history overlay (fcw[3]).  A
+-- second view of b.ChatBuffer for scroll-back review.  Exposes
+-- ShowBigMode / DrawBigMode / DestroyBigMode as globals.
 
 require('common')
 local imgui     = require('imgui')

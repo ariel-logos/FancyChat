@@ -1,37 +1,5 @@
---[[
-	lib/ui_settings.lua
-
-	The Settings tabbed window invoked from the d3d_present render loop:
-
-	  draw_settings_panel()  Renders the entire settings UI when
-	                         allSettings.settingsOpened[1] is true,
-	                         otherwise mirrors persisted values into
-	                         the live `set.*` working copy so the
-	                         pending-edit fields stay in sync the next
-	                         time the panel is opened.
-
-	Tabs (in order):
-	  Chat Window  Font size, chat width, plate alpha, line count,
-	               second-chat toggle, custom tab modes, position
-	               offsets, lock/compact/gamepad/auto-hide flags,
-	               half-length toggle, anti-obstruction config.
-	  Font Colors  Per-mode color editor with import/export and
-	               picker pane.
-	  Shortcuts    Hide / BigMode / Tab / Tab2 keyboard combos and
-	               the inline command reference.
-	  Extra        Block-legacy / hide-combat filters, timestamp,
-	               R0 warning, precise TS, tell + alert sound config,
-	               item preview, autorestore, colorblind, fast scroll,
-	               docked-second-window, heart emoji.
-	  CL Filters   Custom combat-log filter editor + reload button.
-	  Tools        Save logs, open logs folder, open manual, restore
-	               legacy chat (DumpChat) buttons.
-
-	Calls a handful of GLOBAL helpers still defined in fancychat.lua:
-	AddSetColor, AddTooltip, AddWarning, PushWindowStyle/PopWindowStyle,
-	ResetAutoHideTimer, SaveSettings, DumpChat.  Resolved at call time
-	via the global namespace.
-]]
+-- lib/ui_settings.lua — Settings tabbed window.  Six tabs: Chat
+-- Window, Font Colors, Shortcuts, Extra, CL Filters, Tools.
 
 require('common')
 local imgui     = require('imgui')
@@ -269,6 +237,12 @@ function M.draw_settings_panel()
 				SaveSettings()
 			end
 			imgui.Dummy({0, 5})
+			if imgui.Checkbox('Show help (i) hover button on the first chat window##HelpButton', {allSettings.HelpButton[1]}) then
+				allSettings.HelpButton[1] = not allSettings.HelpButton[1]
+				SaveSettings()
+			end
+			AddTooltip('Toggles the small (?) icon at the top-left corner of the first chat window. Hovering it shows a quick reference of built-in mouse / keyboard interactions.', 4)
+			imgui.Dummy({0, 5})
 			if imgui.Checkbox('Compact tabs in the bottom-left corner##ComapctBL', {allSettings.CompactTabsBL[1]}) then
 				allSettings.CompactTabsBL[1] = not allSettings.CompactTabsBL[1]
 				SaveSettings()
@@ -389,18 +363,18 @@ function M.draw_settings_panel()
 			end
 			imgui.SameLine()
 			if imgui.Button('Export Colors') then
-				local exportedcolors = {}
-				for _, key in ipairs(keys) do
-					if not utils.FindInStringTable(key, skip, 0) then
-						exportedcolors[key] = allSettings.colors[key]
-					end
-				end
-				utils.ExportColors(addon.path, fcw[1].PlayerName, exportedcolors)
+				-- Mutex: opening Export closes Import.
+				set.colorIO.importOpen      = false
+				-- (Re-)open: hard-regenerate the suggested filename.
+				set.colorIO.exportOpen      = true
+				set.colorIO.exportName[1]   = utils.NextColorsetName(addon.path, fcw[1].PlayerName)
 			end
 			imgui.SameLine()
 			if imgui.Button('Import Colors') then
-				allSettings.colors = utils.ImportColors(addon.path, fcw[1].PlayerName, allSettings.colors)
-				SaveSettings()
+				set.colorIO.exportOpen      = false
+				set.colorIO.importOpen      = true
+				set.colorIO.importFiles     = utils.ListColorsetFiles(addon.path)
+				set.colorIO.importSelected  = 0
 			end
 			imgui.SameLine()
 			AddTooltip('Do not alter the files!', 3, true)
@@ -577,15 +551,45 @@ function M.draw_settings_panel()
 				{'/fancychat notes',    '[Opens/Closes Notes window]'},
 				{'/fancychat compact',  '[Toggles Tabs Compact mode]'},
 				{'/fancychat manual',   '[Opens the addon Manual]'},
+				{'/fancychat bigmode',  '[Toggles the BigMode overlay]'},
 				{'/fancychat tod',      '[Toggles TOD timestamps]'},
 				{'/fancychat ts',       '[Prints a timestamp of the current time]'},
 				{'/fancychat savelogs', '[Saves chat logs in the addon folder]'},
+				--{'/fancychat debug',    '[Opens the developer debug window]'},   -- debug_window disabled
 			}
 			for _, c in ipairs(cmds) do
 				imgui.Dummy({0, 5}) imgui.Dummy({3, 0}) imgui.SameLine()
 				imgui.Text(c[1])
 				imgui.Dummy({23, 0}) imgui.SameLine()
 				imgui.Text(c[2])
+			end
+
+			-- Built-in (non-configurable) mouse + keyboard interactions
+			-- baked into the chat windows.  Distinct from the
+			-- configurable shortcuts above — these are hard-coded
+			-- behaviors users may not know exist.  Same [Name]\n* keys
+			-- pattern as before for visual consistency.
+			imgui.Dummy({0, 20})
+			imgui.Text('Other Interactions')
+			local interactions = {
+				{'Copy chat line to clipboard',         'Left-Click on a chat line'},
+				{'Open URL in browser',                 'Left-Click on a [link] tag'},
+				{'Open zone map / search popup',        'Ctrl + Left-Click on a chat line containing a zone name'},
+				{'Save chat line to Notepad',           'Shift + Left-Click on a chat line  (max 10 notes)'},
+				{'Reposition chat window',              'Left-Click + Drag on the chat plate'},
+				{'Jump to bottom of chat (reset scroll)', 'Right-Click anywhere'},
+				{'Scroll chat history',                 'Mouse Wheel'},
+				{'Fast scroll (5 lines per tick)',      'Shift + Mouse Wheel'},
+				{'Reveal Settings icon on compact bar', 'Hold Shift while hovering the compact-tab expand icon'},
+				{'Dismiss zone map / search popup',     'Click outside the popup, or press Escape'},
+			}
+			for _, s in ipairs(interactions) do
+				imgui.Dummy({0, 8})
+				imgui.Dummy({3, 0}) imgui.SameLine()
+				imgui.Text('['..s[1]..']')
+				imgui.Dummy({0, 4})
+				imgui.Dummy({3, 0}) imgui.SameLine()
+				imgui.Text('- '..s[2])
 			end
 
 			imgui.EndChild()
@@ -916,6 +920,12 @@ function M.draw_settings_panel()
 			imgui.TextWrapped('You can filter combat messages by adding words to a filter file in the combatfilters folder. Each filter file is a plain-text list of words that would appear in unwanted messages.\n(e.g. effect wears off)\n\n> Words must be present in the original game combat message\n  (i.e. not words modified by addons)\n> Word matching is non case sensitive\n> More details in each filter file\n\n!!! Very long lists could cause performance issues !!!')
 			imgui.Dummy({0, 5})
 
+			-- Detection point: every frame the tab is open.  Cheap
+			-- io.open + close; on the exists -> missing transition it
+			-- fires the one-shot /echo and forces the master toggle off.
+			-- Idempotent on subsequent frames in the missing state.
+			CheckActiveCombatFilter()
+
 			-- Combat-filter file picker.  Lists every .txt under
 			-- combatfilters/ and lets the user pick one as the active
 			-- filter set; selection is persisted in
@@ -934,7 +944,14 @@ function M.draw_settings_panel()
 			-- inside the CL Filters child region.  SetNextItemWidth
 			-- only affects the immediately-following BeginCombo call.
 			imgui.SetNextItemWidth(setsizex * 0.4)
-			if imgui.BeginCombo('##SelectedCombatFilter', allSettings.SelectedCombatFilter, ImGuiComboFlags_None) then
+			-- Prefix the visible combo header with [missing] when the
+			-- backing file is gone so the user notices at a glance.
+			-- The underlying setting value is unchanged.
+			local comboLabel = allSettings.SelectedCombatFilter or ''
+			if set.filterFileMissing then
+				comboLabel = '[missing] '..comboLabel
+			end
+			if imgui.BeginCombo('##SelectedCombatFilter', comboLabel, ImGuiComboFlags_None) then
 				if #filterFiles == 0 then
 					imgui.TextDisabled('(no .txt files in combatfilters/)')
 				else
@@ -943,6 +960,13 @@ function M.draw_settings_panel()
 							allSettings.SelectedCombatFilter = filterFiles[fi]
 							par.customFilters = utils.LoadCustomFilters(allSettings.SelectedCombatFilter)
 							SaveSettings()
+							-- Detection point: combo selection.  The
+							-- new filename comes from a (possibly stale)
+							-- cache - re-validate against disk so the
+							-- missing flag clears when the user picks
+							-- a real file, or stays true if they picked
+							-- a stale cache entry.
+							CheckActiveCombatFilter()
 						end
 					end
 				end
@@ -957,17 +981,43 @@ function M.draw_settings_panel()
 			imgui.SameLine()
 			if imgui.Button('Refresh##CombatFilterFiles') then
 				cachedCombatFilterFiles = utils.ListCombatFilters()
+				-- Detection point: Refresh click.  Rescanning the
+				-- folder is the user's explicit "tell me what's really
+				-- there" gesture - re-validate the active selection.
+				CheckActiveCombatFilter()
 			end
 			AddTooltip('Pick which file in the combatfilters folder to use as the active filter list.\n\nRefresh re-scans combatfilters/ for newly-added or renamed .txt files.', 4)
 			imgui.Dummy({0, 5})
+
+			-- Red warning banner when the active file is missing.
+			-- Rendered between the file-picker row and the action row
+			-- so the user reads "active file is missing" before they
+			-- consider clicking Edit / Reload.
+			if set.filterFileMissing then
+				imgui.TextColored({1.0, 0.3, 0.3, 1.0}, '[!] The active filter file no longer exists in the folder.')
+				imgui.TextColored({1.0, 0.3, 0.3, 1.0}, '    Click Refresh, then pick another from the dropdown.')
+				imgui.Dummy({0, 5})
+			end
 
 			if imgui.Button('Edit Selected Filter') then
 				local filepath = addon.path..'\\combatfilters\\'..allSettings.SelectedCombatFilter
 				os.execute('start "" "'..filepath..'"')
 			end
+			-- Hover-tooltip on Edit / Reload when the file is gone
+			-- explaining why pressing the button won't help.
+			if set.filterFileMissing and imgui.IsItemHovered() then
+				imgui.SetTooltip('Active filter file is missing - pick another from the dropdown above.')
+			end
 			imgui.SameLine()
 			if imgui.Button('Reload Selected Filter') then
 				par.customFilters = utils.LoadCustomFilters(allSettings.SelectedCombatFilter)
+				-- Detection point: Reload click.  Same logic as Refresh
+				-- - the user may have re-created or restored the file
+				-- between deletion and this click.
+				CheckActiveCombatFilter()
+			end
+			if set.filterFileMissing and imgui.IsItemHovered() then
+				imgui.SetTooltip('Active filter file is missing - pick another from the dropdown above.')
 			end
 			imgui.SameLine()
 			if imgui.Button('Open Folder') then
@@ -979,6 +1029,14 @@ function M.draw_settings_panel()
 			if imgui.Checkbox('Enable Combat Log chat filters', {allSettings.CustomFilters[1]}) then
 				allSettings.CustomFilters[1] = not allSettings.CustomFilters[1]
 				SaveSettings()
+				-- Detection point: master-toggle ON.  If the user
+				-- re-enables filtering while the active file is still
+				-- missing, the check will immediately flip the toggle
+				-- back off and reprint the /echo - blocks them from
+				-- silently re-arming the broken state.
+				if allSettings.CustomFilters[1] then
+					CheckActiveCombatFilter()
+				end
 			end
 			imgui.Dummy({0, 5})
 
@@ -1050,8 +1108,10 @@ function M.draw_settings_panel()
 				if imguiWrap.ImageButton('TextureIDFolder', fcw[1].TextureIDFolder,
 					{dsize.x / 100, dsize.x / 100}, {-0.01, -0.01}, {1.01, 1.01},
 					-1, {0, 0, 0, 0}, {1, 1, 1, 1}) then
-					os.execute('mkdir '..addon.path..'logs\\'..fcw[1].PlayerName)
-					os.execute('start "" "'..addon.path..'logs\\'..fcw[1].PlayerName..'"')
+					local logsDir = AshitaCore:GetInstallPath()
+						..'\\config\\addons\\'..addon.name..'\\logs\\'..fcw[1].PlayerName
+					os.execute('mkdir "'..logsDir..'" 2>nul')
+					os.execute('start "" "'..logsDir..'"')
 				end
 			end
 			imgui.SameLine()
@@ -1092,11 +1152,336 @@ function M.draw_settings_panel()
 			imgui.EndTabItem()
 		end
 
+		----------------------------------------------------------------
+		-- Tab: Credits
+		----------------------------------------------------------------
+		if imgui.BeginTabItem('Credits', nil) then
+			imguiWrap.BeginChild('##Credits Child',
+				{(setsizex * 3.8 / 3.9) - (12 * (1 - (setsizex * 3.8 / 1920))) - 3, setsizey * 2.7 / 2.8 - 60}, true)
+
+			imgui.Dummy({0, 15})
+
+			-- ----- Centered logo at the top -----
+			-- Sized to 35% of the child width (capped at 220 px) so it
+			-- scales nicely on different Settings-window widths but never
+			-- dominates the tab.  TextureIDLogo is loaded from
+			-- images/logo.png in utils.LoadTextures().
+			if fcw[1].TextureIDLogo ~= nil then
+				local _winW    = imgui.GetWindowWidth()
+				local _logoSz  = math.min(_winW * 0.35, 220)
+				imgui.SetCursorPosX((_winW - _logoSz) * 0.5)
+				-- UV crop: shows the central 80% x 80% of the source
+				-- texture (10% trimmed from each side).  The texture
+				-- has transparent padding around the visible artwork;
+				-- cropping eliminates the dead space so the visible
+				-- logo content fills the rect and the version caption
+				-- below sits flush against it.
+				imgui.Image(fcw[1].TextureIDLogo,
+				            {_logoSz, _logoSz*0.8},
+				            {0, 0.1},   -- uv0 (top-left)
+				            {1, 0.85})   -- uv1 (bottom-right)
+				-- Tight to the logo so the version reads as a caption.
+				imgui.Dummy({0, 2})
+			end
+
+			-- ----- Version + author line, centered, yellow -----
+			-- addon.version is of the form "<major>.<minor>.<YYMMDD>";
+			-- extract the 6-digit suffix and format it as "DD Month YYYY".
+			local _winW       = imgui.GetWindowWidth()
+			local _versionStr = tostring(addon.version or '')
+			local _datePart   = _versionStr:match('(%d%d%d%d%d%d)$')
+			local _dateDisplay = nil
+			if _datePart then
+				local _months = {'January','February','March','April','May','June',
+				                 'July','August','September','October','November','December'}
+				local yy = tonumber(_datePart:sub(1, 2))
+				local mm = tonumber(_datePart:sub(3, 4))
+				local dd = tonumber(_datePart:sub(5, 6))
+				if yy and mm and dd and _months[mm] then
+					_dateDisplay = string.format('%d %s %d', dd, _months[mm], 2000 + yy)
+				end
+			end
+
+			local _YELLOW = {1.0, 0.92, 0.16, 1.0}
+
+			local _line1 = 'Version: '..(_versionStr ~= '' and _versionStr or '?')
+			local _w1    = imgui.CalcTextSize(_line1)
+			imgui.SetCursorPosX((_winW - _w1) * 0.5)
+			imgui.TextColored(_YELLOW, _line1)
+
+			if _dateDisplay then
+				local _line2 = 'Created by Arielfy on '.._dateDisplay
+				local _w2    = imgui.CalcTextSize(_line2)
+				imgui.SetCursorPosX((_winW - _w2) * 0.5)
+				imgui.TextColored(_YELLOW, _line2)
+			end
+
+			imgui.Dummy({0, 15})
+
+			-- Section-header colour, shared by Links / Major Thanks /
+			-- Special Thanks for visual consistency.  Light azure.
+			local _SECTION = {0.50, 0.78, 0.95, 1.0}
+
+			-- ----- Links -----
+			imgui.TextColored(_SECTION, 'Links')
+			imgui.Separator()
+			imgui.Dummy({0, 8})
+
+			-- Each entry is {label, url}.  Empty url shows "(link coming)"
+			-- as a disabled placeholder; otherwise the URL is rendered
+			-- as a clickable hyperlink that opens in the default
+			-- browser via imguiWrap.TextLinkOpenURL.  Labels (and the
+			-- matching bullet) are in a light-purple hue distinct from
+			-- the Major Thanks green / light-red.
+			local _LIGHT_PURPLE = {0.80, 0.65, 0.95, 1.0}
+			local _links = {
+				{'FancyChat GitHub Repo:', 'https://github.com/ariel-logos/Fancychat'},
+				{'Arielfy GitHub:',        'https://github.com/ariel-logos'},
+				{'ElfyLab:',               'http://ariel-logos.github.io/ElfyLab'},
+			}
+			for _, _link in ipairs(_links) do
+				imgui.Dummy({30, 0}) imgui.SameLine()
+				-- Color-matched bullet (same trick as the Major-Thanks
+				-- helper: push ImGuiCol_Text just for the bullet glyph,
+				-- then restore).
+				imgui.PushStyleColor(ImGuiCol_Text, _LIGHT_PURPLE)
+				imgui.Bullet()
+				imgui.PopStyleColor()
+				imgui.TextColored(_LIGHT_PURPLE, _link[1])
+				imgui.SameLine()
+				if _link[2] ~= '' then
+					-- Strip the scheme AND leading "www." from the
+					-- displayed URL so it reads cleanly ("github.com/foo"
+					-- rather than "https://www.github.com/foo"); the
+					-- click target still uses the full URL so the
+					-- browser launches correctly.
+					local _display = _link[2]
+						:gsub('^https?://', '')
+						:gsub('^www%.', '')
+					imguiWrap.TextLinkOpenURL(_display, _link[2])
+				else
+					imgui.TextDisabled('(link coming)')
+				end
+			end
+
+			imgui.Dummy({0, 25})
+
+			-- ----- Major Thanks -----
+			-- Two colour-coded subsections under one header: the Ashita
+			-- platform contributors (green) and the testers (light red
+			-- - kept distinctly red rather than pink by keeping the
+			-- green channel noticeably higher than blue).  Each name
+			-- can carry an optional URL; when set, it renders as
+			-- "Name(<clickable url>)" with no space before the parens.
+			imgui.TextColored(_SECTION, 'Major Thanks')
+			imgui.Separator()
+			imgui.Dummy({0, 8})
+
+			local _GREEN     = {0.45, 0.85, 0.55, 1.0}  -- soft light green
+			local _LIGHT_RED = {0.95, 0.45, 0.35, 1.0}  -- #F27359, red-orange (NOT pink)
+
+			local function _credit(name, url, color)
+				imgui.Dummy({30, 0}) imgui.SameLine()
+				-- Bullet tinted to match the name's color: temporarily
+				-- override ImGuiCol_Text so the bullet glyph picks up
+				-- our hue, then restore.  Bullet() finishes with an
+				-- internal SameLine so the name lands on the same row.
+				imgui.PushStyleColor(ImGuiCol_Text, color)
+				imgui.Bullet()
+				imgui.PopStyleColor()
+				imgui.TextColored(color, name)
+				if url and url ~= '' then
+					local _href = url:find('://') and url or ('https://'..url)
+					-- Display-only: scheme + leading "www." stripped so
+					-- "https://www.foo.com" reads as "foo.com".  Click
+					-- target keeps the full URL.
+					local _display = url
+						:gsub('^https?://', '')
+						:gsub('^www%.', '')
+					imgui.SameLine(0, 0)
+					imgui.Text('  (')
+					imgui.SameLine(0, 0)
+					imguiWrap.TextLinkOpenURL(_display, _href)
+					imgui.SameLine(0, 0)
+					imgui.Text(')')
+				end
+			end
+
+			-- Subsection 1: Ashita platform + key devs (green)
+			imgui.Dummy({10, 0}) imgui.SameLine()
+			imgui.Text('For the invaluable addon dev tools, help and patience:')
+			imgui.Dummy({0, 4})
+			-- TODO: fill optional URLs.  Empty string = no link.
+			local _ashita = {
+				{'The Ashita Team', ''},
+				{'atom0s',          ''},
+				{'Thorny',          ''},
+			}
+			for _, _e in ipairs(_ashita) do
+				_credit(_e[1], _e[2], _GREEN)
+			end
+
+			-- Visual break between the two subsections; the colour
+			-- shift carries most of the separation.
+			imgui.Dummy({0, 12})
+
+			-- Subsection 2: Testers (light red)
+			imgui.Dummy({10, 0}) imgui.SameLine()
+			imgui.Text('For their time spent catching bugs and providing feedback:')
+			imgui.Dummy({0, 4})
+			-- TODO: fill optional URLs.  Empty string = no link.
+			local _testers = {
+				{'Zeratia', ''},
+				{'Mod',     ''},
+				{'Carver',  'www.catseyexi.com'},
+				{'Emi',     ''},
+				{'Sky',     ''},
+			}
+			for _, _e in ipairs(_testers) do
+				_credit(_e[1], _e[2], _LIGHT_RED)
+			end
+
+			imgui.Dummy({0, 25})
+
+			-- ----- Special Thanks -----
+			-- Free-form section at the bottom for shoutouts, dedications,
+			-- inside jokes, whatever you want.  Edit the lines below.
+			-- TextWrapped honors the child's content width so long lines
+			-- wrap to fit the panel.
+			imgui.TextColored(_SECTION, 'Special Thanks')
+			imgui.Separator()
+			imgui.Dummy({0, 8})
+
+			imgui.PushTextWrapPos(imgui.GetWindowWidth() * 0.95)
+			imgui.Dummy({10, 0}) imgui.SameLine()
+			imgui.TextWrapped('Thanks to my family and all my friends who, for the past year, watched me disappear into my room to push this project forward. Even through the countless hours I spent buried in code, you stayed close to me, checking in, dragging me out for a meal, putting up with the late nights and the monologues about chat windows.')
+
+			imgui.Dummy({0, 12})
+
+			imgui.Dummy({10, 0}) imgui.SameLine()
+			imgui.TextWrapped('A final thanks to my dad, I am sorry I could not show you the final result; you would have been happy and proud, as you always were with everything I did. I miss you.')
+			imgui.PopTextWrapPos()
+			
+			imgui.Dummy({0, 24})
+			imgui.EndChild()
+			imgui.EndTabItem()
+		end
+
 		imgui.EndTabBar()
 	end
 
 	imgui.End()
 	PopWindowStyle()
+
+	-- ----------------------------------------------------------------
+	-- Colorset Save / Load popups.  Centered on screen, fixed size,
+	-- no title bar, opaque black background, ImGui-orange buttons.
+	-- The Load popup's file list lives in a scrollable child so a
+	-- long folder doesn't push the buttons off-screen.  Dismissed
+	-- only via the Save / Load action, Cancel, or Escape — clicking
+	-- outside is intentionally a no-op.
+	-- ----------------------------------------------------------------
+	local popupFlags = bit.bor(
+		ImGuiWindowFlags_NoDecoration,
+		ImGuiWindowFlags_NoTitleBar,
+		ImGuiWindowFlags_NoMove,
+		ImGuiWindowFlags_NoSavedSettings)
+
+	-- Opaque-black bg + coral buttons (#D45447 = 0.831,0.329,0.278).
+	local function pushPopupStyle()
+		imgui.PushStyleColor(ImGuiCol_WindowBg,      {0,     0,     0,     1.0})
+		imgui.PushStyleColor(ImGuiCol_ChildBg,       {0,     0,     0,     1.0})
+		imgui.PushStyleColor(ImGuiCol_Button,        {0.831, 0.329, 0.278, 1.0})
+		imgui.PushStyleColor(ImGuiCol_ButtonHovered, {0.929, 0.420, 0.353, 1.0})
+		imgui.PushStyleColor(ImGuiCol_ButtonActive,  {0.700, 0.250, 0.200, 1.0})
+	end
+	local function popPopupStyle() imgui.PopStyleColor(5) end
+
+	local _disp   = imgui.GetIO().DisplaySize
+	local _cx, _cy = _disp.x * 0.5, _disp.y * 0.5
+
+	if set.colorIO.exportOpen then
+		imgui.SetNextWindowPos({_cx, _cy}, ImGuiCond_Always, {0.5, 0.5})
+		imgui.SetNextWindowSize({440, 130}, ImGuiCond_Always)
+		pushPopupStyle()
+		if imgui.Begin('##fc_export', true, popupFlags) then
+			imgui.Text('Filename:')
+			imgui.PushItemWidth(-1)                      -- fill the popup width
+			imgui.InputText('##fc_export_name', set.colorIO.exportName, 64)
+			imgui.PopItemWidth()
+			imgui.Spacing()
+			if imgui.Button('Save##fc_export_save', {80, 0}) then
+				local skipKeys = {'combat', 'combatspell', 'cexi'}
+				local payload  = {}
+				for k, v in pairs(allSettings.colors) do
+					if not utils.FindInStringTable(k, skipKeys, 0) then
+						payload[k] = v
+					end
+				end
+				utils.ExportColors(addon.path, set.colorIO.exportName[1], payload)
+				set.colorIO.exportOpen = false
+			end
+			imgui.SameLine()
+			if imgui.Button('Cancel##fc_export_cancel', {80, 0}) then
+				set.colorIO.exportOpen = false
+			end
+			if imguiWrap.GetKeyDown(1) then     -- Escape
+				set.colorIO.exportOpen = false
+			end
+		end
+		imgui.End()
+		popPopupStyle()
+	end
+
+	if set.colorIO.importOpen then
+		imgui.SetNextWindowPos({_cx, _cy}, ImGuiCond_Always, {0.5, 0.5})
+		imgui.SetNextWindowSize({440, 400}, ImGuiCond_Always)
+		pushPopupStyle()
+		if imgui.Begin('##fc_import', true, popupFlags) then
+			local files = set.colorIO.importFiles
+			imgui.Text('Select a colorset file:')
+			-- Reserve the bottom row of the popup for the buttons:
+			-- list height = (whatever vertical space is left) - one row
+			-- for the buttons - a small spacing gap.  Negative Y in
+			-- BeginChild's size means "fill remaining minus -Y px"; we
+			-- compute the explicit amount so the buttons always fit.
+			local _, availY = imgui.GetContentRegionAvail()
+			local listH     = math.max(80, availY - 40)  -- 40 = one button row + gap
+			imguiWrap.BeginChild('##fc_import_list', {0, listH}, true)
+			if #files == 0 then
+				imgui.TextDisabled('(no files in chatcolors/)')
+			else
+				for i, name in ipairs(files) do
+					if imgui.Selectable(name, set.colorIO.importSelected == i) then
+						set.colorIO.importSelected = i
+					end
+				end
+			end
+			imgui.EndChild()
+			local hasSel = set.colorIO.importSelected > 0 and #files > 0
+			if not hasSel then
+				imgui.PushStyleColor(ImGuiCol_Button,        {0.35, 0.35, 0.35, 0.5})
+				imgui.PushStyleColor(ImGuiCol_ButtonHovered, {0.35, 0.35, 0.35, 0.5})
+				imgui.PushStyleColor(ImGuiCol_ButtonActive,  {0.35, 0.35, 0.35, 0.5})
+			end
+			if imgui.Button('Load##fc_import_load', {80, 0}) and hasSel then
+				local fname = files[set.colorIO.importSelected]
+				allSettings.colors = utils.ImportColors(addon.path, fname, allSettings.colors)
+				SaveSettings()
+				set.colorIO.importOpen = false
+			end
+			if not hasSel then imgui.PopStyleColor(3) end
+			imgui.SameLine()
+			if imgui.Button('Cancel##fc_import_cancel', {80, 0}) then
+				set.colorIO.importOpen = false
+			end
+			if imguiWrap.GetKeyDown(1) then     -- Escape
+				set.colorIO.importOpen = false
+			end
+		end
+		imgui.End()
+		popPopupStyle()
+	end
 end
 
 return M

@@ -1,41 +1,5 @@
---[[
-	lib/debug_window.lua
-
-	The `/fchat debug` window and its sibling helpers.  This is the
-	developer-facing diagnostic UI that's NOT meant for end users —
-	it's only opened explicitly via the `debug` subcommand or the
-	checkbox bound to dw.WindowOpened.
-
-	Three exported functions, all also installed as globals so the
-	render loop and command handler can reach them by name:
-
-	  updateCommandList(text)
-	    Per-character chat-input history maintenance.  Pushes `text`
-	    to the front of fcw[1].LastCommands[1] and trims to a 20-entry
-	    sliding window.
-
-	  DebugWindow()
-	    The main diagnostic ImGui window.  Walks dw.testPTR through a
-	    chain of memory pointers (revealing FFXI's internal menu/dialog
-	    state), shows live buffer counts, parser state, scroll position,
-	    and the dw.TestMessage / dw.TestMessage2 staging strings.  Also
-	    exposes the Show-Message-Mode / Show-Channel-Color toggles
-	    that paint debug colors over the live chat.
-
-	  Debug(msg, target, chained)
-	    Append a string to one of the two staging text buffers
-	    (dw.TestMessage / dw.TestMessage2) shown by DebugWindow.
-	    target=1 picks the first buffer, target=2 the second.
-	    chained=true appends a newline + prefix; otherwise overwrites.
-
-	The implicit-global variables `dw_WindowW`, `dw_WindowH`,
-	`dw_testPTR2`..`dw_testPTR5`, `dw_testString` are LEFT AS GLOBALS
-	(not declared local) — they're scratch debug storage that nothing
-	else in the codebase reads, and inadvertently localising them
-	would change the semantics of the existing code that assigns them
-	in DebugWindow's body and re-reads them from `imgui.SetNextWindowSize`
-	the following frame.
-]]
+-- lib/debug_window.lua — developer diagnostic UI (/fchat debug).
+-- Exports updateCommandList / DebugWindow / Debug as globals.
 
 require('common')
 local imgui     = require('imgui')
@@ -62,9 +26,11 @@ _G.updateCommandList = M.updateCommandList
 function M.DebugWindow()
 	imgui.SetNextWindowSize({dw_WindowW, dw_WindowH})
 	imgui.SetNextWindowSizeConstraints({200, 500}, {FLT_MAX, FLT_MAX})
+	if fcw[1].isHiddenGUI then utils.ImguiVis(true) end
 	imgui.Begin('FancyChat_Debug_'+fcw[1].PlayerName, dw.WindowOpened)
 
 	if next(b.ChatBuffer[1][2]) ~= nil then
+		
 		-- Memory pointer chase: dw.testPTR -> testPTR2 -> testPTR3 ->
 		-- testPTR4 -> testPTR5 -> string.  Reveals the active dialog
 		-- /menu name FFXI is rendering.  Each step's offset was
@@ -150,6 +116,7 @@ function M.DebugWindow()
 	end
 	dw_WindowW, dw_WindowH = imgui.GetWindowSize()
 	imgui.End()
+	if fcw[1].isHiddenGUI then utils.ImguiVis(false) end
 end
 _G.DebugWindow = M.DebugWindow
 

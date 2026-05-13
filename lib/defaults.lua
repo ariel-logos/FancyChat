@@ -1,15 +1,5 @@
---[[
-	lib/defaults.lua
-
-	Factory + constant tables that initialise the FancyChat state at addon
-	load time.  Pure data only — no side effects beyond the one-shot
-	utils.LoadTextures() call inside default_fcw() (which is exactly the
-	same call the original code made inline when uiw was first declared).
-
-	Each `default_*` factory returns a fresh table so a future reset path
-	(or a unit test) can rebuild state cleanly.  Constants used as styling
-	constants (color metadata, tab styles) are exported by reference.
-]]
+-- lib/defaults.lua — initial-state factories (default_*) and styling
+-- constants.  Pure data; sole side effect is utils.LoadTextures().
 
 require('common')
 require('imgui')  -- populates ImGuiWindowFlags_* globals used in default_fcw
@@ -73,6 +63,8 @@ function M.default_fcw()
 				 '!points', '!prestige', '!fatigue', '!currency', '!dailies', '!pops'},
 				1
 			},
+			HasDoneServMes		  = false,
+			WaitingServMes 		  = 0,
 			BufferBusy            = false,
 			WasRendered           = false,
 			itemInfo              = {},
@@ -108,11 +100,12 @@ function M.default_fcw()
 			Closing               = false,
 			LoggedIn              = false,
 			LoggedLobby           = 0,
+			FirstLogin			  = 1,
 			SaveStart             = 0,
 			SaveCD                = 5,
 			ReLogStart            = 0,
-			ReLogCD               = 2,
-			PlayerName            = '-1',
+			ServMesCD             = 8,
+			PlayerName            = '---',
 			RoRectBaseX           = 0,
 			RoRectBaseY           = 0,
 			FWDBaseX              = 0,
@@ -143,6 +136,7 @@ function M.default_fcw()
 			TextureIDInfo         = nil,
 			TextureIDNotepad      = nil,
 			TextureIDDumpchat     = nil,
+			TextureIDLogo         = nil,
 			HoverLine             = -1,
 			Keydown               = false,
 			Keydown2              = false,
@@ -286,7 +280,7 @@ function M.default_settings()
 		PreciseTS            = T{false},
 		MoveChatATMenu       = T{true},
 		CustomFilters        = T{false},
-		SelectedCombatFilter = 'custom_combat_filters.txt',
+		SelectedCombatFilter = 'example.txt',
 		autoDumpChat         = T{false},
 		CustomTabModes       = T{false, false, false, false, false},  -- npc, ls, party, tell, shout
 		ItemPreview          = T{true},
@@ -301,6 +295,7 @@ function M.default_settings()
 		EnableFastScroll     = T{true},
 		EnabledChatMove      = T{false},
 		LockWindowPos        = T{false},
+		HelpButton           = T{true},
 		CompactTabs          = false,
 		PlayerName           = '---',
 		FormatTSMode         = 1,
@@ -412,6 +407,11 @@ function M.default_colors()
 		helm         = {0xFFE5FF3D},
 		useitem      = {0xFFF58FFF},
 		negative     = {0xFFFF5640},
+		-- Both error slots default to the colours previously hardcoded
+		-- in utils.modesDA for FFXI chat modes 123 and 157.  Customisable
+		-- from Settings -> Font Colors as "Error (main)" / "Error (other)".
+		error1       = {0xFFFF0090},
+		error        = {0xFFFF44BB},
 		roe			 = {0xFFF56C42},
 		dmgdone      = {0xFF91FF47, 0xFF91FFF0},
 		dmggot       = {0xFFFA4343, 0xFFFFA269},
@@ -454,6 +454,8 @@ M.color_descriptions = {
 	helm         = {'HELM result',         'Color highlighting the yelded item from an HELM action'},
 	useitem      = {'Using Items',            'Color highlighting the use of an item'},
 	negative     = {'Negative Effect',     'Color that notifies a potential negative action (e.g. throwing items away)'},
+	error1       = {'Error (main)',        'Primary FFXI error / "can\'t do that" messages.'},
+	error        = {'Error (other)',       'Secondary FFXI error messages.'},
 	roe			 = {'RoE Messages',        'Color of Records of Emenince messages'},
 }
 

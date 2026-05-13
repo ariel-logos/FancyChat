@@ -1,24 +1,4 @@
---[[
-	lib/input.lua
-
-	All three input event callbacks:
-
-	  xinput_button - Gamepad navigation: tab cycle, scroll, BigMode
-	                  toggle, chat-input enter/space, command history.
-	                  Active only while allSettings.GamepadNav is true,
-	                  and gated by gamepadButtons.enabled (button 8 hold).
-
-	  key_state     - Keyboard shortcuts: Hide, BigMode, primary tab
-	                  cycle, secondary tab cycle.  Each is a two-key
-	                  combo configured in Settings.
-
-	  mouse         - Wheel scroll routes its delta into all three
-	                  chat windows' ScrollDelta.
-
-	Calls a handful of GLOBAL helpers still defined in fancychat.lua:
-	ResetAutoHideTimer, SetChatOpacity, ResetScrolling, updateCommandList.
-	Resolved at call time via the global namespace.
-]]
+-- lib/input.lua — xinput_button / key_state / mouse callbacks.
 
 require('common')
 local ffi   = require('ffi')
@@ -29,6 +9,7 @@ local fcw            = state.fcw
 local tab            = state.tab
 local gamepadButtons = state.gamepadButtons
 local allSettings    = state.allSettings
+local set            = state.set
 
 local M = {}
 
@@ -149,7 +130,7 @@ function M.register()
 			AshitaCore:GetChatManager():QueueCommand(-1, '/sendkey enter down')
 			local cmd = AshitaCore:GetChatManager():GetInputTextRaw()
 			if #cmd > 0 and not cmd:find('^%s*$') then
-				updateCommandList(cmd)
+				--updateCommandList(cmd)   -- debug_window disabled
 			end
 			gamepadButtons.pressedEnter = true
 			gamepadButtons.buttonsCD = os.clock()
@@ -216,13 +197,23 @@ function M.register()
 
 		local keyptr = ffi.cast('uint8_t*', e.data_raw)
 
+		-- Escape closes the zone-search popup.  Done in this callback
+		-- (rather than only via imgui.GetIO().KeysDown inside the popup
+		-- draw block) because the popup can be dismissed even when
+		-- it doesn't currently have ImGui keyboard focus — DI scancode
+		-- 1 is Escape and is read directly out of the raw key-state
+		-- buffer, bypassing ImGui's input routing entirely.
+		if set.zoneTip.visible and keyptr[1] ~= 0 then
+			set.zoneTip.visible = false
+		end
+
 		-- Pressing Enter while typing in the chat input commits the line
 		-- to the per-character command history.
 		if AshitaCore:GetChatManager():IsInputOpen() == 0x11
 			and (keyptr[28] ~= 0 or keyptr[156] ~= 0) then
 			local cmd = AshitaCore:GetChatManager():GetInputTextRaw()
 			if #cmd > 0 and not cmd:find('^%s*$') then
-				updateCommandList(cmd)
+				--updateCommandList(cmd)   -- debug_window disabled
 			end
 		end
 

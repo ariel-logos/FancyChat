@@ -1,41 +1,7 @@
---[[
-	lib/render.lua
-
-	The two D3D event callbacks that drive the entire on-screen
-	chat: `d3d_present` (per-frame logic + ImGui windows) and
-	`d3d_endscene` (GDI font flush after ImGui finishes).
-
-	This is the largest single piece of code in the addon — it
-	orchestrates every other module's output: window placement,
-	chat-line scrolling, hover/click handling, tab buttons, the
-	BigMode overlay, item/spell preview popups, GuideMe / Notepad
-	/ Settings panels, and the auto-hide fade.  None of the
-	business logic lives here; it's pure UI plumbing that reads
-	the shared state tables and calls into the helper modules
-	(buffer, ui_helpers, ui_panels, ui_settings, parser, bigmode)
-	via the `_G.*` globals each of those modules registers.
-
-	Two exported things:
-
-	  M.register()
-	    Installs the d3d_present + d3d_endscene callbacks with
-	    Ashita.  Called once from fancychat.lua at addon load.
-
-	  ResetAutoHideTimer()  (also _G.ResetAutoHideTimer)
-	    Trivial one-liner that pokes fcw[1].autoHideTime so the
-	    chat window stays visible.  Lives here because render is
-	    its primary consumer, but every module that registers
-	    user activity (input, parser, ui_panels, ui_settings,
-	    lifecycle, bigmode) calls it via the global alias.
-
-	The module body is structured so that:
-	  - All imports are local upvalues (no dynamic requires).
-	  - Every state table read/written goes through `state.*`
-	    aliases, which are shared with every other module.
-	  - Cross-module calls go through `_G.<Name>` globals
-	    (DrawInfo, ResetLines, PositionLines, ChangeTab, etc.).
-	    These are wired up by each helper module's own load.
-]]
+-- lib/render.lua — d3d_present + d3d_endscene callbacks.  Per-frame
+-- UI plumbing; reads state.* tables and calls helper modules via the
+-- _G.* globals each registers.  Exports M.register() and the global
+-- ResetAutoHideTimer() (used by every module on user activity).
 
 require('common')
 local imgui       = require('imgui')
@@ -47,6 +13,7 @@ local help        = require('help')
 local state       = require('lib.state')
 local ui_panels   = require('lib.ui_panels')
 local ui_settings = require('lib.ui_settings')
+local ffi         = require('ffi')
 
 local uiw            = state.uiw
 local mvc            = state.mvc
@@ -61,11 +28,7 @@ local ro             = state.ro
 local allSettings    = state.allSettings
 local gamepadButtons = state.gamepadButtons
 
--- ----------------------------------------------------------------
--- Localised hot stdlib + ImGui hooks for the per-frame loop.
--- These are upvalues, so each call skips a global-table lookup
--- and is more JIT-friendly than `imgui.X` / `string.X`.
--- ----------------------------------------------------------------
+-- Hot stdlib + ImGui locals (upvalue caching for the per-frame loop).
 local math_floor   = math.floor
 local math_min     = math.min
 local math_max     = math.max
@@ -85,9 +48,7 @@ local imGetMousePos     = imgui.GetMousePos
 local imGetIO           = imgui.GetIO
 local iwIsWindowHovered = imguiWrap.IsWindowHovered
 
--- ImGui flag constants used per-frame in this file.  Captured once
--- so render doesn't re-resolve them from _G on every Begin / hover
--- check / style push.
+-- ImGui flag constants captured once.
 local FLAG_HoveredRectOnly       = ImGuiHoveredFlags_RectOnly
 local FLAG_MouseLeft             = ImGuiMouseButton_Left
 local FLAG_WinNoMove             = ImGuiWindowFlags_NoMove
@@ -95,21 +56,14 @@ local FLAG_WinNoDecoration       = ImGuiWindowFlags_NoDecoration
 local FLAG_WinNoBackground       = ImGuiWindowFlags_NoBackground
 local FLAG_StyleVarFrameBorder   = ImGuiStyleVar_FrameBorderSize
 
--- Precomputed highlight colours.  Both alpha values are constants
--- (0.0 and 0.3) so the U32 result never changes; the previous code
--- recomputed and reallocated the {r,g,b,a} table per highlighted
--- line per frame.
+-- Precomputed highlight colour U32s.
 local COLOR_HIGHLIGHT_FILL  = imGetColorU32({ 1.0, 1.0, 1.0, 0.3 })
 local COLOR_HIGHLIGHT_CLEAR = imGetColorU32({ 1.0, 1.0, 1.0, 0.0 })
 local COLOR_BORDER_OVERLAY  = imGetColorU32({ 1.0, 1.0, 1.0, 0.75 })
 
 local M = {}
 
--- One-liner used by every module that wants to keep the chat
--- visible on user activity.  Defined here because render owns the
--- auto-hide fade timeline; exposed as a global so input.lua,
--- parser.lua, ui_panels.lua, etc. can call it without depending on
--- this module.
+-- Pokes the auto-hide fade timer; called by every module on activity.
 function M.ResetAutoHideTimer()
 	fcw[1].autoHideTime = os.time()
 end
@@ -117,48 +71,65 @@ _G.ResetAutoHideTimer = M.ResetAutoHideTimer
 
 function M.register()
 	ashita.events.register('d3d_present', 'present_cb', function ()
-		-- Per-frame caches: avoid hundreds of repeated lookups for
-		-- references that don't change inside a single frame.
-		--   fcw1/2/3 — never reassigned; just mutated in place.
-		--   _fh — font height; only changes between frames via the settings UI.
-		--   _now — single "now" timestamp; the frame logic treats every
-		--   call to os.clock() within it as the same instant anyway.
+		-- Per-frame caches (avoids repeated lookups).
 		local fcw1, fcw2, fcw3 = fcw[1], fcw[2], fcw[3]
 		local _fh  = allSettings.fontSettings.font_height
 		local _now = os.clock()
 
+		-- Hover state for the top-left help (?) button on window 1.
+		-- Reset each frame; populated only when the BG window is drawn
+		-- AND the mouse is over the button.  Anchor coords are screen-
+		-- space top-left of the button, used to position the tooltip.
+		local helpHovered                  = false
+		local helpAnchorX, helpAnchorY     = 0, 0
+
 		fcw1.LoginStatus = AshitaCore:GetMemoryManager():GetPlayer():GetLoginStatus();
 	
-		if not fcw1.InitDone then
-			Init();
-		end
 		if fcw1.LoginStatus == 2 then
-			fcw1.LoggedIn = true
+			if not fcw1.InitDone then
+				Init();
+				-- Captured once per addon load (Init only runs while
+				-- InitDone is false).  Used by the /servmes gate below
+				-- to skip the auto-fire if 0x00E0 arrives more than
+				-- 30s after this addon-load timestamp - relevant when
+				-- the user does /addon reload fancychat mid-session.
+				-- Logout / login resets this via the /addon reload at
+				-- line ~98, so on every fresh login Init() runs again
+				-- and LoginTime is re-captured.
+				par.LoginTime = os.time()
+			end
 			local player = GetPlayerEntity();
-			if fcw1.PlayerName ~= '---' then
+			if not player or not settings then return end
+			fcw1.LoggedIn = true
+			
+			if fcw1.PlayerName == '' and settings.name ~= '' then
+				AshitaCore:GetChatManager():QueueCommand(-1, "/addon reload fancychat")
+			else
 				fcw1.PlayerName = settings.name
 				allSettings.PlayerName = settings.name
 			end
-		elseif fcw1.LoginStatus == 0 then
+		elseif fcw1.LoginStatus == 1 then
+			return
+		else		
 			fcw1.LoggedIn = false
+			fcw1.PlayerName = ''
 			fcw1.LoggedLobby = 1
+			fcw1.WaitingServMes = 0
+			par.LoginTime = 0
+			return
 		end
-			-- --if settings.name ~= fcw1.PlayerName then  fcw1.LoggedLobby = 0 end
+		
+		
 		
 		if fcw1.LoggedIn and not fcw1.Closing and not fcw1.Zoning then
-			if (fcw1.LoggedLobby == 1 or (fcw1.PlayerName == '---')) then
-				if fcw1.ReLogStart == 0 then
-					fcw1.ReLogStart = _now
-				else
-					if (_now - fcw1.ReLogStart > fcw1.ReLogCD) then	
-						allSettings.PlayerName = settings.name;
-						SaveSettings();
-						fcw1.Closing = true;
-						AshitaCore:GetChatManager():QueueCommand(-1, "/addon reload fancychat")
-					end
-				end
-				return
-			end;
+			
+
+			if fcw1.WaitingServMes > 0 and _now - fcw1.WaitingServMes > 2 and os.time() - par.LoginTime < 30 then
+				
+				AshitaCore:GetChatManager():QueueCommand(1, "/servmes")
+				fcw1.WaitingServMes = -1
+				fcw1.HasDoneServMes = true
+			end
 		
 			if AshitaCore:GetChatManager():IsInputOpen() ~= 0x11 then
 				fcw1.LastCommands[2] = 0
@@ -261,7 +232,7 @@ function M.register()
 				if imguiWrap.GetKeyDown(28) then ResetAutoHideTimer() end
 			end
 			if MenuName:find('auc1') and #uiw.MenuList > 0 and uiw.MenuList[#uiw.MenuList][1]=='menucomyn' then uiw.MenuList = {{'menuauc1',0}} end
-			Debug(MenuName, 2, false);	
+			--Debug(MenuName, 2, false);   -- debug_window disabled
 			if MenuID == 0 or MenuName:match('menu[%s]+menuwind') or MenuName:match('menu[%s]+playermo') then
 				mvc.Menu1 = false;
 				mvc.Menu2 = false;
@@ -270,7 +241,7 @@ function M.register()
 			
 				local MenuExt = ashita.memory.read_uint32(uiw.MenuPtr-0x3C)
 				local MenuLabel = {MenuName:gsub('[%s]+',''), MenuExt,''};
-				Debug(MenuLabel[1]..'-'..MenuLabel[2], 2, false);	
+				--Debug(MenuLabel[1]..'-'..MenuLabel[2], 2, false);   -- debug_window disabled
 		
 				if MenuLabel[1]=='menuinventor' then
 					-- uiw.MenuDescPTR2 = ashita.memory.read_uint32(uiw.MenuDescPTR+0x54);
@@ -548,7 +519,7 @@ function M.register()
 				local positionStartX, positionStartY = imgui.GetCursorScreenPos();
 				positionStartX = positionStartX + allSettings.WindowPosOffset[1];
 				positionStartY = positionStartY + allSettings.WindowPosOffset[2];
-			
+
 				mvc.targetposY = 0;
 				mvc.targetposX = 0;
 				if fcw1.MoveChat then
@@ -727,7 +698,37 @@ function M.register()
 					if (fcw1.Clicking and imIsMouseReleased(FLAG_MouseLeft)) then
 					fcw1.Clicking = false;
 						if(copyBufferText ~=nil) then
-							if imGetIO().KeyShift then
+							if imGetIO().KeyCtrl then
+								-- Ctrl + left-click: open the /sea zone
+								-- popup at the cursor.  Skip the copy /
+								-- notepad branches below so the line's
+								-- text is NOT placed on the clipboard.
+								local zones = utils.FindZonesInText(copyBufferText, set.zoneNames)
+								if #zones > 0 then
+									local mx, my   = imGetMousePos()
+									set.zoneTip.visible = true
+									set.zoneTip.zones   = zones
+									set.zoneTip.x       = mx
+									set.zoneTip.y       = my
+									-- One-shot latch consumed on the popup's
+									-- first render frame: triggers a single
+									-- SetNextWindowFocus (so the popup pops
+									-- on top of the chat) and suppresses the
+									-- open-frame dismissal race (otherwise
+									-- the mouse-release that opened us would
+									-- immediately re-close us).
+									set.zoneTip.justAppeared  = true
+									-- Reset the accordion state so every
+									-- popup open starts with Maps expanded
+									-- and the local-map directory rescan
+									-- happens fresh (so any new files the
+									-- user dropped into maps/<zone>/ get
+									-- picked up between opens).
+									set.zoneTip.activeSection = {}
+									set.zoneTip.localMaps     = {}
+									set.zoneTip.pressInside   = false
+								end
+							elseif imGetIO().KeyShift then
 								if #allSettings.Notes < 10 and #copyBufferText > 0 then
 									table_insert(allSettings.Notes, copyBufferText)
 									print('Message saved in the Notepad ['..#allSettings.Notes..'/10]')
@@ -807,9 +808,120 @@ function M.register()
 		
 			-- Preparing some variables for the Tabs window --
 				imgui.End();
-		
-		
-			
+
+				-- Help (?) button rendered in its own dedicated 24x24
+				-- transparent window so its top-left can be anchored
+				-- exactly to the chat plate (ro.RectBG[1]) without
+				-- being affected by the BG window's WindowPadding or
+				-- content-clip rect.  Drawn AFTER the BG window's End
+				-- so it sits on top in stack order.  The button's
+				-- background is fully transparent; a faint white tint
+				-- is shown on hover / press for feedback.
+				--
+				-- IsItemHovered() is called with FLAG_HoveredRectOnly
+				-- because the chat BG window (NoBringToFrontOnFocus)
+				-- occludes us in ImGui's z-order — the rect-only flag
+				-- bypasses occlusion-based hover suppression.
+				--
+				-- Gated by allSettings.HelpButton[1] (Settings -> Chat
+				-- Window).  When disabled, the entire button + tooltip
+				-- pipeline is skipped (helpHovered stays false).
+				if allSettings.HelpButton[1] then
+					helpAnchorX = ro.RectBG[1].settings.position_x
+					helpAnchorY = ro.RectBG[1].settings.position_y
+					imgui.PushStyleVar(ImGuiStyleVar_WindowPadding, {0, 0})
+					imgui.SetNextWindowPos({helpAnchorX, helpAnchorY}, ImGuiCond_Always)
+					imgui.SetNextWindowSize({24, 24})
+					local _helpBtnFlags = bit_bor(
+						ImGuiWindowFlags_NoDecoration,
+						ImGuiWindowFlags_NoBackground,
+						ImGuiWindowFlags_NoMove,
+						ImGuiWindowFlags_NoSavedSettings,
+						ImGuiWindowFlags_NoBringToFrontOnFocus,
+						ImGuiWindowFlags_NoFocusOnAppearing,
+						ImGuiWindowFlags_NoNav)
+					if imgui.Begin('##fc1_help_button', true, _helpBtnFlags) then
+						-- Frame layout: 14x14 image + 5px padding on each
+						-- side = 24x24 button = exact window size.  The
+						-- FramePadding push applies in the new (>=1.89)
+						-- ImGui binding (where the ImageButton call has
+						-- no framePadding arg); the framePadding=5 arg
+						-- below is what the old binding uses.
+						imgui.PushStyleVar(ImGuiStyleVar_FramePadding,    {5, 5})
+						-- No frame-border outline around the icon.
+						imgui.PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0)
+						imgui.PushStyleColor(ImGuiCol_Button,        {0, 0, 0, 0   })
+						imgui.PushStyleColor(ImGuiCol_ButtonHovered, {1, 1, 1, 0.15})
+						imgui.PushStyleColor(ImGuiCol_ButtonActive,  {1, 1, 1, 0.30})
+						-- Same info icon (fcw1.TextureIDInfo) that the
+						-- Settings tooltips use via AddTooltip in
+						-- ui_helpers.lua - visual consistency.  Tint at
+						-- a soft light-gray (~70%) so it reads as a
+						-- subtle hover affordance rather than a full-
+						-- attention chrome element.
+						imguiWrap.ImageButton(
+							'fc1_help_imgbtn',
+							fcw1.TextureIDInfo,
+							{14, 14},          -- image size
+							{0, 0}, {1, 1},    -- uv0 / uv1
+							5,                 -- frame padding (old binding)
+							{0, 0, 0, 0},        -- bg color (transparent)
+							{0.85, 0.85, 0.85, 1}) -- tint (between light gray and white)
+						imgui.PopStyleColor(3)
+						imgui.PopStyleVar(2)
+						helpHovered = imgui.IsItemHovered(FLAG_HoveredRectOnly)
+					end
+					imgui.End()
+					imgui.PopStyleVar()
+				end
+
+				-- Floating help-tooltip window for the (?) button.
+				-- Rendered OUTSIDE the BG window so its own size /
+				-- position aren't constrained by the parent.  Pivot
+				-- {0, 1} anchors the tooltip's bottom-left corner at
+				-- the button's top-left → the tooltip grows up + right.
+				--
+				-- NoBringToFrontOnFocus is deliberately absent and
+				-- SetNextWindowFocus is called each frame the tooltip
+				-- is shown: the chat BG window has NoBringToFrontOnFocus
+				-- so it never moves out of the way on its own, and
+				-- without the explicit focus call the tooltip would
+				-- render behind it (same pattern as ZoneSearchPopup).
+				if helpHovered then
+					imgui.SetNextWindowPos(
+						{ helpAnchorX, helpAnchorY },
+						ImGuiCond_Always,
+						{ 0, 1 })
+					imgui.SetNextWindowFocus()
+					local _helpFlags = bit_bor(
+						ImGuiWindowFlags_NoDecoration,
+						ImGuiWindowFlags_NoTitleBar,
+						ImGuiWindowFlags_NoFocusOnAppearing,
+						ImGuiWindowFlags_NoMove,
+						ImGuiWindowFlags_NoSavedSettings,
+						ImGuiWindowFlags_NoNav,
+						ImGuiWindowFlags_NoResize,
+						ImGuiWindowFlags_AlwaysAutoResize)
+					if imgui.Begin('##fc1_help_tooltip', true, _helpFlags) then
+						imgui.Text('FancyChat - quick reference')
+						imgui.Separator()
+						imgui.BulletText('L-Click on a chat line          Copy text to clipboard')
+						imgui.BulletText('Ctrl + L-Click on a zone name   Open zone search & map popup')
+						imgui.BulletText('Shift + L-Click on a chat line  Save line to Notepad (max 10)')
+						imgui.BulletText('L-Click on a [link] tag         Open URL in browser')
+						imgui.BulletText('R-Click anywhere on the chat    Jump to the latest message')
+						imgui.BulletText('L-Click + Drag on chat window   Reposition the chat window')
+						imgui.BulletText('Mouse Wheel over the chat       Scroll history')
+						imgui.BulletText('Shift + Mouse Wheel             Fast scroll (5 lines / tick)')
+						imgui.BulletText('Shift hover compact-tab button  Swap it for the Settings icon')
+						imgui.Separator()
+						imgui.TextDisabled('Type /fancychat settings for more options')
+						imgui.TextDisabled('This (?) button can be disabled under Settings -> Chat Window')
+					end
+					imgui.End()
+				end
+
+
 			-- Setting up the Tabs window elements --
 				local tabsW = ro.RectBG[1].settings.width;
 				local tabsH = fcw1.BG_H/(allSettings.ChatLines)+2;
@@ -1565,11 +1677,371 @@ function M.register()
 	
 	
 	------------------------------------------
-		
+
 		-- Render Debug Window if opened --
-	
-		if (dw.WindowOpened[1]) then DebugWindow(); end
-	
+
+		--if (dw.WindowOpened[1]) then DebugWindow(); end   -- debug_window disabled
+
+		-- Ctrl+left-click /sea popup.  set.zoneTip is armed by the
+		-- click-release handler on the primary chat window.  Dismissed
+		-- by clicking outside, pressing Escape, or chat auto-hide.
+		if set.zoneTip.visible
+			and allSettings.AutoHideWindow[1]
+			and (os.time() - fcw1.autoHideTime > allSettings.AutoHideTimeMax)
+		then
+			set.zoneTip.visible = false
+		end
+		if set.zoneTip.visible then
+			-- NoBringToFrontOnFocus is deliberately absent — without it,
+			-- clicks on the popup get stolen by overlapping chat windows.
+			local wFlags = bit.bor(
+				ImGuiWindowFlags_NoDecoration,
+				ImGuiWindowFlags_NoTitleBar,
+				ImGuiWindowFlags_NoFocusOnAppearing,
+				ImGuiWindowFlags_NoMove,
+				ImGuiWindowFlags_NoSavedSettings,
+				ImGuiWindowFlags_NoNav,
+				ImGuiWindowFlags_NoResize,
+				ImGuiWindowFlags_AlwaysAutoResize)
+
+			-- Anchor the popup with pivot {0, 1}: the given screen
+			-- position is treated as the BOTTOM-LEFT of the auto-resized
+			-- window.  ImGui computes the final top-left as
+			-- (pos.x - 0*width, pos.y - 1*height) = (pos.x, pos.y - height),
+			-- which is exactly the up-and-right growth we want.  No
+			-- separate measure pass needed: ImGui knows the height at
+			-- Begin time because AlwaysAutoResize is computed during
+			-- layout, then applied to the pivot calculation before the
+			-- window renders.  Versioned window name dodges any stale
+			-- imgui.ini entry written by an older version of the code.
+			imgui.SetNextWindowPos(
+				{set.zoneTip.x + 4, set.zoneTip.y - 4},
+				ImGuiCond_Always,
+				{0, 1})
+
+			-- Capture the just-appeared latch BEFORE Begin so the alpha
+			-- Push/Pop below stays balanced.  The flag itself gets
+			-- cleared INSIDE the Begin block (after the dismissal-skip
+			-- logic), so by the time we'd reach the post-End Pop the
+			-- flag would already read false.  Local captures the
+			-- value at entry to this block.
+			local maskFirstFrame = set.zoneTip.justAppeared
+
+			-- One-shot focus on appearance.  justAppeared is set true
+			-- by the chat handler on Ctrl+L-click, consumed below at
+			-- end of Begin block so subsequent visible frames don't
+			-- keep stealing focus.
+			if maskFirstFrame then
+				imgui.SetNextWindowFocus()
+				-- Near-transparent alpha (1/255) on the first render
+				-- frame so the user never sees the popup at the wrong
+				-- position before ImGui's AlwaysAutoResize knows the
+				-- height.  Pure 0.0 was tried previously and triggered
+				-- ImGui's window-skip optimisation on second-show
+				-- (broke reopen entirely); a tiny non-zero alpha is
+				-- functionally invisible but bypasses that codepath.
+				imgui.PushStyleVar(ImGuiStyleVar_Alpha, 1/255)
+			end
+
+			if imgui.Begin('##FCZoneSearch_v3', true, wFlags) then
+				for zi, zone in ipairs(set.zoneTip.zones or {}) do
+					-- Wrap the zone name in double quotes so multi-word
+					-- zones (e.g. "Rolanberry Fields", "Ru'Lude Gardens")
+					-- are passed as a single argument to /sea instead
+					-- of being split on spaces by the chat parser.
+					local searchCmd = '/sea "'..zone..'"'
+					if imgui.Selectable(searchCmd) then
+						AshitaCore:GetChatManager():QueueCommand(-1, searchCmd)
+						set.zoneTip.visible = false
+					end
+
+					-- Visual separator between the /sea command and the
+					-- two browser-link entries below.
+					imgui.Separator()
+
+					-- Open the FFXIclopedia wiki page in the user's
+					-- default browser.  ashita.misc.open_url is a
+					-- one-liner; no in-game image rendering needed.
+					if imgui.Selectable('Open '..zone..' on FFXIclopedia') then
+						ashita.misc.open_url(utils.GetZoneWikiUrl(zone))
+						set.zoneTip.visible = false
+					end
+
+					-- bg-wiki page (independent of FFXIclopedia, useful
+					-- when Cloudflare blocks Fandom).
+					if imgui.Selectable('Open '..zone..' on bg-wiki') then
+						ashita.misc.open_url(utils.GetBgWikiZoneUrl(zone))
+						set.zoneTip.visible = false
+					end
+
+					-- Local map sections.  Lazy-fill the per-zone scan
+					-- result the first frame this zone is drawn in the
+					-- popup, then reuse for subsequent frames.  The
+					-- whole cache is wiped on each popup open so the
+					-- accordion always starts with Maps expanded and
+					-- any disk changes between opens are visible.
+					if set.zoneTip.localMaps[zone] == nil then
+						set.zoneTip.localMaps[zone] = utils.GetLocalZoneMaps(zone) or false
+					end
+					local sections = set.zoneTip.localMaps[zone]
+					-- Three valid states for activeSection[zone]:
+					--   nil   → never touched on this popup-open  → default to 'Maps' open
+					--   false → user explicitly clicked the green '-' to collapse
+					--           the open section          → no section open
+					--   string → that section is open
+					-- We can't use `or 'Maps'` here because Lua treats `false`
+					-- as falsy too, so a collapsed state would silently
+					-- re-expand Maps the next frame.
+					local active = set.zoneTip.activeSection[zone]
+					if active == nil then active = 'Maps' end
+
+					if not sections then
+						-- Per the chosen UX: zones with no local maps
+						-- still show the "Maps" header expanded with a
+						-- single greyed-out "(No Map)" placeholder.
+						-- No other section headers are drawn for these
+						-- zones (none exist on disk).
+						imgui.TextDisabled('- Maps -')
+						imgui.TextDisabled('  (No Map)')
+					else
+						-- Each section row is "[+/- button] section name".
+						-- Button size is locked to a square scaled by the
+						-- current font size so the "+" / "-" label always
+						-- fits and the button visually matches the text
+						-- next to it (+4 px gives a small breathing
+						-- margin around the glyph).
+						local fontH    = imgui.GetFontSize()
+						local btnSide  = fontH + 4
+						local btnSize  = {btnSide, btnSide}
+						-- Indent map-entry lines past where the button
+						-- ends so the entries hang under the section
+						-- name, not under the button column.
+						local indentPx = btnSide + 4
+
+						for _, section in ipairs(sections) do
+							local isActive = section.folder == active
+
+							-- Green tint when this section is the
+							-- expanded one.  Push all three button
+							-- state colors so hover / active stay in
+							-- the same hue family rather than reverting
+							-- to ImGui's default blue on hover.
+							if isActive then
+								imgui.PushStyleColor(ImGuiCol_Button,        {0.20, 0.65, 0.30, 1.0})
+								imgui.PushStyleColor(ImGuiCol_ButtonHovered, {0.30, 0.80, 0.40, 1.0})
+								imgui.PushStyleColor(ImGuiCol_ButtonActive,  {0.10, 0.50, 0.20, 1.0})
+							end
+
+							-- '##' + per-row suffix gives the button a
+							-- stable ImGui ID without putting that text
+							-- in the visible label.  Without a unique
+							-- suffix, every "+" and "-" button would
+							-- collide on the same internal ID.
+							local btnLabel = (isActive and '-' or '+')
+								..'##sec_'..zone..'_'..section.folder
+							if imgui.Button(btnLabel, btnSize) then
+								if isActive then
+									-- Click on the green '-' button:
+									-- collapse this section.  Stored as
+									-- `false` rather than nil so the
+									-- next-frame "default to Maps"
+									-- coalesce doesn't fire.
+									set.zoneTip.activeSection[zone] = false
+								else
+									-- Click on a '+' button: expand
+									-- this section, implicitly
+									-- collapsing whichever was open.
+									set.zoneTip.activeSection[zone] = section.folder
+								end
+							end
+
+							if isActive then
+								imgui.PopStyleColor(3)
+							end
+
+							-- Section name, on the same horizontal line
+							-- as the button.  AlignTextToFramePadding
+							-- bumps the cursor.y by FramePadding.y so
+							-- the text baseline lines up with the
+							-- button's text baseline instead of
+							-- floating at the top of the button frame.
+							imgui.SameLine()
+							imgui.AlignTextToFramePadding()
+							imgui.Text(section.display)
+
+							if isActive then
+								-- Bracket the entries with Indent /
+								-- Unindent so they hang under the
+								-- section name (past the button
+								-- column) and the next section row
+								-- starts back at column 0.
+								imgui.Indent(indentPx)
+								for _, entry in ipairs(section.entries) do
+									if imgui.Selectable(entry.display) then
+										-- Load (or reuse cached) texture
+										-- from disk.  Cache key is the
+										-- absolute file path so the same
+										-- file referenced from different
+										-- zones (rare but possible if the
+										-- user reorganises maps/) shares
+										-- one decoded texture.
+										local cached = set.zoneMapTextures[entry.path]
+										if not cached then
+											local tex, w, h = utils.LoadTextureFromFile(entry.path)
+											if tex then
+												cached = {
+													tex = tex,
+													ptr = tonumber(ffi.cast('uint32_t', tex)),
+													w   = w,
+													h   = h,
+												}
+												set.zoneMapTextures[entry.path] = cached
+											end
+										end
+										if cached then
+											-- `or 0` makes this resilient if
+											-- state.lua's default wasn't picked
+											-- up by the live `set` table (e.g.
+											-- after a partial /addon reload).
+											set.zoneMapUidCounter = (set.zoneMapUidCounter or 0) + 1
+											table.insert(set.zoneMapWindows, {
+												-- Plain ASCII hyphen for
+												-- the same font-glyph
+												-- reason as elsewhere.
+												title  = zone..' - '..entry.display,
+												url    = entry.path,
+												ptr    = cached.ptr,
+												w      = cached.w,
+												h      = cached.h,
+												opened = {true},
+												uid    = set.zoneMapUidCounter,
+											})
+										end
+										set.zoneTip.visible = false
+									end
+								end
+								imgui.Unindent(indentPx)
+							end
+						end
+					end
+
+					-- Double separator between zones to distinguish them
+					-- from the single separator drawn within a zone.
+					if zi < #set.zoneTip.zones then
+						imgui.Separator()
+						imgui.Separator()
+					end
+				end
+
+				-- Press-anchored dismissal: capture pressInside on
+				-- press, dismiss on release only if press was outside.
+				-- The justAppeared guard suppresses the open-frame
+				-- release (the mouse-up that opened us) from being
+				-- treated as a dismissal release.
+				local hovered = imguiWrap.IsWindowHovered(ImGuiHoveredFlags_RectOnly)
+				if hovered then ResetAutoHideTimer() end
+				if not set.zoneTip.justAppeared then
+					if imIsMouseClicked(FLAG_MouseLeft)
+						or imIsMouseClicked(ImGuiMouseButton_Right) then
+						set.zoneTip.pressInside = hovered
+					end
+					if not set.zoneTip.pressInside
+						and (imIsMouseReleased(FLAG_MouseLeft)
+						     or imIsMouseReleased(ImGuiMouseButton_Right)) then
+						set.zoneTip.visible = false
+					end
+				end
+
+				-- Escape dismissal.  GetKeyDown(1) = DI scancode 1 =
+				-- Escape; works regardless of popup focus state.
+				if imguiWrap.GetKeyDown(1) then
+					set.zoneTip.visible = false
+				end
+
+				-- Consume the one-shot just-appeared latch AFTER all
+				-- the per-frame logic above so the next frame falls
+				-- into the normal dismissal path.
+				set.zoneTip.justAppeared = false
+			end
+			imgui.End()
+			-- Balance the PushStyleVar(Alpha) above (only pushed on the
+			-- first-appearance frame; maskFirstFrame remembers that).
+			if maskFirstFrame then
+				imgui.PopStyleVar()
+			end
+		end
+
+		-- Zone-map windows.  Each entry in set.zoneMapWindows was
+		-- pushed by the popup's "Show map: …" Selectable above and
+		-- carries its own pre-decoded D3D8 texture pointer.  Draw
+		-- each in its own draggable, resizable ImGui window with the
+		-- close-X enabled — the user dismisses an individual map via
+		-- that X.  When opened[1] flips to false (X clicked), drop
+		-- the entry from the list; the texture stays cached in
+		-- set.zoneMapTextures[url] for instant re-open.
+		--
+		-- Iterate in reverse so removing entries during the loop
+		-- doesn't skip neighbours.
+		-- Read the current WindowBg colour from ImGui's style so the
+		-- title bar can be tinted to match (rather than the default
+		-- distinct title-bar shade).  style.Colors is a 0-indexed
+		-- enum exposed as a 1-indexed Lua array, so the index needs
+		-- a +1 bump.  The returned value is an ImVec4 with .x/.y/.z/.w
+		-- which we unpack into a plain table for PushStyleColor.
+		local _bg = imgui.GetStyle().Colors[ImGuiCol_WindowBg + 1]
+		local _bgVec = {_bg.x, _bg.y, _bg.z, _bg.w}
+		for wi = #set.zoneMapWindows, 1, -1 do
+			local mw = set.zoneMapWindows[wi]
+			-- Default size: a square at 70% of the current display
+			-- height.  ImGuiCond_FirstUseEver applies the size only
+			-- on the first frame each window's unique uid is seen,
+			-- so subsequent frames respect any user resize done via
+			-- the bottom-right grip.  Each new "open" assigns a
+			-- fresh uid, so reopening a map after closing it brings
+			-- it back at the default size rather than the previously
+			-- resized size.
+			local dsize = imgui.GetIO().DisplaySize
+			local side  = math.floor(dsize.y * 0.7)
+			imgui.SetNextWindowSize({side, side}, ImGuiCond_FirstUseEver)
+			-- Make the title bar visually merge with the window body
+			-- by overriding all three title-bg states (inactive,
+			-- focused, collapsed) with the WindowBg colour captured
+			-- above.  The title text and close-X stay visible since
+			-- those use ImGuiCol_Text / ImGuiCol_CloseButton which we
+			-- don't touch.
+			imgui.PushStyleColor(ImGuiCol_TitleBg,          _bgVec)
+			imgui.PushStyleColor(ImGuiCol_TitleBgActive,    _bgVec)
+			imgui.PushStyleColor(ImGuiCol_TitleBgCollapsed, _bgVec)
+			-- ID suffix is the per-instance uid (NOT the array index)
+			-- so closing an earlier window doesn't reshuffle the IDs
+			-- of the remaining ones — without that, ImGui would map
+			-- each surviving window onto the previous slot's saved
+			-- size, snapping it to a different size on close.
+			if imgui.Begin('Map: '..mw.title..'##ZoneMap'..tostring(mw.uid),
+				mw.opened, ImGuiWindowFlags_NoSavedSettings) then
+				-- Scale the image to fit the content region while
+				-- preserving aspect ratio, then centre it both
+				-- horizontally and vertically inside the square.
+				-- GetContentRegionAvail returns the area inside the
+				-- title bar + window padding.
+				local availW, availH = imgui.GetContentRegionAvail()
+				local scale = math.min(availW / mw.w, availH / mw.h)
+				local drawW = mw.w * scale
+				local drawH = mw.h * scale
+				local cx, cy = imgui.GetCursorPos()
+				imgui.SetCursorPos({
+					cx + math.max((availW - drawW) * 0.5, 0),
+					cy + math.max((availH - drawH) * 0.5, 0),
+				})
+				imgui.Image(mw.ptr, {drawW, drawH})
+			end
+			imgui.End()
+			imgui.PopStyleColor(3)
+			if not mw.opened[1] then
+				table.remove(set.zoneMapWindows, wi)
+			end
+		end
+
 	end);
 
 	ashita.events.register('d3d_endscene', 'd3d_endscene_callback1', function (isRenderingBackBuffer)

@@ -1,48 +1,8 @@
---[[
-	lib/buffer.lua
-
-	The chat-buffer plumbing.  Every function in here mutates per-window
-	state on `fcw[id]` and either reads from or writes to the GDI font
-	objects in `fo.Chat[id][L_i]` / `fo.Aux[id][L_i]` (where L_i is a
-	circular cursor that wraps at ChatLines).
-
-	The chat buffer itself lives at `b.ChatBuffer[mode][2]` and consists
-	of 5-6 parallel arrays (.text, .color, .auxText, .auxColor, .url,
-	and optional .mode), all indexed in lock-step.  Mode is 1..8 mapping
-	to All / AllAlt / Combat / Linkshell / Party / Tell / Shout / Custom.
-
-	Per-window state of interest:
-	  fcw[id].ChatHead             Circular cursor into fo.Chat[id]
-	                               slots (1..ChatLines).  Points at the
-	                               OLDEST visible line — the next write
-	                               replaces it and the cursor advances.
-	  fcw[id].ScrolledBack         Lines scrolled back from the latest.
-	  fcw[id].Scrolling            True while a scroll animation is
-	                               active.  Suppresses live UpdateLines.
-	  fcw[id].PositionLinesRequest {layoutChat, layoutScrollbar}.  Both
-	                               must be flipped to false for the
-	                               layout pass to settle.
-	  fcw[id].RequestAuxFix        True when aux text needs to be
-	                               re-positioned because its main text
-	                               rect just became available.
-	  fcw[id].ChatShift            Vertical pixel offset used to
-	                               animate a new line fading in.
-	  b.ChatBufferIdx[id]          Buffer cursor: how many lines have
-	                               been consumed into the visible window.
-	  b.ChatBufferN[id]            Total line count for the current tab.
-
-	BigMode quirk: fcw[3] is BigMode, which SHARES the buffer with
-	fcw[1].  Several functions take an extra `ChatLines` parameter; when
-	it is supplied, the function treats fo_id as a window slot index but
-	reads the buffer mode from `fcw[1]` (i.e. it sets `mode_id = 1`).
-	Without that ChatLines argument, mode_id == fo_id.  Keep this in
-	mind when reading the body of ResetLines / GoToLine / PositionLines.
-
-	All 13 functions are exposed as globals (`_G.X = M.X`) so the
-	render loop, BigMode, ui_settings and the parser pipeline — none of
-	which are currently `require()`-ing this module — can keep calling
-	them by name with no further changes.
-]]
+-- lib/buffer.lua — chat-buffer plumbing.  Reads/writes fo.Chat[id] /
+-- fo.Aux[id] via a circular cursor wrapping at ChatLines, against
+-- the per-tab b.ChatBuffer[mode][2] arrays.  fcw[3] is BigMode and
+-- shares the buffer with fcw[1].  All 13 functions are exposed as
+-- globals for the render loop, BigMode, and the parser pipeline.
 
 require('common')
 local imgui = require('imgui')

@@ -1,26 +1,5 @@
---[[
-	lib/ui_panels.lua
-
-	Two of FancyChat's secondary ImGui panels:
-
-	  draw_guideme() - The GuideMe walkthrough viewer.  Fetches a
-	                   ffxiclopedia / bg-wiki page, extracts the
-	                   walkthrough section and renders it as plain
-	                   wrapped text with a font-size slider.
-
-	  draw_notepad() - A simple per-character note keeper (max 10
-	                   notes), persisted via SaveSettings.
-
-	Each function is a no-op when its corresponding *Opened flag is
-	false, so the call sites in fancychat.lua's d3d_present loop just
-	invoke them unconditionally each frame.
-
-	Both rely on a handful of GLOBAL helpers still defined in
-	fancychat.lua: PushWindowStyle/PopWindowStyle, ResetAutoHideTimer,
-	AddTooltip, SaveSettings.  When those move out into their own
-	modules this file will not need to change — Lua's global lookup
-	resolves them at call time.
-]]
+-- lib/ui_panels.lua — draw_guideme() (wiki walkthrough viewer) and
+-- draw_notepad() (per-character notes, max 10).
 
 require('common')
 local imgui     = require('imgui')
@@ -200,6 +179,7 @@ function M.draw_guideme()
 		imgui.End()
 	end
 	PopWindowStyle()
+	if fcw[1].isHiddenGUI then utils.ImguiVis(false) end
 end
 
 function M.draw_notepad()
@@ -297,6 +277,8 @@ function M.draw_notepad()
 		imgui.End()
 	end
 	PopWindowStyle()
+	
+	if fcw[1].isHiddenGUI then utils.ImguiVis(false) end
 end
 
 return M
