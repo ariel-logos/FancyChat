@@ -59,8 +59,7 @@ function M.default_fcw()
 			-- cexi
 			LastCommands = T{
 				{}, 0,
-				{'!mog', '!chef', '!signet', '!sanction', '!sigil', '!ventures',
-				 '!points', '!prestige', '!fatigue', '!currency', '!dailies', '!pops'},
+				{'/fish','/sit','/heal','/invite','/decline','/join','/follow','/map','/logout','/shutdown'},
 				1
 			},
 			HasDoneServMes		  = false,
