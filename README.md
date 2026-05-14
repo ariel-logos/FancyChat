@@ -274,7 +274,7 @@ Quick reference (see [docs/Data Storage](docs/Data-Storage.md) for the full layo
 
 ### Credits
 
-- **game-icons.net** [link](https://https://game-icons.net/) for the gameicons.ttf font.
+- **game-icons.net** [(link)](https://https://game-icons.net/) for the gameicons.ttf font.
   
 A heartfelt thank you to:
 
