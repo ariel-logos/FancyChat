@@ -56,7 +56,7 @@ The modifications add Fancychat-specific rendering behaviour (custom marked-colo
 > ${\textsf{\color{orange}{If you are building your own Ashita addon and want a GDI font texture library, use Thorny's original}}}$ — not this version. The modifications here are tightly coupled to Fancychat's rendering pipeline and are not maintained as a general-purpose drop-in replacement.
 
 #### AI usage
-Fancychat was built collaboratively with AI tools (predominantly large language models acting as coding / writing assistants). For full transparency, the main areas where AI was used:
+Fancychat final build was created collaboratively with AI tools. For full transparency I disclose the main areas where AI was used:
 
 - **Documentation** — the bulk of the README, the [`docs/`](docs/) folder pages, and the in-game manual (`help.lua`) were drafted and refined with AI assistance.
 - **Code refactoring** — the split of the original single-file `fancychat.lua` (~8,700 lines) into the modular `lib/*.lua` structure, along with the inline explanatory comments throughout, was AI-assisted.
