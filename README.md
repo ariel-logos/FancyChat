@@ -37,6 +37,8 @@ It replaces FFXI's native chat with a customizable in-game chat overlay: message
 Open the <a href="https://github.com/ariel-logos/Fancychat/releases" target="_blank">Releases</a> page, download the latest version, and unpack it into the `addons/` folder of your Ashita installation. You should end up with a `fancychat/` folder next to your other add-ons.
 
 In game, type `/addon load fancychat` to start it, then `/fchat manual` for the built-in guide or `/fchat settings` to configure it. To start the add-on automatically every time you launch the game, add `/addon load fancychat` to your Ashita default script.
+
+**For better compatibility, make sure you load FancyChat as one of the last addons in the Ashita default script!**
 <br></br>
 
 ### Disclaimer
@@ -72,7 +74,7 @@ For longer reference docs see the [`docs/` folder](docs/Home.md). Every Settings
 <br></br>
 
 ### Compatibility
-Fancychat is **not designed** to run alongside other add-ons that modify, reformat, or recolour incoming chat messages. Combat-log enhancers such as `simplelog`, alternative chat replacements, or anything that rewrites the chat stream are **not supported**. Running two chat-handling add-ons at the same time will produce visual conflicts (duplicated lines, broken colours, mangled formatting, missing spaces) that Fancychat will not try to recover from.
+Fancychat is **not designed** to run alongside other add-ons that modify, reformat, or recolour incoming chat messages. Combat-log enhancers such as `simplelog`, alternative chat replacements, or anything that rewrites the chat stream are **not supported**. Running two chat-handling add-ons at the same time will produce visual conflicts (duplicated lines, broken colours, mangled formatting, missing spaces) that Fancychat will not try to recover from. However, there might be some lucky compatible addo-ons, so you can try your luck.
 
 If you want to use Fancychat, unload other chat-modifying add-ons first (`/addon unload <name>`). If you prefer a different chat add-on, unload Fancychat instead.
 
