@@ -60,11 +60,11 @@ Fancychat was built collaboratively with AI tools (predominantly large language 
 
 - **Documentation** — the bulk of the README, the [`docs/`](docs/) folder pages, and the in-game manual (`help.lua`) were drafted and refined with AI assistance.
 - **Code refactoring** — the split of the original single-file `fancychat.lua` (~8,700 lines) into the modular `lib/*.lua` structure, along with the inline explanatory comments throughout, was AI-assisted.
-- **Bug investigation** — several bugs hunts were debugged with AI help as a final pass.
-- **C++ modifications** — some of the final changes in `custom gdifonts src/` (the modified gdifonts library) were AI-assisted in a last pass.
+- **Bug investigation** — several bugs hunts were debugged with AI help in a final pass.
+- **C++ modifications** — some of the final changes in `custom gdifonts src/` (the modified gdifonts library) were AI-assisted in a final pass.
 - **Auxiliary tooling and asset prep** — the zone-map download / organisation scripts under `maps/`, the JPEG compression pass on the maps, the FancyChat logo, and the notification WAV downmix (stereo → mono / 44.1 → 22 kHz) all involved AI assistance.
 
-Architecture decisions, feature design, in-game testing, and final-author review are mine — AI was a collaborator, not the designer. Any bugs you find are still my responsibility.
+Architecture decisions, feature design, in-game testing, and final-author review are mine — AI was a collaborator used as a polishing tool before release, not the designer, nor the original code writer. Therefore, any bugs or design fault you find are still my responsibility.
 <br></br>
 
 ### 📖 Documentation
