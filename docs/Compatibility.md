@@ -1,6 +1,6 @@
 # Compatibility
 
-> **TL;DR:** Fancychat is **not designed** to run alongside other addons that modify, reformat, or recolour incoming chat messages. Pick one chat addon at a time.
+> **TL;DR:** Fancychat is **not designed** to run alongside other addons that modify, reformat, or recolour incoming chat messages. Pick one chat addon at a time. Or try your luck by loading FancyChat last and see what happens.
 
 ## What does NOT work alongside Fancychat
 
@@ -8,7 +8,7 @@ Combat-log enhancers and chat replacements that intercept or rewrite the chat st
 
 - `simplelog` — combat-line reformatter
 - Alternative chat-replacement add-ons
-- Anything else that reformats, colourises, or otherwise rewrites incoming chat messages before you see them
+- Anything else that reformats, colourises, or otherwise rewrites incoming chat messages before you see them (with some exceptions)
 
 Running two chat-handling add-ons at the same time produces visual conflicts:
 
