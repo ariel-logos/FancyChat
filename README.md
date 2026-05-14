@@ -53,7 +53,7 @@ The bundled `gdifonts/gdifonttexture.dll` is a ${\textsf{\color{orange}{modified
 
 The modifications add Fancychat-specific rendering behaviour (custom marked-color escape codes, additional draw paths, and other tweaks tailored to the addon's pipeline). The full source of the modified version is included in this repo under [`custom gdifonts src/`](custom%20gdifonts%20src/) for transparency and as a basis for anyone wanting to rebuild the DLL from source.
 
-> ${\textsf{\color{orange}{If you are building your own Ashita addon and want a GDI font texture library, use Thorny's original}}}$ — not this fork. The modifications here are tightly coupled to Fancychat's rendering pipeline and are not maintained as a general-purpose drop-in replacement.
+> ${\textsf{\color{orange}{If you are building your own Ashita addon and want a GDI font texture library, use Thorny's original}}}$ — not this version. The modifications here are tightly coupled to Fancychat's rendering pipeline and are not maintained as a general-purpose drop-in replacement.
 
 #### AI usage
 Fancychat was built collaboratively with AI tools (predominantly large language models acting as coding / writing assistants). For full transparency, the main areas where AI was used:
