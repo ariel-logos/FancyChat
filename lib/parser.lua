@@ -537,33 +537,33 @@ _G.HandleActors = M.HandleActors
 -- and the chat line, return an MCList tuple {start, end, color} for
 -- the yield span (or false).
 -- ===================================================================
-function M.HELMtext(t, text)
-	local s = 0
-	local e = 0
-	local c = allSettings.colors.helm[1]
-	if t[1] == 'harvest'
-		or t[1] == 'dig up'
-		or t[1] == 'cut off' then
+-- function M.HELMtext(t, text)
+	-- local s = 0
+	-- local e = 0
+	-- local c = allSettings.colors.helm[1]
+	-- if t[1] == 'harvest'
+		-- or t[1] == 'dig up'
+		-- or t[1] == 'cut off' then
 
-		s = text:find(t[1], 1, true)
-		if s then
-			s = s + #t[1]
-			e = text:find(t[2], s, true)
-			if not e then e = #text end
-			if e then e = e - 1 end
-			return {s, e, c}
-		else
-			s = 0
-			e = text:find(t[2], s, true)
-			if e then
-				e = e - 1
-				return {s, e, c}
-			end
-		end
-	end
-	return false
-end
-_G.HELMtext = M.HELMtext
+		-- s = text:find(t[1], 1, true)
+		-- if s then
+			-- s = s + #t[1]
+			-- e = text:find(t[2], s, true)
+			-- if not e then e = #text end
+			-- if e then e = e - 1 end
+			-- return {s, e, c}
+		-- else
+			-- s = 0
+			-- e = text:find(t[2], s, true)
+			-- if e then
+				-- e = e - 1
+				-- return {s, e, c}
+			-- end
+		-- end
+	-- end
+	-- return false
+-- end
+-- _G.HELMtext = M.HELMtext
 
 -- ===================================================================
 -- FindHELM: detect a Harvesting/Excavation/Logging/Mining yield line
@@ -571,43 +571,43 @@ _G.HELMtext = M.HELMtext
 -- only.  Skips lines that contain a `:` past the timestamp (e.g.
 -- "<player>: ..." chat lines that happen to mention these verbs).
 -- ===================================================================
-function M.FindHELM(text, mode)
-	if mode ~= 9 and mode ~= 151 then return false end
-	if text:find(':', #par.LastTS, true) then return false end
+-- function M.FindHELM(text, mode)
+	-- if mode ~= 9 and mode ~= 151 then return false end
+	-- if text:find(':', #par.LastTS, true) then return false end
 
-	local f = text:find(' harvest ')
-	if f then
-		local opening = 'harvest'
-		local closing = text:find('!', f, true) and '!' or nil
-		if not closing then
-			closing = text:find(',', f, true) and ',' or nil
-		end
-		if closing then return {opening, closing} end
-	end
+	-- local f = text:find(' harvest ')
+	-- if f then
+		-- local opening = 'harvest'
+		-- local closing = text:find('!', f, true) and '!' or nil
+		-- if not closing then
+			-- closing = text:find(',', f, true) and ',' or nil
+		-- end
+		-- if closing then return {opening, closing} end
+	-- end
 
-	f = text:find(' dig up ')
-	if f then
-		local opening = 'dig up'
-		local closing = text:find('!', f, true) and '!' or nil
-		if not closing then
-			closing = text:find(',', f, true) and ',' or nil
-		end
-		if closing then return {opening, closing} end
-	end
+	-- f = text:find(' dig up ')
+	-- if f then
+		-- local opening = 'dig up'
+		-- local closing = text:find('!', f, true) and '!' or nil
+		-- if not closing then
+			-- closing = text:find(',', f, true) and ',' or nil
+		-- end
+		-- if closing then return {opening, closing} end
+	-- end
 
-	f = text:find(' cut off ')
-	if f then
-		local opening = 'cut off'
-		local closing = text:find('!', f, true) and '!' or nil
-		if not closing then
-			closing = text:find(',', f, true) and ',' or nil
-		end
-		if closing then return {opening, closing} end
-	end
+	-- f = text:find(' cut off ')
+	-- if f then
+		-- local opening = 'cut off'
+		-- local closing = text:find('!', f, true) and '!' or nil
+		-- if not closing then
+			-- closing = text:find(',', f, true) and ',' or nil
+		-- end
+		-- if closing then return {opening, closing} end
+	-- end
 
-	return false
-end
-_G.FindHELM = M.FindHELM
+	-- return false
+-- end
+-- _G.FindHELM = M.FindHELM
 
 -- ===================================================================
 -- parseThis: the dispatcher.  See module-header comment for the full
@@ -1007,7 +1007,7 @@ parseThis = function(e, e_message)
 		if not isCombatMsg then urlText = utils_ParseUrlLink(newText) end
 		local auxURL_text = ''
 		local skipped = 0
-		local HELMfound = FindHELM(newText, par.MessageMode)
+		--local HELMfound = FindHELM(newText, par.MessageMode)
 
 		-- (#2) Hoist the primary chat buffer once.  Inside this loop
 		-- it gets touched up to 14× per iteration; reading b.ChatBuffer
@@ -1229,14 +1229,14 @@ parseThis = function(e, e_message)
 				special_text = ''
 			end
 
-			if HELMfound then
-				local HEMLtable = HELMtext(HELMfound, string_sub(newText, 1, cutIdx))
-				if HEMLtable then
-					fo.Fwd[1]:set_visible(false)
-					fo.Fwd[2]:set_visible(false)
-					table_insert(MCList, HEMLtable)
-				end
-			end
+			-- if HELMfound then
+				-- local HEMLtable = HELMtext(HELMfound, string_sub(newText, 1, cutIdx))
+				-- if HEMLtable then
+					-- fo.Fwd[1]:set_visible(false)
+					-- fo.Fwd[2]:set_visible(false)
+					-- table_insert(MCList, HEMLtable)
+				-- end
+			-- end
 
 			-- Apply all accumulated MCList entries: sort by start, then
 			-- splice MC escape sequences into the text.  Each escape
