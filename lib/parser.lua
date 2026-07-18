@@ -25,7 +25,7 @@
 	Helper functions kept here because they only make sense in the
 	parser context:
 	  CleanTextFunctionNew  Byte-pass cleaner: strips colors, FFXI bytes,
-	                        SJIS multibytes, optional emoji substitution.
+	                        SJIS multibytes.
 	  HandleSpecial    Find the [prefix..suffix] span in a chat line
 	                   and return an MCList tuple to colorize it.
 	  CheckSpecial     Mode-specific dispatcher for HandleSpecial
@@ -98,11 +98,9 @@ local utils_IsInTable              = utils.IsInTable
 local utils_CountExtraBytesT       = utils.CountExtraBytesT
 local utils_utf8split              = utils.utf8split
 local utils_ParseUrlLink           = utils.ParseUrlLink
-local utils_parseEmoji             = utils.parseEmoji
-local utils_emojiCols              = utils.emojiCols
 local utils_MC                     = utils.MC
 local utils_MCCheck                = utils.MCCheck
-local utils_LoadCustomFilters      = utils.LoadCustomFilters
+local utils_LoadFilters            = utils.LoadFilters
 local utils_modesDA                = utils.modesDA
 local utils_disambYou              = utils.disambYou
 local utils_disambEnemy            = utils.disambEnemy
@@ -286,10 +284,7 @@ _G.HandleSpecial = M.HandleSpecial
 -- ===================================================================
 -- CheckSpecial: dispatch by MessageMode to the right HandleSpecial
 -- pattern.  Recognises:
---   * CEXI accumulators (linkshell-points / activity-points / summit
---     objectives / point accumulation / partyfinder)
 --   * Loot results: You find / synth / throw / lot / sell / buy
---   * Quest accept / complete (CEXI)
 --   * Level attain (with icons.LVLUP), caught/learn
 --   * Item obtain / key-item / bazaar / use
 --   * Exp / limit gain (with icons.EXP)
@@ -424,36 +419,7 @@ function M.CheckSpecial(newText, col, cutIdx)
 		end
 	end
 	
-	if set.isCEXI and (par.MessageMode == 9 or par.MessageMode == 127 or par.MessageMode == 121) then
-		if newText:find('Now accumulating linkshell points for ') or par.checkAgain[2] == 'CE-acc' then
-			return HandleSpecial(newText, 'CE-acc', 'Now accumulating linkshell points for ', '%.', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('Activity Points: ') or par.checkAgain[2] == 'CE-AP' then
-			return HandleSpecial(newText, 'CE-AP', 'Activity Points: ', '%.', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('Summit Objective:') or par.checkAgain[2] == 'CE-SO' then
-			return HandleSpecial(newText, 'CE-SO', 'Summit Objective:', '%.', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('Summit Bonus:') or par.checkAgain[2] == 'CE-SB' then
-			return HandleSpecial(newText, 'CE-SB', 'Summit Bonus:', nil, cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('Summit of the Stars perk') or par.checkAgain[2] == 'CE-SP' then
-			return HandleSpecial(newText, 'CE-SP', 'now active:', nil, cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find(' activity points%.') or par.checkAgain[2] == 'CE-AP2' then
-			return HandleSpecial(newText, 'CE-AP2', 'gains', '%.', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('Point Accumulation:') or par.checkAgain[2] == 'CE-PA' then
-			return HandleSpecial(newText, 'CE-PA', 'Point Accumulation:', '%.', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('PartyFinder') or par.checkAgain[2] == 'CE-PF' then
-			return HandleSpecial(newText, 'CE-PF', nil, '%[PartyFinder', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('completed a special venture') or par.checkAgain[2] == 'CE-venC' then
-			return HandleSpecial(newText, 'CE-venC', nil, 'You have completed a special venture objective%. %(Progress: [0-9]*/[0-9]*%)', cutIdx, 0xFFFFD500)
-		elseif newText:find('Defeat Mobs') or par.checkAgain[2] == 'CE-DM' then
-			return HandleSpecial(newText, 'CE-DM', 'Defeat Mobs ', ' %(', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('Quest Accepted:') or par.checkAgain[2] == 'CE-QA' then
-			return HandleSpecial(newText, 'CE-QA', nil, utf8.char(0x25C7)..' Quest Accepted:', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('Quest Completed:') or par.checkAgain[2] == 'CE-QC2' then
-			return HandleSpecial(newText, 'CE-QC2', nil, utf8.char(0x25C6)..' Quest Completed:', cutIdx, allSettings.colors.cexi[1])
-		elseif newText:find('Quest Completed') or par.checkAgain[2] == 'CE-QC' then
-			return HandleSpecial(newText, 'CE-QC', nil, utf8.char(0x25C6)..' Quest Completed', cutIdx, allSettings.colors.cexi[1])
-		end
-	end
-	
+
 end
 _G.CheckSpecial = M.CheckSpecial
 
@@ -474,6 +440,8 @@ function M.SetBufferN(tabname)
 	if tabname == 'Tell'      then return b.ChatBufferN_Tell      end
 	if tabname == 'Shout'     then return b.ChatBufferN_Shout     end
 	if tabname == 'Custom'    then return b.ChatBufferN_Custom    end
+	if tabname == 'L1'        then return b.ChatBufferN_L1        end
+	if tabname == 'L2'        then return b.ChatBufferN_L2        end
 	return chatBufferN_All
 end
 _G.SetBufferN = M.SetBufferN
@@ -481,7 +449,7 @@ _G.SetBufferN = M.SetBufferN
 -- ===================================================================
 -- SetTargetPosX: render-loop helper that picks the menu-aware
 -- target X / Y for chat repositioning when an FFXI UI menu is open.
--- The mvc.Menu1..6 flags are set per-frame in d3d_present after
+-- The mvc.Menu1..7 flags are set per-frame in d3d_present after
 -- inspecting the active menu's name.
 -- ===================================================================
 function M.SetTargetPosX(x, y, positionStartX)
@@ -493,6 +461,7 @@ function M.SetTargetPosX(x, y, positionStartX)
 	if mvc.Menu3 then mvc.targetposY = (y / uiw.UISizeY * uiw.UISizeY) - ((y * 250) / uiw.UISizeY); return fcw[1].MoveChatPos3 end
 	if mvc.Menu4 then mvc.targetposY = (y / uiw.UISizeY * uiw.UISizeY) - ((y * 250) / uiw.UISizeY); return fcw[1].MoveChatPos4 end
 	if mvc.Menu5 then mvc.targetposY = (y / uiw.UISizeY * uiw.UISizeY) - ((y * 160) / uiw.UISizeY); return fcw[1].MoveChatPos1 end
+	if mvc.Menu7 then mvc.targetposY = (y / uiw.UISizeY * uiw.UISizeY) - ((y * 250) / uiw.UISizeY); return fcw[1].MoveChatPos5 end
 	if mvc.Menu6 then
 		mvc.targetposY = (y / uiw.UISizeY * uiw.UISizeY) - ((y * 180) / uiw.UISizeY)
 		return positionStartX
@@ -679,10 +648,16 @@ parseThis = function(e, e_message)
 	-- multiple places below (the de-dup check, the LastTS update,
 	-- and PreciseTS).  Compute the timestamp ONCE here.
 	local now             = os_time()
-	local ts_default      = os_date(par.FormatTS[1], now)..' '
-	local ts_user         = allSettings.timeStamp[1]
-		and os_date(par.FormatTS[allSettings.FormatTSMode], now)..' '
-		or ''
+	local ts12h           = allSettings.TimeStamp12h[1]
+	local ts_default      = os_date(par.FormatTS[1], now)
+	if ts12h then ts_default = utils.fmt_ts_12h(ts_default) end
+	ts_default            = ts_default..' '
+	local ts_user         = ''
+	if allSettings.timeStamp[1] then
+		ts_user = os_date(par.FormatTS[allSettings.FormatTSMode], now)
+		if ts12h then ts_user = utils.fmt_ts_12h(ts_user) end
+		ts_user = ts_user..' '
+	end
 	local ts = ts_user
 
 	original_msg = msg
@@ -807,27 +782,6 @@ parseThis = function(e, e_message)
 	end
 
 	local newText = CleanTextFunctionNew(msg, par.LastMode)
-
-	-- Discord-bridge text rewrite: server-side discord relay messages
-	-- start with a lowercase letter on emoji-allowed channels.  Rewrite
-	-- bracketed names "<x>" to "{x}" and parse :emoji_name: tokens.
-	local isDiscordText = false
-	if set.isCEXI then
-		if utils_IsInTable(par.emojiChannels, par.MessageMode) then
-			for i = 1, #newText do
-				local first_letter = newText:sub(i, i)
-				if first_letter:match('%a') then
-					if first_letter >= 'a' and first_letter <= 'z' then
-						newText = utils_parseEmoji(newText:gsub('<', '{', 1):gsub('>', '}', 1))
-						isDiscordText = true
-						break
-					else
-						break
-					end
-				end
-			end
-		end
-	end
 
 	if newText:match('^%s*\n?$') then par.LastMode = 'empty' return end
 
@@ -961,11 +915,18 @@ parseThis = function(e, e_message)
 			isYou = true; isOthers = false; isAlliance = false
 		end
 
-		if (allSettings.hideAlliance[1] and isAlliance)
-			or (allSettings.hideNonParty[1] and isOthers)
-			or (allSettings.hideNonYou[1]   and not isYou) then
-			par.LastMode = 'filtered'
-			return
+		-- Text-based filter.  Only runs when packet-based mode is
+		-- OFF; when it's ON, the blocking happens at packet level
+		-- in lib/combat_packets.lua's handle_action_packet (via
+		-- the packet_in callback in lifecycle.lua) and the action
+		-- never reaches the chat layer in the first place.
+		if not allSettings.PacketFilterEnabled2[1] then
+			if (allSettings.hideAlliance[1] and isAlliance)
+				or (allSettings.hideNonParty[1] and isOthers)
+				or (allSettings.hideNonYou[1]   and not isYou) then
+				par.LastMode = 'filtered'
+				return
+			end
 		end
 
 		local scope = '_z'
@@ -973,6 +934,19 @@ parseThis = function(e, e_message)
 
 		if allSettings.CustomFilters[1] then
 			if utils_FindInStringTableFilters(newText, par.customFilters, scope) then
+				par.LastMode = 'filtered'
+				return
+			end
+		end
+	end
+
+	-- Non-combat ("Other") filter pass.  Same matching logic as the
+	-- combat filter above, but targets every non-combat chat line and
+	-- always uses '_z' (all) scope since the isYou / isParty rich
+	-- scoping only applies to combat-log messages.
+	if not par.LastMode:find('combat', 1, true) then
+		if allSettings.OtherFilters[1] then
+			if utils_FindInStringTableFilters(newText, par.otherFilters, '_z') then
 				par.LastMode = 'filtered'
 				return
 			end
@@ -1026,12 +1000,25 @@ parseThis = function(e, e_message)
 		table_remove(recent, 1)
 	end
 
+	-- Dedup bypass for MessageModes that legitimately repeat back-to-
+	-- back within the same second and would be wrongly suppressed by
+	-- the rolling-window check:
+	--   121 craft         - crafting / lot result lines on the same channel
+	--   127 system8       - system messages (cream tier)
+	--   131 combat_y      - "You" gain exp / limit / gil / chain
+	--   142 system7NPC    - NPC system messages
+	--   204 searchcomment - player search-comment lines
+	local mm = par.MessageMode
+	local dedupBypass = (mm == 121 or mm == 127 or mm == 131 or mm == 142 or mm == 204)
+
 	-- Search the remaining window for an ASCII-equal predecessor.
 	local checkMsgOrDate = true
-	for ri = 1, #recent do
-		if recent[ri].key == newMsgKey then
-			checkMsgOrDate = false
-			break
+	if not dedupBypass then
+		for ri = 1, #recent do
+			if recent[ri].key == newMsgKey then
+				checkMsgOrDate = false
+				break
+			end
 		end
 	end
 
@@ -1052,7 +1039,21 @@ parseThis = function(e, e_message)
 		local isCombatMsg = false
 		par.tabmode = nil
 		if     string_find(par.LastMode, '^combat')    then par.tabmode = 3; isCombatMsg = true
-		elseif string_find(par.LastMode, '^linkshell') then par.tabmode = 4
+		elseif string_find(par.LastMode, '^linkshell') then
+			-- When SplitLinkshellTab is on, route LS1 / LS2 to their
+			-- dedicated buffer slots (9 / 10) instead of the shared
+			-- slot 4.  par.LastMode is 'linkshell1', 'linkshell1out',
+			-- 'linkshell2', 'linkshell2out', ... so the digit right
+			-- after 'linkshell' is the LS number.
+			if allSettings.SplitLinkshellTab[1] then
+				if string_find(par.LastMode, '^linkshell2') then
+					par.tabmode = 10
+				else
+					par.tabmode = 9
+				end
+			else
+				par.tabmode = 4
+			end
 		elseif string_find(par.LastMode, '^party')     then par.tabmode = 5
 		elseif string_find(par.LastMode, '^tell')      then par.tabmode = 6
 		elseif string_find(par.LastMode, '^shout')     then par.tabmode = 7
@@ -1060,14 +1061,25 @@ parseThis = function(e, e_message)
 		end
 
 		-- Custom tab membership: the user can opt-in NPC / LS / Party
-		-- / Tell / Shout into the Custom tab via Settings.
+		-- / Tell / Shout into the Custom tab via Settings.  When the
+		-- Linkshell tab is split into L1 / L2, slot [2] (combined LS)
+		-- is bypassed and slots [6] (L1) / [7] (L2) drive the linkshell
+		-- routing instead — exactly mirroring how the tab itself is
+		-- rendered.
 		par.isCustom = false
-		for cmode = 1, #allSettings.CustomTabModes do
-			if allSettings.CustomTabModes[cmode] then
-				if cmode == 1 and string_find(par.LastMode, 'NPC$') or par.tabmode == cmode + 2 then
-					par.isCustom = true
-					break
-				end
+		local ctm = allSettings.CustomTabModes
+		if (ctm[1] and string_find(par.LastMode, 'NPC$'))
+		or (ctm[3] and par.tabmode == 5)
+		or (ctm[4] and par.tabmode == 6)
+		or (ctm[5] and par.tabmode == 7) then
+			par.isCustom = true
+		elseif allSettings.SplitLinkshellTab[1] then
+			if (ctm[6] and par.tabmode == 9) or (ctm[7] and par.tabmode == 10) then
+				par.isCustom = true
+			end
+		else
+			if ctm[2] and par.tabmode == 4 then
+				par.isCustom = true
 			end
 		end
 		
@@ -1104,7 +1116,7 @@ parseThis = function(e, e_message)
 			local special_color = ''
 
 			local bytesLine = utils_CountExtraBytesT(newText)
-			local cutIdx = math_min(allSettings.chatLineMaxL + bytesLine[math_min(allSettings.chatLineMaxL, #bytesLine)] + 1, textLeft)
+			local cutIdx = math_min(allSettings.chatLineMaxL + bytesLine[math_min(allSettings.chatLineMaxL, #bytesLine)], textLeft)
 
 			-- Atomicity for legacy colour escapes: never let a slice
 			-- end on the lead byte of \x1E\NN or \x1F\NN with the
@@ -1348,16 +1360,6 @@ parseThis = function(e, e_message)
 				buf1.text[#buf1.text] = utils_MCCheck(mctext)
 			end
 
-			-- Discord emoji painter — also gated by FC colour marking
-			-- because emojiCols emits MC escapes around every emoji.
-			if fcMarkingActive and set.isCEXI and isDiscordText then
-				local mctext = buf1.text[#buf1.text]
-				mctext = utils_emojiCols(mctext)
-				if #mctext < 4096 then
-					buf1.text[#buf1.text] = utils_MCCheck(mctext)
-				end
-			end
-
 			-- Legacy in-band palette escape translation.  Runs when
 			-- respectLegacyColors is TRUE — either FC marking is
 			-- inactive (legacy escapes are the only colour info) or
@@ -1489,13 +1491,17 @@ parseThis = function(e, e_message)
 
 				-- Buffer-cap enforcement.
 				if #buf1.text > b.ChatBufferMaxSize then
-					local cleanupRanges = {b.CleanupThresh, 0, 0, 0, 0, 0, 0, 0}
+					-- Two extra slots (9, 10) for L1 / L2 in split mode.
+					local cleanupRanges = {b.CleanupThresh, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 					for tr = 1, b.CleanupThresh do
 						local tabremove = 0
 						local cremove   = 0
 						if string_find(buf1.mode[tr], '@$')         ~= nil then cremove = 8 end
 						if string_find(buf1.mode[tr], '^combat')    ~= nil then tabremove = 3
-						elseif string_find(buf1.mode[tr], '^linkshell') ~= nil then tabremove = 4
+						elseif string_find(buf1.mode[tr], '^linkshell2') ~= nil then
+							tabremove = allSettings.SplitLinkshellTab[1] and 10 or 4
+						elseif string_find(buf1.mode[tr], '^linkshell') ~= nil then
+							tabremove = allSettings.SplitLinkshellTab[1] and 9 or 4
 						elseif string_find(buf1.mode[tr], '^party')     ~= nil then tabremove = 5
 						elseif string_find(buf1.mode[tr], '^tell')      ~= nil then tabremove = 6
 						elseif string_find(buf1.mode[tr], '^shout')     ~= nil then tabremove = 7
@@ -1536,8 +1542,22 @@ parseThis = function(e, e_message)
 			b.ChatBufferN_Combat = b.ChatBufferN_Combat + n_lines
 			if allSettings.SelectedTab == 'Combat' or allSettings.SelectedTab2 == 'Combat' then ResetAutoHideTimer() end
 		elseif string_find(par.LastMode, '^linkshell') then
-			b.ChatBufferN_Linkshell = b.ChatBufferN_Linkshell + n_lines
-			if allSettings.SelectedTab == 'Linkshell' or allSettings.SelectedTab2 == 'Linkshell' then ResetAutoHideTimer() end
+			-- Mirrors the tabmode-setting branch above: when split is
+			-- on, bump the L1 / L2 counter and reset the timer for
+			-- whichever of the two split tabs is being watched;
+			-- otherwise bump the shared Linkshell counter as before.
+			if allSettings.SplitLinkshellTab[1] then
+				if string_find(par.LastMode, '^linkshell2') then
+					b.ChatBufferN_L2 = b.ChatBufferN_L2 + n_lines
+					if allSettings.SelectedTab == 'L2' or allSettings.SelectedTab2 == 'L2' then ResetAutoHideTimer() end
+				else
+					b.ChatBufferN_L1 = b.ChatBufferN_L1 + n_lines
+					if allSettings.SelectedTab == 'L1' or allSettings.SelectedTab2 == 'L1' then ResetAutoHideTimer() end
+				end
+			else
+				b.ChatBufferN_Linkshell = b.ChatBufferN_Linkshell + n_lines
+				if allSettings.SelectedTab == 'Linkshell' or allSettings.SelectedTab2 == 'Linkshell' then ResetAutoHideTimer() end
+			end
 		elseif string_find(par.LastMode, '^party') then
 			b.ChatBufferN_Party = b.ChatBufferN_Party + n_lines
 			if allSettings.SelectedTab == 'Party' or allSettings.SelectedTab2 == 'Party' then ResetAutoHideTimer() end

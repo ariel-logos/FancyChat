@@ -75,9 +75,7 @@ function M.AddTooltip(message, offset, critical)
 		imguiWrap.Image(fcw[1].TextureIDInfo, {15, 15}, {0, 0}, {1, 1}, {0.937, 0.349, 0.290, 1})
 	end
 	if imgui.IsItemHovered(0) then
-		imgui.BeginTooltip()
 		imgui.SetTooltip(utils.breakLine(message, 40))
-		imgui.EndTooltip()
 	end
 end
 _G.AddTooltip = M.AddTooltip
@@ -398,6 +396,13 @@ function M.DrawInfo(text)
 		else
 			M.DrawInfoWin(H, drawcalls[d][1], drawcalls[d][2], drawcalls[d][3])
 		end
+	end
+	-- Tell the per-frame broadcast (compass anchor) that an item-preview
+	-- row is active and how tall it is, so things anchored to the chat
+	-- can shift up by that amount.
+	if #drawcalls > 0 then
+		fcw[1].itemPreviewActive = true
+		fcw[1].LastInfoH         = H
 	end
 end
 _G.DrawInfo = M.DrawInfo

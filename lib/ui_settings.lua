@@ -20,12 +20,12 @@ local gamepadButtons = state.gamepadButtons
 
 local M = {}
 
--- Module-level cache of the combatfilters/ directory listing.  Populated
--- lazily on the first frame the CL Filters tab is drawn so the dir scan
--- doesn't run every frame.  The "Refresh" button next to the picker
--- re-scans on demand (e.g. after the user adds / renames a .txt file
--- through the OS).
-local cachedCombatFilterFiles = nil
+-- Module-level cache of the filters/<kind>/ directory listing,
+-- keyed by kind ('combat' / 'other').  Populated lazily on the first
+-- frame each Filters sub-tab is drawn so the dir scan doesn't run
+-- every frame.  The "Refresh" button next to each picker re-scans
+-- its own kind on demand.
+local cachedFilterFiles = { combat = nil, other = nil }
 
 function M.draw_settings_panel()
 
@@ -33,10 +33,12 @@ function M.draw_settings_panel()
 	-- the `set.*` working copy so the next open shows the current
 	-- state and not stale pending edits.
 	if not allSettings.settingsOpened[1] then
-		set.SecondChat[1] = allSettings.SecondChat[1]
-		set.ChatLineMaxL  = allSettings.chatLineMaxL
-		set.PlateBGColor  = allSettings.rectSettings.fill_color
-		set.FontHeight    = allSettings.fontSettings.font_height
+		set.SecondChat[1]        = allSettings.SecondChat[1]
+		set.ChatLineMaxL         = allSettings.chatLineMaxL
+		set.PlateBGColor         = allSettings.rectSettings.fill_color
+		set.FontHeight           = allSettings.fontSettings.font_height
+		set.InstantChatScroll[1] = allSettings.InstantChatScroll[1]
+		set.SplitLinkshellTab[1] = allSettings.SplitLinkshellTab[1]
 		for ct = 1, #allSettings.CustomTabModes do
 			set.CustomTabModes[ct] = allSettings.CustomTabModes[ct]
 		end
@@ -94,18 +96,69 @@ function M.draw_settings_panel()
 				set.ChatLineMaxL = lineSize[1]
 			end
 
+			-- Decode the persisted ARGB into a {0..1} alpha float plus
+			-- a {r,g,b} float triple so two widgets can edit them
+			-- independently.  Both writes flow through `recompose` at
+			-- the bottom of the block so the channels they don't own
+			-- are preserved.
 			local plateBGcolor = set.PlateBGColor
 			local plateBGAlpha = T{tonumber(bit.rshift(plateBGcolor, 24)) / 255}
+			local plateBGRGB   = T{
+				bit.band(bit.rshift(plateBGcolor, 16), 0xFF) / 255,
+				bit.band(bit.rshift(plateBGcolor,  8), 0xFF) / 255,
+				bit.band(plateBGcolor,                 0xFF) / 255,
+			}
+			local plateBGchanged = false
+
 			cposY = imgui.GetCursorPosY()
 			cposX = imgui.GetCursorPosX()
 			imgui.SetCursorPosY(cposY + 10)
-			imgui.Text('Plate BG Alpha')
+			imgui.Text('Plate BG Opacity')
 			imgui.SameLine()
 			imgui.SetCursorPosY(cposY + 7)
 			imgui.SetCursorPosX((dsize.x / 4.3 - dsize.x / 8) * (1920 / dsize.x))
-			if imgui.SliderFloat('##plateBGAlphaSlider', plateBGAlpha, 0, 0.499, '%.2f',
+			if imgui.SliderFloat('##plateBGAlphaSlider', plateBGAlpha, 0, 1.0, '%.2f',
 				bit.bor(ImGuiSliderFlags_AlwaysClamp, ImGuiSliderFlags_NoRoundToFormat)) then
-				set.PlateBGColor = bit.lshift(bit.tobit(plateBGAlpha[1] * 255), 24)
+				plateBGchanged = true
+			end
+
+			-- Background colour picker.  ColorButton renders just the
+			-- swatch; clicking it opens our own modal-style popup that
+			-- holds the full ColorPicker3 + an explicit Done button to
+			-- dismiss it (Escape doesn't reliably close ImGui popups on
+			-- the Ashita 4.30 binding, so click-outside or Done are the
+			-- only ways out).  Alpha is handled by the slider on the
+			-- row above, hence NoAlpha on both widgets.
+			cposY = imgui.GetCursorPosY()
+			imgui.SetCursorPosY(cposY + 10)
+			imgui.Text('Plate BG Color')
+			imgui.SameLine()
+			imgui.SetCursorPosY(cposY + 7)
+			imgui.SetCursorPosX((dsize.x / 4.3 - dsize.x / 8) * (1920 / dsize.x))
+			local swatchColor = T{plateBGRGB[1], plateBGRGB[2], plateBGRGB[3], 1.0}
+			if imgui.ColorButton('##plateBGSwatch', swatchColor,
+				ImGuiColorEditFlags_NoAlpha, {dsize.x / 7.5, 20}) then
+				imgui.OpenPopup('##plateBGColorPopup')
+			end
+			if imgui.BeginPopup('##plateBGColorPopup') then
+				if imgui.ColorPicker3('##plateBGColorPickerWidget', plateBGRGB,
+					bit.bor(ImGuiColorEditFlags_NoLabel,
+					        ImGuiColorEditFlags_NoAlpha)) then
+					plateBGchanged = true
+				end
+				imgui.Separator()
+				if imgui.Button('Confirm##plateBGColorConfirm', {-1, 0}) then
+					imgui.CloseCurrentPopup()
+				end
+				imgui.EndPopup()
+			end
+
+			if plateBGchanged then
+				set.PlateBGColor = bit.bor(
+					bit.lshift(bit.tobit(plateBGAlpha[1] * 255), 24),
+					bit.lshift(bit.tobit(plateBGRGB[1]   * 255), 16),
+					bit.lshift(bit.tobit(plateBGRGB[2]   * 255),  8),
+					bit.tobit(plateBGRGB[3] * 255))
 			end
 
 			local chatlines = T{set.ChatLines}
@@ -134,17 +187,68 @@ function M.draw_settings_panel()
 			AddTooltip('Depending on the server settings, this might not catch all NPC messages or catch some /say messages.', 4) imgui.SameLine() imgui.SetCursorPosY(cposY)
 			if imgui.Checkbox('Tell', {set.CustomTabModes[4]}) then set.CustomTabModes[4] = not set.CustomTabModes[4] end imgui.SameLine()
 			if imgui.Checkbox('Party',{set.CustomTabModes[3]}) then set.CustomTabModes[3] = not set.CustomTabModes[3] end imgui.SameLine()
-			if imgui.Checkbox('LS',   {set.CustomTabModes[2]}) then set.CustomTabModes[2] = not set.CustomTabModes[2] end imgui.SameLine()
+			-- Linkshell row mirrors the tab itself: with split off the
+			-- user sees the single LS checkbox driving slot [2]; with
+			-- split on they see independent L1 / L2 checkboxes driving
+			-- slots [6] / [7].  The parser only consults the slot(s)
+			-- relevant to the active split state.
+			if set.SplitLinkshellTab[1] then
+				if imgui.Checkbox('L1',   {set.CustomTabModes[6]}) then set.CustomTabModes[6] = not set.CustomTabModes[6] end imgui.SameLine()
+				if imgui.Checkbox('L2',   {set.CustomTabModes[7]}) then set.CustomTabModes[7] = not set.CustomTabModes[7] end imgui.SameLine()
+			else
+				if imgui.Checkbox('LS',   {set.CustomTabModes[2]}) then set.CustomTabModes[2] = not set.CustomTabModes[2] end imgui.SameLine()
+			end
 			if imgui.Checkbox('Shout',{set.CustomTabModes[5]}) then set.CustomTabModes[5] = not set.CustomTabModes[5] end
+
+			imgui.Dummy({0, 10})
+			if imgui.Checkbox('Instant new line (skip scroll animation)##InstantChatScroll', {set.InstantChatScroll[1]}) then
+				set.InstantChatScroll[1] = not set.InstantChatScroll[1]
+			end
+			AddTooltip('When on, new chat lines appear immediately at the bottom instead of sliding up. Useful on busy combat logs or low-FPS setups. Applies on next addon restart.', 4)
+
+			imgui.Dummy({0, 5})
+			if imgui.Checkbox('Split Linkshell tab into L1 / L2##SplitLinkshellTab', {set.SplitLinkshellTab[1]}) then
+				set.SplitLinkshellTab[1] = not set.SplitLinkshellTab[1]
+				-- Migrate the Custom-tab LS membership across the
+				-- split / no-split transition so the checkboxes the
+				-- user is about to see reflect a sensible default:
+				--   OFF -> ON : LS=true expands into both L1+L2; LS
+				--               slot is cleared.
+				--   ON  -> OFF: both L1+L2 collapse into LS=true; if
+				--               only one (or neither) was on, LS
+				--               defaults to false per spec.  L1/L2
+				--               slots are cleared either way.
+				if set.SplitLinkshellTab[1] then
+					if set.CustomTabModes[2] then
+						set.CustomTabModes[6] = true
+						set.CustomTabModes[7] = true
+					else
+						set.CustomTabModes[6] = false
+						set.CustomTabModes[7] = false
+					end
+					set.CustomTabModes[2] = false
+				else
+					if set.CustomTabModes[6] and set.CustomTabModes[7] then
+						set.CustomTabModes[2] = true
+					else
+						set.CustomTabModes[2] = false
+					end
+					set.CustomTabModes[6] = false
+					set.CustomTabModes[7] = false
+				end
+			end
+			AddTooltip('When on, the Linkshell tab is replaced by two separate L1 / L2 tabs. LS1 traffic routes to L1, LS2 traffic routes to L2. Either tab can be independently selected on each chat window. Applies on next addon restart.', 4)
 
 			imgui.Dummy({0, 5})
 			if imgui.Button('Reset default values') then
-				set.ChatLineMaxL    = 100
-				set.PlateBGColor    = bit.lshift(bit.tobit(0.3 * 255), 24)
-				set.FontHeight      = 20
-				set.ChatLines       = 8
-				set.SecondChat[1]   = false
-				set.CustomTabModes  = T{false, false, false, false, false}
+				set.ChatLineMaxL         = 100
+				set.PlateBGColor         = bit.lshift(bit.tobit(0.3 * 255), 24)
+				set.FontHeight           = 20
+				set.ChatLines            = 8
+				set.SecondChat[1]        = false
+				set.InstantChatScroll[1] = false
+				set.SplitLinkshellTab[1] = false
+				set.CustomTabModes       = T{false, false, false, false, false, false, false}
 			end
 
 			imgui.Dummy({0, 5})
@@ -169,6 +273,8 @@ function M.draw_settings_panel()
 				allSettings.fontSettings.font_height = set.FontHeight
 				allSettings.rectSettings.fill_color  = set.PlateBGColor
 				allSettings.chatLineMaxL             = set.ChatLineMaxL
+				allSettings.InstantChatScroll[1]     = set.InstantChatScroll[1]
+				allSettings.SplitLinkshellTab[1]     = set.SplitLinkshellTab[1]
 				for ct = 1, #set.CustomTabModes do
 					allSettings.CustomTabModes[ct] = set.CustomTabModes[ct]
 				end
@@ -242,6 +348,12 @@ function M.draw_settings_panel()
 				allSettings.LockWindowPos[1] = not allSettings.LockWindowPos[1]
 				SaveSettings()
 			end
+			imgui.Dummy({0, 5})
+			if imgui.Checkbox('Keep FancyChat visible while legacy chat is open##ShowWithLegacy', {allSettings.ShowWithLegacy[1]}) then
+				allSettings.ShowWithLegacy[1] = not allSettings.ShowWithLegacy[1]
+				SaveSettings()
+			end
+			AddTooltip('When off (default), FancyChat hides itself the moment you click on the legacy FFXI chat or open the chat input. When on, both windows stay visible side by side.', 4)
 			imgui.Dummy({0, 5})
 			if imgui.Checkbox('Show help (i) hover button on the first chat window##HelpButton', {allSettings.HelpButton[1]}) then
 				allSettings.HelpButton[1] = not allSettings.HelpButton[1]
@@ -333,7 +445,7 @@ function M.draw_settings_panel()
 				local lb = colorDesc[b] and colorDesc[b][1] or b
 				return la < lb
 			end)
-			local skip = {'combat', 'combatspell', 'cexi'}
+			local skip = {'combat', 'combatspell'}
 			set.colorTextW = 0
 			for _, key in ipairs(keys) do
 				if not utils.FindInStringTable(key, skip, 0) then
@@ -415,6 +527,7 @@ function M.draw_settings_panel()
 						SaveSettings()
 					end
 				end
+				imgui.EndCombo()
 			end
 			imgui.SameLine()
 			if imgui.BeginCombo('##HideShortcutCombo', letter, ImGuiComboFlags_None) then
@@ -631,9 +744,7 @@ function M.draw_settings_panel()
 				imgui.SameLine(GP_TOOLTIP_X)
 				imguiWrap.Image(fcw[1].TextureIDInfo, {15, 15})
 				if imgui.IsItemHovered(0) then
-					imgui.BeginTooltip()
 					imgui.SetTooltip(utils.breakLine(message, 40))
-					imgui.EndTooltip()
 				end
 			end
 
@@ -789,28 +900,93 @@ function M.draw_settings_panel()
 				end
 				SaveSettings()
 			end
-			imgui.Dummy({0, 5})
+			-- Filter mode selector.  Text-based = the three legacy
+			-- boolean toggles that use name-matching in the parser;
+			-- Packet-based = the 0x0028-driven hierarchy that's
+			-- mutually exclusive with the text-based system.  Picking
+			-- one hides the other's controls below.
+			imgui.Dummy({0, 8})
 			imgui.Dummy({5, 0}) imgui.SameLine()
-			if imgui.Checkbox('Hide alliance combat log', {allSettings.hideAlliance[1]}) then
-				allSettings.hideAlliance[1] = not allSettings.hideAlliance[1]
-				if not allSettings.hideAlliance[1] then allSettings.hideNonYou[1] = false end
+			-- Align the label with the radio circles by using the same
+			-- frame padding ImGui applies to the radio widgets.
+			imgui.AlignTextToFramePadding()
+			imgui.Text('Filter mode:')
+			imgui.SameLine()
+			if imgui.RadioButton('Text-based', not allSettings.PacketFilterEnabled2[1]) then
+				allSettings.PacketFilterEnabled2[1] = false
 				SaveSettings()
 			end
-			imgui.Dummy({0, 5})
-			imgui.Dummy({5, 0}) imgui.SameLine()
-			if imgui.Checkbox('Hide non-party combat log', {allSettings.hideNonParty[1]}) then
-				allSettings.hideNonParty[1] = not allSettings.hideNonParty[1]
-				if not allSettings.hideNonParty[1] then allSettings.hideNonYou[1] = false end
+			imgui.SameLine()
+			local cposY = imgui.GetCursorPosY()
+			AddTooltip('Text-based filtering matches by actor name only. Messages from a filtered entity can slip through when another visible entity nearby shares the same name (most common with trusts, pets, and adventuring fellows that multiple players summon). If this happens often, switch to Packet-based mode. It filters by server entity ID, so name collisions never confuse it.', 4, true)
+			imgui.SameLine() imgui.SetCursorPosY(cposY)
+			if imgui.RadioButton('Packet-based', allSettings.PacketFilterEnabled2[1]) then
+				allSettings.PacketFilterEnabled2[1] = true
 				SaveSettings()
 			end
-			imgui.Dummy({15, 0}) imgui.SameLine() imgui.Text('L')
-			imgui.SetCursorPosY(imgui.GetCursorPosY() - 20)
-			imgui.Dummy({27, 0}) imgui.SameLine()
-			if imgui.Checkbox('Only show you and your pet logs.', {allSettings.hideNonYou[1]}) then
-				allSettings.hideNonYou[1] = not allSettings.hideNonYou[1]
-				if allSettings.hideNonYou[1] then allSettings.hideNonParty[1] = true end
-				if allSettings.hideNonYou[1] then allSettings.hideAlliance[1] = true end
-				SaveSettings()
+
+			if not allSettings.PacketFilterEnabled2[1] then
+				-- Text-based system: the original three checkboxes.
+				imgui.Dummy({0, 5})
+				imgui.Dummy({5, 0}) imgui.SameLine()
+				if imgui.Checkbox('Hide alliance combat log', {allSettings.hideAlliance[1]}) then
+					allSettings.hideAlliance[1] = not allSettings.hideAlliance[1]
+					if not allSettings.hideAlliance[1] then allSettings.hideNonYou[1] = false end
+					SaveSettings()
+				end
+				imgui.Dummy({0, 5})
+				imgui.Dummy({5, 0}) imgui.SameLine()
+				if imgui.Checkbox('Hide non-party combat log', {allSettings.hideNonParty[1]}) then
+					allSettings.hideNonParty[1] = not allSettings.hideNonParty[1]
+					if not allSettings.hideNonParty[1] then allSettings.hideNonYou[1] = false end
+					SaveSettings()
+				end
+				imgui.Dummy({15, 0}) imgui.SameLine() imgui.Text('L')
+				imgui.SetCursorPosY(imgui.GetCursorPosY() - 20)
+				imgui.Dummy({27, 0}) imgui.SameLine()
+				if imgui.Checkbox('Only show you and your pet logs.', {allSettings.hideNonYou[1]}) then
+					allSettings.hideNonYou[1] = not allSettings.hideNonYou[1]
+					if allSettings.hideNonYou[1] then allSettings.hideNonParty[1] = true end
+					if allSettings.hideNonYou[1] then allSettings.hideAlliance[1] = true end
+					SaveSettings()
+				end
+			else
+				-- Packet-based system: a 5-way hierarchy radio.  Each
+				-- level subsumes everything stricter (level 1 shows
+				-- all, level 5 shows only the player).  TARGET (the
+				-- mob you / party are engaged with) is always shown.
+				imgui.Dummy({0, 5})
+				imgui.Dummy({5, 0}) imgui.SameLine()
+				imgui.Text('Show combat from:')
+				AddTooltip('The mob you or any of your party members are engaged with is always shown, regardless of which option you pick below.', 0, 1)
+				imgui.Dummy({0, 3})
+				local levels = {
+					{1, 'Everyone (Others + Alliance + Party + You + Pet)'},
+					{2, 'Alliance + Party + You + Pet'},
+					{3, 'Party + You + Pet'},
+					{4, 'You + Pet'},
+					{5, 'You only'},
+				}
+				for _, lv in ipairs(levels) do
+					imgui.Dummy({15, 0}) imgui.SameLine()
+					if imgui.RadioButton(lv[2]..'##PacketFilterLevel'..tostring(lv[1]),
+						allSettings.PacketFilterLevel == lv[1]) then
+						allSettings.PacketFilterLevel = lv[1]
+						SaveSettings()
+					end
+				end
+
+				-- Restrict the always-shown TARGET scope to packets
+				-- where the player is among the targets.  Useful in
+				-- "only show what's happening to me" play.
+				imgui.Dummy({0, 5})
+				imgui.Dummy({15, 0}) imgui.SameLine()
+				if imgui.Checkbox('Only show TARGET actions that involve me##PacketFilterTargetMeOnly',
+					{allSettings.PacketFilterTargetMeOnly[1]}) then
+					allSettings.PacketFilterTargetMeOnly[1] = not allSettings.PacketFilterTargetMeOnly[1]
+					SaveSettings()
+				end
+				AddTooltip('When checked, the engaged mob\'s actions only show if you are one of its targets. Hits / abilities aimed only at party members get hidden.', 4)
 			end
 
 			imgui.Dummy({0, 5})
@@ -846,6 +1022,12 @@ function M.draw_settings_panel()
 				imgui.EndCombo()
 			end
 			imgui.PopItemWidth()
+			imgui.SameLine()
+			if imgui.Checkbox('12-hour clock', {allSettings.TimeStamp12h[1]}) then
+				allSettings.TimeStamp12h[1] = not allSettings.TimeStamp12h[1]
+				SaveSettings()
+			end
+			AddTooltip('Hours above 12 get reduced by 12 (e.g. 14:30 becomes 2:30). AM/PM is not shown.', 4)
 			imgui.Dummy({0, 5})
 			imgui.Dummy({5, 0}) imgui.SameLine()
 			if imgui.Checkbox('Timestamp as a line', {allSettings.timeStampLine[1]}) then
@@ -1051,162 +1233,185 @@ function M.draw_settings_panel()
 		end
 
 		----------------------------------------------------------------
-		-- Tab: CL Filters
+		-- Tab: Filters  (contains two sub-tabs: Combat / Other)
 		----------------------------------------------------------------
 		if imgui.BeginTabItem('Filters', nil) then
 			imguiWrap.BeginChild('##Filters Child',
 				{(setsizex * 3.8 / 3.9) - (12 * (1 - (setsizex * 3.8 / 1920))) - 3, setsizey * 2.7 / 2.8 - 60}, true)
-			imgui.PushTextWrapPos(imgui.GetWindowWidth() * 0.96)
-			imgui.TextWrapped('You can filter combat messages by adding words to a filter file in the combatfilters folder. Each filter file is a plain-text list of words that would appear in unwanted messages.\n(e.g. effect wears off)\n\n> Words must be present in the original game combat message\n  (i.e. not words modified by addons)\n> Word matching is non case sensitive\n> More details in each filter file\n\n!!! Very long lists could cause performance issues !!!')
-			imgui.Dummy({0, 5})
 
-			-- Detection point: every frame the tab is open.  Cheap
-			-- io.open + close; on the exists -> missing transition it
-			-- fires the one-shot /echo and forces the master toggle off.
-			-- Idempotent on subsequent frames in the missing state.
-			CheckActiveCombatFilter()
-
-			-- Combat-filter file picker.  Lists every .txt under
-			-- combatfilters/ and lets the user pick one as the active
-			-- filter set; selection is persisted in
-			-- allSettings.SelectedCombatFilter and reloaded on addon
-			-- start (see lib/lifecycle.lua).  The list itself is cached
-			-- in `cachedCombatFilterFiles` to avoid running the dir
-			-- scan every frame — the Refresh button re-scans on demand.
-			if cachedCombatFilterFiles == nil then
-				cachedCombatFilterFiles = utils.ListCombatFilters()
-			end
-			local filterFiles = cachedCombatFilterFiles
-			imgui.Text('Active filter file:')
-			imgui.SameLine()
-			-- Constrain the combo to ~40% of the panel width so the
-			-- Refresh button (and its tooltip target) stays visible
-			-- inside the CL Filters child region.  SetNextItemWidth
-			-- only affects the immediately-following BeginCombo call.
-			imgui.SetNextItemWidth(setsizex * 0.4)
-			-- Prefix the visible combo header with [missing] when the
-			-- backing file is gone so the user notices at a glance.
-			-- The underlying setting value is unchanged.
-			local comboLabel = allSettings.SelectedCombatFilter or ''
-			if set.filterFileMissing then
-				comboLabel = '[missing] '..comboLabel
-			end
-			if imgui.BeginCombo('##SelectedCombatFilter', comboLabel, ImGuiComboFlags_None) then
-				if #filterFiles == 0 then
-					imgui.TextDisabled('(no .txt files in combatfilters/)')
-				else
-					for fi = 1, #filterFiles do
-						if imgui.Selectable(filterFiles[fi], filterFiles[fi] == allSettings.SelectedCombatFilter) then
-							allSettings.SelectedCombatFilter = filterFiles[fi]
-							par.customFilters = utils.LoadCustomFilters(allSettings.SelectedCombatFilter)
-							SaveSettings()
-							-- Detection point: combo selection.  The
-							-- new filename comes from a (possibly stale)
-							-- cache - re-validate against disk so the
-							-- missing flag clears when the user picks
-							-- a real file, or stays true if they picked
-							-- a stale cache entry.
-							CheckActiveCombatFilter()
-						end
-					end
-				end
-				imgui.EndCombo()
-			end
-			-- Refresh BEFORE the tooltip icon — AddTooltip lowers the
-			-- cursor Y by `offset` to vertically centre its little
-			-- info icon against the previous widget, and that lowered
-			-- Y carries through to any following imgui.SameLine() calls,
-			-- pushing the button below the combo's baseline.  Drawing
-			-- the button first keeps it aligned with the combo.
-			imgui.SameLine()
-			if imgui.Button('Refresh##CombatFilterFiles') then
-				cachedCombatFilterFiles = utils.ListCombatFilters()
-				-- Detection point: Refresh click.  Rescanning the
-				-- folder is the user's explicit "tell me what's really
-				-- there" gesture - re-validate the active selection.
-				CheckActiveCombatFilter()
-			end
-			AddTooltip('Pick which file in the combatfilters folder to use as the active filter list.\n\nRefresh re-scans combatfilters/ for newly-added or renamed .txt files.', 4)
-			imgui.Dummy({0, 5})
-
-			-- Red warning banner when the active file is missing.
-			-- Rendered between the file-picker row and the action row
-			-- so the user reads "active file is missing" before they
-			-- consider clicking Edit / Reload.
-			if set.filterFileMissing then
-				imgui.TextColored({1.0, 0.3, 0.3, 1.0}, '[!] The active filter file no longer exists in the folder.')
-				imgui.TextColored({1.0, 0.3, 0.3, 1.0}, '    Click Refresh, then pick another from the dropdown.')
+			-- Draw the file-picker + master-toggle + active-filter table
+			-- for one filter kind.  Driven by the per-kind table below
+			-- so both Combat Filters and Other Filters use identical UI
+			-- with only the underlying setting keys + folder path swapped.
+			--
+			-- kind          : 'combat' / 'other' (passed to utils.* helpers)
+			-- masterKey     : key in allSettings holding the master toggle
+			-- selectedKey   : key in allSettings holding the active filename
+			-- missingKey    : key in `set` holding the file-missing flag
+			-- listKey       : key in `par` holding the parsed filter list
+			-- folderName    : on-disk subfolder name (for Open Folder button)
+			-- introBlurb    : top-of-tab descriptive paragraph
+			-- masterLabel   : label on the enable checkbox
+			-- tableHeader   : label above the result table
+			local function draw_filter_panel(opts)
+				imgui.PushTextWrapPos(imgui.GetWindowWidth() * 0.96)
+				imgui.TextWrapped(opts.introBlurb)
 				imgui.Dummy({0, 5})
-			end
 
-			if imgui.Button('Edit Selected Filter') then
-				local filepath = addon.path..'\\combatfilters\\'..allSettings.SelectedCombatFilter
-				os.execute('start "" "'..filepath..'"')
-			end
-			-- Hover-tooltip on Edit / Reload when the file is gone
-			-- explaining why pressing the button won't help.
-			if set.filterFileMissing and imgui.IsItemHovered() then
-				imgui.SetTooltip('Active filter file is missing - pick another from the dropdown above.')
-			end
-			imgui.SameLine()
-			if imgui.Button('Reload Selected Filter') then
-				par.customFilters = utils.LoadCustomFilters(allSettings.SelectedCombatFilter)
-				-- Detection point: Reload click.  Same logic as Refresh
-				-- - the user may have re-created or restored the file
-				-- between deletion and this click.
-				CheckActiveCombatFilter()
-			end
-			if set.filterFileMissing and imgui.IsItemHovered() then
-				imgui.SetTooltip('Active filter file is missing - pick another from the dropdown above.')
-			end
-			imgui.SameLine()
-			if imgui.Button('Open Folder') then
-				os.execute('start "" "'..addon.path..'\\combatfilters\\"')
-			end
-			AddTooltip('Open the combatfilters/ folder in Explorer to add or rename filter files.', 4)
-			imgui.Separator()
-			imgui.Dummy({0, 5})
-			if imgui.Checkbox('Enable Combat Log chat filters', {allSettings.CustomFilters[1]}) then
-				allSettings.CustomFilters[1] = not allSettings.CustomFilters[1]
-				SaveSettings()
-				-- Detection point: master-toggle ON.  If the user
-				-- re-enables filtering while the active file is still
-				-- missing, the check will immediately flip the toggle
-				-- back off and reprint the /echo - blocks them from
-				-- silently re-arming the broken state.
-				if allSettings.CustomFilters[1] then
-					CheckActiveCombatFilter()
+				-- Detection point: every frame the sub-tab is open.
+				CheckActiveFilter(opts.kind)
+
+				-- File picker.  The list itself is cached in
+				-- cachedFilterFiles[kind] to avoid running the dir
+				-- scan every frame -- Refresh re-scans on demand.
+				if cachedFilterFiles[opts.kind] == nil then
+					cachedFilterFiles[opts.kind] = utils.ListFilters(opts.kind)
 				end
-			end
-			imgui.Dummy({0, 5})
+				local filterFiles = cachedFilterFiles[opts.kind]
+				local missing     = set[opts.missingKey]
 
-			if allSettings.CustomFilters[1] then
-				imgui.Text('Current Combat Log Filters:')
-				if imgui.BeginTable('resultTable', 2,
-					bit.bor(ImGuiTableFlags_RowBg, ImGuiTableFlags_BordersH, ImGuiTableFlags_BordersV, ImGuiTableFlags_ContextMenuInBody)) then
-					imgui.TableSetupColumn('Filter',     ImGuiTableColumnFlags_WidthFixed,   imgui.GetWindowWidth() * 0.7, 0)
-					imgui.TableSetupColumn('Applied to', ImGuiTableColumnFlags_WidthStretch, 0, 0)
-					imgui.TableHeadersRow()
-					for cf = 1, #par.customFilters do
-						imgui.TableNextRow()
-						imgui.TableSetColumnIndex(0)
-						imgui.PushTextWrapPos(imgui.GetWindowWidth() * 0.7)
-						imgui.TextWrapped(par.customFilters[cf][1]:replace('%', '%%'))
-						imgui.PopTextWrapPos()
-						imgui.TableSetColumnIndex(1)
-						local cf_scope = ''
-						if par.customFilters[cf][2] then
-							if     par.customFilters[cf][2] == '_z' then cf_scope = cf_scope + 'All'
-							elseif par.customFilters[cf][2] == '_y' then cf_scope = cf_scope + 'All but you'
-							elseif par.customFilters[cf][2] == '_p' then cf_scope = cf_scope + 'All but party' end
+				imgui.Text('Active filter file:')
+				imgui.SameLine()
+				imgui.SetNextItemWidth(setsizex * 0.4)
+				local comboLabel = allSettings[opts.selectedKey] or ''
+				if missing then
+					comboLabel = '[missing] '..comboLabel
+				end
+				if imgui.BeginCombo('##SelectedFilter_'..opts.kind, comboLabel, ImGuiComboFlags_None) then
+					if #filterFiles == 0 then
+						imgui.TextDisabled('(no .txt files in filters/'..opts.kind..'/)')
+					else
+						for fi = 1, #filterFiles do
+							if imgui.Selectable(filterFiles[fi], filterFiles[fi] == allSettings[opts.selectedKey]) then
+								allSettings[opts.selectedKey] = filterFiles[fi]
+								par[opts.listKey] = utils.LoadFilters(opts.kind, allSettings[opts.selectedKey])
+								SaveSettings()
+								CheckActiveFilter(opts.kind)
+							end
 						end
-						imgui.PushTextWrapPos(imgui.GetWindowWidth() * 0.9)
-						imgui.TextWrapped(cf_scope)
-						imgui.PopTextWrapPos()
 					end
-					imgui.PopTextWrapPos()
-					imgui.EndTable()
+					imgui.EndCombo()
 				end
+				imgui.SameLine()
+				if imgui.Button('Refresh##FilterFiles_'..opts.kind) then
+					cachedFilterFiles[opts.kind] = utils.ListFilters(opts.kind)
+					CheckActiveFilter(opts.kind)
+				end
+				AddTooltip('Pick which file in filters/'..opts.kind..'/ to use as the active filter list.\n\nRefresh re-scans the folder for newly-added or renamed .txt files.', 4)
+				imgui.Dummy({0, 5})
+
+				if missing then
+					imgui.TextColored({1.0, 0.3, 0.3, 1.0}, '[!] The active filter file no longer exists in the folder.')
+					imgui.TextColored({1.0, 0.3, 0.3, 1.0}, '    Click Refresh, then pick another from the dropdown.')
+					imgui.Dummy({0, 5})
+				end
+
+				if imgui.Button('Edit Selected Filter##'..opts.kind) then
+					local filepath = addon.path..'\\filters\\'..opts.kind..'\\'..allSettings[opts.selectedKey]
+					os.execute('start "" "'..filepath..'"')
+				end
+				if missing and imgui.IsItemHovered() then
+					imgui.SetTooltip('Active filter file is missing - pick another from the dropdown above.')
+				end
+				imgui.SameLine()
+				if imgui.Button('Reload Selected Filter##'..opts.kind) then
+					par[opts.listKey] = utils.LoadFilters(opts.kind, allSettings[opts.selectedKey])
+					CheckActiveFilter(opts.kind)
+				end
+				if missing and imgui.IsItemHovered() then
+					imgui.SetTooltip('Active filter file is missing - pick another from the dropdown above.')
+				end
+				imgui.SameLine()
+				if imgui.Button('Open Folder##'..opts.kind) then
+					os.execute('start "" "'..addon.path..'\\filters\\'..opts.kind..'\\"')
+				end
+				AddTooltip('Open the filters/'..opts.kind..'/ folder in Explorer to add or rename filter files.', 4)
+				imgui.Separator()
+				imgui.Dummy({0, 5})
+
+				if imgui.Checkbox(opts.masterLabel..'##master_'..opts.kind, {allSettings[opts.masterKey][1]}) then
+					allSettings[opts.masterKey][1] = not allSettings[opts.masterKey][1]
+					SaveSettings()
+					if allSettings[opts.masterKey][1] then
+						CheckActiveFilter(opts.kind)
+					end
+				end
+				imgui.Dummy({0, 5})
+
+				if allSettings[opts.masterKey][1] then
+					imgui.Text(opts.tableHeader)
+					-- Scope ('Applied to') only exists for combat
+					-- filters - for the 'other' kind every line is
+					-- always treated as scope = '_z' (all), so we drop
+					-- the column entirely to avoid a useless "All"
+					-- repeated down the table.
+					local hasScope = opts.kind == 'combat'
+					local nCols    = hasScope and 2 or 1
+					if imgui.BeginTable('resultTable_'..opts.kind, nCols,
+						bit.bor(ImGuiTableFlags_RowBg, ImGuiTableFlags_BordersH, ImGuiTableFlags_BordersV, ImGuiTableFlags_ContextMenuInBody)) then
+						if hasScope then
+							imgui.TableSetupColumn('Filter',     ImGuiTableColumnFlags_WidthFixed,   imgui.GetWindowWidth() * 0.7, 0)
+							imgui.TableSetupColumn('Applied to', ImGuiTableColumnFlags_WidthStretch, 0, 0)
+						else
+							imgui.TableSetupColumn('Filter', ImGuiTableColumnFlags_WidthStretch, 0, 0)
+						end
+						imgui.TableHeadersRow()
+						local list = par[opts.listKey]
+						for cf = 1, #list do
+							imgui.TableNextRow()
+							imgui.TableSetColumnIndex(0)
+							imgui.PushTextWrapPos(imgui.GetWindowWidth() * (hasScope and 0.7 or 0.95))
+							imgui.TextWrapped(list[cf][1]:replace('%', '%%'))
+							imgui.PopTextWrapPos()
+							if hasScope then
+								imgui.TableSetColumnIndex(1)
+								local cf_scope = ''
+								if list[cf][2] then
+									if     list[cf][2] == '_z' then cf_scope = cf_scope + 'All'
+									elseif list[cf][2] == '_y' then cf_scope = cf_scope + 'All but you'
+									elseif list[cf][2] == '_p' then cf_scope = cf_scope + 'All but party' end
+								end
+								imgui.PushTextWrapPos(imgui.GetWindowWidth() * 0.9)
+								imgui.TextWrapped(cf_scope)
+								imgui.PopTextWrapPos()
+							end
+						end
+						imgui.PopTextWrapPos()
+						imgui.EndTable()
+					end
+				end
+			end
+
+			if imgui.BeginTabBar('##FiltersInnerTabs', ImGuiTabBarFlags_NoCloseWithMiddleMouseButton) then
+				if imgui.BeginTabItem('Combat Filters', nil) then
+					draw_filter_panel({
+						kind        = 'combat',
+						masterKey   = 'CustomFilters',
+						selectedKey = 'SelectedCombatFilter',
+						missingKey  = 'filterFileMissing',
+						listKey     = 'customFilters',
+						introBlurb  = 'You can filter combat messages by adding words to a filter file in the filters/combat folder. Each filter file is a plain-text list of words that would appear in unwanted messages.\n(e.g. effect wears off)\n\n> Words must be present in the original game combat message\n  (i.e. not words modified by addons)\n> Word matching is non case sensitive\n> More details in each filter file\n\n!!! Very long lists could cause performance issues !!!',
+						masterLabel = 'Enable Combat Log chat filters',
+						tableHeader = 'Current Combat Log Filters:',
+					})
+					imgui.EndTabItem()
+				end
+
+				if imgui.BeginTabItem('Other Filters', nil) then
+					draw_filter_panel({
+						kind        = 'other',
+						masterKey   = 'OtherFilters',
+						selectedKey = 'SelectedOtherFilter',
+						missingKey  = 'otherFilterFileMissing',
+						listKey     = 'otherFilters',
+						introBlurb  = 'You can filter non-combat chat messages (NPC dialog, system, tells, shouts, ...) by adding words to a filter file in the filters/other folder. Each filter file is a plain-text list of words that would appear in unwanted messages.\n\n> Words must be present in the original game message\n  (i.e. not words modified by addons)\n> Word matching is non case sensitive\n> More details in each filter file\n\n!!! Very long lists could cause performance issues !!!',
+						masterLabel = 'Enable Other chat filters',
+						tableHeader = 'Current Other Filters:',
+					})
+					imgui.EndTabItem()
+				end
+
+				imgui.EndTabBar()
 			end
 
 			imgui.EndChild()
@@ -1551,7 +1756,7 @@ function M.draw_settings_panel()
 			imgui.PopItemWidth()
 			imgui.Spacing()
 			if imgui.Button('Save##fc_export_save', {80, 0}) then
-				local skipKeys = {'combat', 'combatspell', 'cexi'}
+				local skipKeys = {'combat', 'combatspell'}
 				local payload  = {}
 				for k, v in pairs(allSettings.colors) do
 					if not utils.FindInStringTable(k, skipKeys, 0) then

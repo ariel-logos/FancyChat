@@ -10,10 +10,90 @@ local gdi         = require('gdifonts.include')
 local utils       = require('utils')
 local settings    = require('settings')
 local help        = require('help')
-local state       = require('lib.state')
-local ui_panels   = require('lib.ui_panels')
-local ui_settings = require('lib.ui_settings')
-local ffi         = require('ffi')
+local state          = require('lib.state')
+local ui_panels      = require('lib.ui_panels')
+local ui_settings    = require('lib.ui_settings')
+local combat_packets = require('lib.combat_packets')
+local ffi            = require('ffi')
+
+-- UDP loopback broadcast of the chat anchor for the Compass addon.
+-- Lazy-created on first send so failure (no socket lib) doesn't break
+-- fancychat. Compass listens on the SAME per-PID port we derive here
+-- (49152..65535 range) so multiple game instances on one machine
+-- can't collide on the bind or cross-contaminate each other's data.
+local _compass_udp = nil
+local _compass_port
+-- Last broadcast values; seeded with sentinels so the first real call
+-- always differs and triggers a send.  Replaces the previous
+-- every-frame send pattern (60 syscalls/sec at idle), which burned
+-- CPU for no reason and triggered WSAECONNRESET storms on Windows
+-- for players who didn't have Compass running (sendto to an unbound
+-- 127.0.0.1 port causes ICMP unreachable to bounce back and Windows
+-- marks the socket errored).
+local _last_anchor = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1}
+-- 1 Hz heartbeat so FancyCompass's 2-second stale-data timeout
+-- (lib/chat_anchor.lua) doesn't flip to "FC Offline" during idle
+-- periods.  Skip-if-unchanged combined with a heartbeat gives us
+-- 60 Hz tracking during movement + 1 Hz idle keepalive.
+local _last_send_at = 0
+local function _compass_pid_to_port()
+    pcall(ffi.cdef, 'unsigned long GetCurrentProcessId();')
+    local pid = tonumber(ffi.C.GetCurrentProcessId())
+    local x = bit.bxor(bit.rshift(pid, 16), pid)
+    x = bit.band(x * 0x85ebca6b, 0xFFFFFFFF)
+    x = bit.bxor(bit.rshift(x, 13), x)
+    x = bit.band(x * 0xc2b2ae35, 0xFFFFFFFF)
+    x = bit.bxor(bit.rshift(x, 16), x)
+    return 49152 + bit.band(x, 0x3FFF)
+end
+local function _broadcast_chat_anchor(
+    w1x, w1y, w1w, w1h, w1v, w1e,
+    w2x, w2y, w2w, w2h, w2v, w2e)
+    -- Normalize nil-able args to 0/1 BEFORE the comparison so a
+    -- nil-to-default transition isn't seen as a "change."
+    w1v = w1v or 1; w1e = w1e or 0
+    w2x = w2x or 0; w2y = w2y or 0
+    w2w = w2w or 0; w2h = w2h or 0
+    w2v = w2v or 0; w2e = w2e or 0
+    -- Skip if nothing changed since the last send AND the heartbeat
+    -- interval hasn't elapsed.  Cost when both gates skip: 12 scalar
+    -- compares + 1 time read, no syscall, no string alloc.  Idle chat
+    -- with no Compass running = ~1 send/sec (the heartbeat).  Idle
+    -- chat WITH Compass running = ~1 send/sec, just enough to keep
+    -- Compass's 2-second stale-data check happy.  Any chat movement
+    -- (drag, menu shift, fade, item-preview height change, guide /
+    -- notepad open) flips at least one value and triggers a send that
+    -- same frame, so Compass tracks smoothly.
+    local L   = _last_anchor
+    local now = os.clock()
+    if L[1]==w1x  and L[2]==w1y  and L[3]==w1w  and L[4]==w1h
+        and L[5]==w1v  and L[6]==w1e
+        and L[7]==w2x  and L[8]==w2y  and L[9]==w2w
+        and L[10]==w2h and L[11]==w2v and L[12]==w2e
+        and (now - _last_send_at) < 1.0 then
+        return
+    end
+    L[1],L[2],L[3],L[4],L[5],L[6]    = w1x,w1y,w1w,w1h,w1v,w1e
+    L[7],L[8],L[9],L[10],L[11],L[12] = w2x,w2y,w2w,w2h,w2v,w2e
+    _last_send_at = now
+    -- pcall protects the render loop from any obscure socket error
+    -- (WSAECONNRESET, EHOSTUNREACH, etc.) propagating up.
+    pcall(function()
+        if _compass_udp == nil then
+            local ok, sock = pcall(require, 'socket')
+            if not ok then _compass_udp = false; return end
+            _compass_udp  = sock.udp()
+            _compass_port = _compass_pid_to_port()
+        end
+        if _compass_udp then
+            _compass_udp:sendto(
+                ('%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d'):format(
+                    w1x, w1y, w1w, w1h, w1v, w1e,
+                    w2x, w2y, w2w, w2h, w2v, w2e),
+                '127.0.0.1', _compass_port)
+        end
+    end)
+end
 
 local uiw            = state.uiw
 local mvc            = state.mvc
@@ -71,10 +151,31 @@ _G.ResetAutoHideTimer = M.ResetAutoHideTimer
 
 function M.register()
 	ashita.events.register('d3d_present', 'present_cb', function ()
+		-- Refresh the combat-filter snapshot here, on the render
+		-- thread, so combat_packets.dispatch() in the packet_in
+		-- callback can classify actors without making any native
+		-- entity/party/target calls.  See lib/combat_packets.lua
+		-- M.refresh_snapshot for the rationale.  pcall'd because
+		-- the underlying AshitaCore accessors can still fail
+		-- during zone transitions / login states; a failed refresh
+		-- leaves the previous frame's snapshot in place, which is
+		-- the right fallback.
+		--
+		-- Gated on PacketFilterEnabled2: in text-based filter mode
+		-- the snapshot is never consumed, so we don't even bother
+		-- refreshing it.  When the user toggles back to packet mode
+		-- the next frame's refresh repopulates it before the first
+		-- packet that needs classifying lands.
+		if allSettings.PacketFilterEnabled2[1] then
+			pcall(combat_packets.refresh_snapshot)
+		end
 		-- Per-frame caches (avoids repeated lookups).
 		local fcw1, fcw2, fcw3 = fcw[1], fcw[2], fcw[3]
 		local _fh  = allSettings.fontSettings.font_height
 		local _now = os.clock()
+		-- Reset per-frame flag for the compass anchor broadcast.
+		-- DrawInfo() sets this back to true if it renders item previews.
+		fcw1.itemPreviewActive = false
 
 		-- Hover state for the top-left help (?) button on window 1.
 		-- Reset each frame; populated only when the BG window is drawn
@@ -145,7 +246,9 @@ function M.register()
 							-- stringWrap = stringWrap..'\x81\xAC'
 						-- AshitaCore:GetChatManager():QueueCommand(1, '/echo '..stringWrap..os.date(par.FormatTS[2], os.time())..stringWrap);
 						local tsline = string.rep('\x81\xAC',math_floor((allSettings.chatLineMaxL)/2) - 5)
-						print(tsline..os.date(par.FormatTS[2], os.time())..tsline);
+						local ts_str = os.date(par.FormatTS[2], os.time())
+						if allSettings.TimeStamp12h[1] then ts_str = utils.fmt_ts_12h(ts_str) end
+						print(tsline..ts_str..tsline);
 						par.timePrinted = true;
 					end
 				else
@@ -155,13 +258,30 @@ function M.register()
 				par.timePrinted = true
 			end
 		
-			if allSettings.R0warning[1] and uiw.NetStatObj[1] > 0 and ashita.memory.read_uint32(uiw.NetStatObj[1]) == 0 and uiw.NetStatObj[2] > 0 then	
-				AshitaCore:GetChatManager():AddChatMessage(123, false, '[Warning] R0 detected.')
-				AshitaCore:GetChatManager():AddChatMessage(123, false, 'Use /fchat savelogs to save chat logs.')
-				--CEXI extra message
-				AshitaCore:GetChatManager():AddChatMessage(123, false, 'If this is a server crash and you used a pop item, take a FULL screenshot as proof.')
+			if allSettings.R0warning[1] and uiw.NetStatObj[1] > 0 then
+				local netstat_now = ashita.memory.read_uint32(uiw.NetStatObj[1])
+				-- Connected -> R0 transition: latch the timestamp so the
+				-- warning below can check how long the drop has lasted.
+				if netstat_now == 0 and uiw.NetStatObj[2] > 0 then
+					par.R0ZeroSince = os.clock()
+					par.R0WarnFired = false
+				-- Connection restored: clear state so a future drop starts
+				-- a fresh timer and can fire the warning again.
+				elseif netstat_now > 0 then
+					par.R0ZeroSince = nil
+					par.R0WarnFired = false
+				end
+				-- Fire the warning ONCE per R0 event, only when the drop
+				-- has persisted for more than 5 seconds.  Short single-
+				-- frame netstat dips resolve without spamming the chat.
+				if par.R0ZeroSince and not par.R0WarnFired
+					and (os.clock() - par.R0ZeroSince) > 5 then
+					AshitaCore:GetChatManager():AddChatMessage(123, false, '[Warning] R0 detected.')
+					AshitaCore:GetChatManager():AddChatMessage(123, false, 'Use /fchat savelogs to save chat logs.')
+					par.R0WarnFired = true
+				end
 			end
-		
+
 			uiw.NetStatObj[2] = ashita.memory.read_uint32(uiw.NetStatObj[1])
 	
 			fcw1.PlayerName = settings.name;
@@ -189,14 +309,18 @@ function M.register()
 			uiw.LastMemValue = uiw.MemValue;
 		
 		
-			if (not fcw1.HideChat) then
-			
+			-- Per-frame poke that pins the legacy chat closed.  Skipped
+			-- when the user has "Show with legacy chat" enabled so the
+			-- legacy window can animate open / closed on its own timer
+			-- alongside FancyChat.
+			if (not fcw1.HideChat and not allSettings.ShowWithLegacy[1]) then
+
 				local ptr = ashita.memory.read_uint32(uiw.WinPtr1);
 				if (ptr ~= 0) then
 					ashita.memory.unprotect(ptr + 0x34, 4);
 					ashita.memory.write_uint32(ptr + 0x34, 0x00);
 					uiw.Delay1 = ashita.memory.read_uint32(ptr + 0x34);
-				
+
 				end
 				ptr = ashita.memory.read_uint32(uiw.WinPtr2);
 				if (ptr ~= 0) then
@@ -212,28 +336,30 @@ function M.register()
 			if MenuID ~= 0 then
 				MenuName = ashita.memory.read_string(ashita.memory.read_uint32(MenuID + 4) + 0x46, 16);
 				MenuName = string.gsub(MenuName, '\x00', ''):trimex()
-			
+				
 				--uiw.MenuExt = ashita.memory.read_uint32(uiw.MenuPtr-0x40)
 				if allSettings.EnabledChatMove[1] and allSettings.MoveChatATMenu[1] and (MenuName:match('menu[%s]+fep')) then mvc.Menu6 = true; else mvc.Menu6 = false; end
 				if not MenuName:match('menu[%s]+inline') and not mvc.Menu6 then
-					mvc.Menu1 = false;  mvc.Menu2 = false;  mvc.Menu3 = false;  mvc.Menu4 = false; mvc.Menu5 = false; mvc.Menu6 = false;
-					if (MenuName:match('menu[%s]+inventor')) or (MenuName:match('menu[%s]+loot')) or (MenuName:match('menu[%s]+comyn')) or (MenuName:match('menu[%s]+comment')) then mvc.Menu1 = true; 
-					elseif (MenuName:match('menu[%s]+magic')) or (MenuName:match('menu[%s]+ability'))  or (MenuName:match('menu[%s]+mount')) or (MenuName:match('menu[%s]+emote')) then mvc.Menu2 = true; 
-					elseif (MenuName:match('menu[%s]+magselec')) then mvc.Menu3 = true; 
+					mvc.Menu1 = false;  mvc.Menu2 = false;  mvc.Menu3 = false;  mvc.Menu4 = false; mvc.Menu5 = false; mvc.Menu6 = false; mvc.Menu7 = false;
+					if (MenuName:match('menu[%s]+inventor')) or (MenuName:match('menu[%s]+loot')) or (MenuName:match('menu[%s]+comyn')) or (MenuName:match('menu[%s]+comment')) then mvc.Menu1 = true;
+					elseif (MenuName:match('menu[%s]+magic')) or (MenuName:match('menu[%s]+ability'))  or (MenuName:match('menu[%s]+mount')) or (MenuName:match('menu[%s]+emote')) then mvc.Menu2 = true;
+					elseif (MenuName:match('menu[%s]+magselec')) then mvc.Menu3 = true;
 					elseif  (MenuName:match('menu[%s]+jobcselu')) then mvc.Menu4 = true;
-					elseif (MenuName:match('menu[%s]+mogdoor')) or (MenuName:match('menu[%s]+arealist')) or (MenuName:match('menu[%s]+maplist')) or MenuName:match('menu[%s]+gmtell')  or MenuName:match('menu[%s]+merityn') then mvc.Menu5 = true;
+					elseif (MenuName:match('menu[%s]+mogdoor')) or (MenuName:match('menu[%s]+chatctrl')) or (MenuName:match('menu[%s]+arealist')) or (MenuName:match('menu[%s]+maplist')) or MenuName:match('menu[%s]+gmtell')  or MenuName:match('menu[%s]+merityn') or (MenuName:match('menu[%s]+roomlist')) then mvc.Menu5 = true;
+					elseif (MenuName:match('menu[%s]+rmlo2')) or (MenuName:match('menu[%s]+shopbuy')) or (MenuName:match('menu[%s]+guildsho')) or (MenuName:match('menu[%s]+shopmain')) or (MenuName:match('menu[%s]+shopsell')) or (MenuName:match('menu[%s]+abiselec')) or (MenuName:match('menu[%s]+mogext')) or (MenuName:match('menu[%s]+myroom')) or (MenuName:match('menu[%s]+storage')) or (MenuName:match('menu[%s]+mogpost')) or (MenuName:match('menu[%s]+jobchang')) or (MenuName:match('menu[%s]+playermo')) then mvc.Menu7 = true;
 					end
 				--elseif mvc.Menu6 then
 					--mvc.Menu6 = false
 				end
 			
 			else
-				mvc.Menu1 = false;  mvc.Menu2 = false;  mvc.Menu3 = false;  mvc.Menu4 = false; mvc.Menu5 =false; mvc.Menu6 =false;
+				mvc.Menu1 = false;  mvc.Menu2 = false;  mvc.Menu3 = false;  mvc.Menu4 = false; mvc.Menu5 =false; mvc.Menu6 =false; mvc.Menu7 = false;
 				if imguiWrap.GetKeyDown(28) then ResetAutoHideTimer() end
 			end
 			if MenuName:find('auc1') and #uiw.MenuList > 0 and uiw.MenuList[#uiw.MenuList][1]=='menucomyn' then uiw.MenuList = {{'menuauc1',0}} end
 			--Debug(MenuName, 2, false);   -- debug_window disabled
-			if MenuID == 0 or MenuName:match('menu[%s]+menuwind') or MenuName:match('menu[%s]+playermo') then
+			
+			if MenuID == 0 or MenuName:match('menu[%s]+menuwind') then
 				mvc.Menu1 = false;
 				mvc.Menu2 = false;
 				uiw.MenuList = {}
@@ -241,8 +367,8 @@ function M.register()
 			
 				local MenuExt = ashita.memory.read_uint32(uiw.MenuPtr-0x3C)
 				local MenuLabel = {MenuName:gsub('[%s]+',''), MenuExt,''};
-				--Debug(MenuLabel[1]..'-'..MenuLabel[2], 2, false);   -- debug_window disabled
-		
+				--print(MenuLabel[1]..'-'..MenuLabel[2], 2, false);   -- debug_window disabled
+				dw.menuname = MenuLabel[1]..'-'..MenuLabel[2]
 				if MenuLabel[1]=='menuinventor' then
 					-- uiw.MenuDescPTR2 = ashita.memory.read_uint32(uiw.MenuDescPTR+0x54);
 					-- uiw.MenuDescPTR2 = ashita.memory.read_uint32(uiw.MenuDescPTR2+0x0C);
@@ -345,10 +471,10 @@ function M.register()
 			
 			end
 			uiw.LastMenu = MenuLabel;
-			local list = '';
-			for i = 1, #uiw.MenuList do
-				list = list..','..uiw.MenuList[i][1]..'-'..tostring(uiw.MenuList[i][2])..'-'..tostring(uiw.MenuList[i][3])
-			end
+			-- local list = '';
+			-- for i = 1, #uiw.MenuList do
+				-- list = list..','..uiw.MenuList[i][1]..'-'..tostring(uiw.MenuList[i][2])..'-'..tostring(uiw.MenuList[i][3])
+			-- end
 			--menu list
 				
 		
@@ -392,13 +518,13 @@ function M.register()
 		
 			local chat2moved = false;
 			if not fcw1.MoveChat or not allSettings.SecondChat[1] then
-				fcw1.MoveChat = (mvc.Menu1 or mvc.Menu2 or mvc.Menu3 or mvc.Menu4 or mvc.Menu5 or mvc.Menu6 or uiw.DialogShown) and allSettings.LockWindowPos[1] and allSettings.EnabledChatMove[1];
+				fcw1.MoveChat = (mvc.Menu1 or mvc.Menu2 or mvc.Menu3 or mvc.Menu4 or mvc.Menu5 or mvc.Menu6 or mvc.Menu7 or uiw.DialogShown) and allSettings.LockWindowPos[1] and allSettings.EnabledChatMove[1];
 			else
 				chat2moved = true;
 			end
 		
 		-- Settings FOs rendering flags --	
-			if (uiw.LegacyChatOpen or fcw1.HideChat) then
+			if ((uiw.LegacyChatOpen and not allSettings.ShowWithLegacy[1]) or fcw1.HideChat) then
 				fcw1.RenderFOs = false;
 			else
 				fcw1.RenderFOs = true;
@@ -417,20 +543,59 @@ function M.register()
 			end
 		
 		
-		
-		
-		
-
-		
-		
-		
 		-- Render All FancyChat windows --
 			local windowFlags = 0
 		
 		
 			if AshitaCore:GetChatManager():IsInputOpen() ~= 0x00 then ResetAutoHideTimer() end
+
+			-- Defensive self-heal: when Auto-Hide is currently OFF but
+			-- the fade state is dirty (autoHideFade > 0 or 10 sentinel,
+			-- fadeTime set), nothing else will ever clear it - the
+			-- auto-hide tick that owns the cleanup paths is gated on
+			-- AutoHideWindow[1] and won't run.  Worst case is the
+			-- 10-sentinel state, where d3d_endscene's `autoHideFade < 1`
+			-- guard skips the entire chat-render block, leaving the
+			-- chat permanently invisible.  This used to be reachable by
+			-- toggling Auto-Hide off while a fade was in flight; force
+			-- the restore here so the chat reappears the next frame.
+			if not allSettings.AutoHideWindow[1]
+				and (fcw1.autoHideFade ~= 0 or fcw1.autoHideFadeTime ~= 0) then
+				fcw1.autoHideFade     = 0
+				fcw1.autoHideFadeTime = 0
+				fcw1.autoHideTime     = os.time()
+				fcw1.lastFadeOpacity  = nil
+				fcw2.lastFadeOpacity  = nil
+				ro.RectBG[1]:set_fill_color(allSettings.rectSettings.fill_color)
+				if allSettings.SecondChat[1] then
+					ro.RectBG[2]:set_fill_color(allSettings.rectSettings.fill_color)
+				end
+				SetChatOpacity(1, 1)
+				if allSettings.SecondChat[1] then SetChatOpacity(1, 2) end
+			end
+
 			if allSettings.AutoHideWindow[1] and _now - fcw1.autoHideCheckCD > 0.02 then
 				fcw1.autoHideCheckCD = _now
+				-- DISABLED FOR NOW: alt-tab focus guard.  Was the
+				-- "while game window is not in focus, pin the idle
+				-- timer and force-cancel any in-progress fade" block.
+				-- Re-enable by restoring the `if not utils.IsGameFocused()
+				-- then ... elseif` chain.
+				--if not utils.IsGameFocused() then
+				--	fcw1.autoHideTime = os.time()
+				--	if fcw1.autoHideFade ~= 0 or fcw1.autoHideFadeTime ~= 0 then
+				--		fcw1.autoHideFade     = 0
+				--		fcw1.autoHideFadeTime = 0
+				--		fcw1.lastFadeOpacity  = nil
+				--		fcw2.lastFadeOpacity  = nil
+				--		ro.RectBG[1]:set_fill_color(allSettings.rectSettings.fill_color)
+				--		if allSettings.SecondChat[1] then
+				--			ro.RectBG[2]:set_fill_color(allSettings.rectSettings.fill_color)
+				--		end
+				--		SetChatOpacity(1, 1)
+				--		if allSettings.SecondChat[1] then SetChatOpacity(1, 2) end
+				--	end
+				--elseif (os.time() - fcw1.autoHideTime > allSettings.AutoHideTimeMax) then
 				if (os.time() - fcw1.autoHideTime > allSettings.AutoHideTimeMax) then
 					if fcw1.autoHideFadeTime == 0 then fcw1.autoHideFadeTime = _now end
 					fcw1.autoHideFade = (_now-fcw1.autoHideFadeTime)/0.35
@@ -441,13 +606,30 @@ function M.register()
 						fcw1.autoHideFade = 1
 					
 					else
-					
+
 						fcw1.autoHideFade = 1-((_now-fcw1.autoHideFadeTime)/0.1)
 						if fcw1.autoHideFade <= 0 then
 							fcw1.autoHideFade = 0
 							fcw1.autoHideFadeTime = 0
 							fcw1.autoHideFade = 0
-						
+							-- Force-restore the plate fill_color + per-line
+							-- opacity to the configured values.  The
+							-- d3d_endscene block that normally drives the
+							-- fade is gated on a handful of other flags
+							-- (LegacyChatOpen, BigMode, RenderFOs, ...) and
+							-- on `autoHideFade < 1`; if any of those was
+							-- false at the frames fade crossed 1.0, the
+							-- per-tick set_fill_color was skipped and the
+							-- plate stayed stuck at near-zero alpha.  This
+							-- unconditional restore on fade-completion
+							-- guarantees the visible state is correct
+							-- regardless of what the d3d_endscene saw.
+							ro.RectBG[1]:set_fill_color(allSettings.rectSettings.fill_color)
+							if allSettings.SecondChat[1] then
+								ro.RectBG[2]:set_fill_color(allSettings.rectSettings.fill_color)
+							end
+							SetChatOpacity(1, 1)
+							if allSettings.SecondChat[1] then SetChatOpacity(1, 2) end
 						end
 					end
 				end
@@ -499,7 +681,7 @@ function M.register()
 				fcw3.BigModePrev = false
 			end
 
-			if (not uiw.LegacyChatOpen and not fcw1.HideChat and not fcw1.Closing and fcw1.autoHideFade < 1 and not fcw3.BigMode) then
+			if ((not uiw.LegacyChatOpen or allSettings.ShowWithLegacy[1]) and not fcw1.HideChat and not fcw1.Closing and fcw1.autoHideFade < 1 and not fcw3.BigMode) then
 			
 				
 				
@@ -557,6 +739,11 @@ function M.register()
 			
 				fcw1.Anchor_X = positionStartX;--+(fcw1.BG_W/(_fh*10));--60);
 				fcw1.Anchor_Y = positionStartY+(fcw1.BG_H*0.8);
+				-- Stash the BG-plate top-left coords so the end-of-frame
+				-- compass broadcast can use them even when the chat is
+				-- hidden (this render branch hasn't run).
+				fcw1.BG_X = positionStartX
+				fcw1.BG_Y = positionStartY
 				fcw1.PosChanged = false;
 				if fcw1.Anchor_X == 0 or math_abs(fcw1.Anchor_X - fcw1.PrevAnchor_X) >0.1  or
 				fcw1.Anchor_Y == 0 or math_abs(fcw1.Anchor_Y - fcw1.PrevAnchor_Y) >0.1 
@@ -950,8 +1137,8 @@ function M.register()
 					imgui.SetNextWindowSize(fcw1.compactSize);
 				end
 			
-				windowFlags = bit_bor( FLAG_WinNoDecoration, FLAG_WinNoBackground);
-			
+				windowFlags = bit_bor(FLAG_WinNoDecoration, FLAG_WinNoBackground);
+
 				imgui.Begin('FancyChat_ChatTabs_'+fcw1.PlayerName, true, windowFlags);
 				--font.FontSize = 450/_fh;
 					-- function() imgui.SetWindowFontScale(_fh/25) end,
@@ -964,68 +1151,99 @@ function M.register()
 			
 			
 				if not allSettings.CompactTabs then
+					-- Non-compact tab bar: unselected buttons use the chat
+					-- plate's fill (RGB + alpha); hovered / active keep
+					-- their original RGB but get the chat plate's alpha so
+					-- the bar reads as part of the chat. Selected tab does
+					-- the same alpha-override trick inside the per-tab if.
+					local _c  = allSettings.rectSettings.fill_color
+					local _ba = bit.band(bit.rshift(_c, 24), 0xFF) / 255
+					local _br = bit.band(bit.rshift(_c, 16), 0xFF) / 255
+					local _bg = bit.band(bit.rshift(_c,  8), 0xFF) / 255
+					local _bb = bit.band(_c,                0xFF) / 255
+					imgui.PushStyleColor(ImGuiCol_Button,        {_br, _bg, _bb, _ba})
+					imgui.PushStyleColor(ImGuiCol_ButtonHovered, {0.5, 0.5, 0.5, _ba})
+					imgui.PushStyleColor(ImGuiCol_ButtonActive,  {0,   0,   0,   _ba})
+
 					local reserved = tabsW - ((tabsH*4)-8)-8.3
 					local cursY = imgui.GetCursorPosY()-7
 					local cursx = imgui.GetCursorPosX()-4
+					-- Half-width L1 / L2: when SplitLinkshellTab is on, the
+					-- two tabs together occupy the same visual slot a
+					-- single Linkshell tab would have, so the other tabs
+					-- aren't squeezed.  Each L1 / L2 counts as 0.5
+					-- "visual slots"; every other tab counts as 1.
+					local visualSlots1 = 0
 					for T_i = 1, #tab.Tabs do
-						imgui.SetCursorPos({cursx+(reserved/#tab.Tabs)*(T_i-1),cursY});
-						if (tab.Tabs[T_i] == allSettings.SelectedTab) then
-							PushColorStyles(tab.ButtonColorStylesSelected);
-							imgui.Button(tab.Tabs[T_i]:gsub('Alt','##Alt'),{reserved/#tab.Tabs,tabsH-2});
-							PopColorStyles(tab.ButtonColorStylesSelected);
+						local tn = tab.Tabs[T_i]
+						visualSlots1 = visualSlots1 + ((tn == 'L1' or tn == 'L2') and 0.5 or 1)
+					end
+					local unitW1 = reserved / visualSlots1
+					local cursOff1 = 0
+					for T_i = 1, #tab.Tabs do
+						local tn = tab.Tabs[T_i]
+						local w  = ((tn == 'L1' or tn == 'L2') and (unitW1 * 0.5) or unitW1)
+						imgui.SetCursorPos({cursx + cursOff1, cursY});
+						if (tn == allSettings.SelectedTab) then
+							-- Selected: same RGB as the default selected
+							-- style, but alpha replaced with chat alpha.
+							-- Text alpha is left alone for legibility.
+							imgui.PushStyleColor(ImGuiCol_Text,          {0.1, 0.1, 0.1, 0.9})
+							imgui.PushStyleColor(ImGuiCol_Button,        {0.8, 0.8, 0.8, _ba})
+							imgui.PushStyleColor(ImGuiCol_ButtonActive,  {1,   1,   1,   _ba})
+							imgui.PushStyleColor(ImGuiCol_ButtonHovered, {0.7, 0.7, 0.7, _ba})
+							imgui.Button(tn:gsub('Alt','##Alt'),{w,tabsH-2});
+							imgui.PopStyleColor(4)
 						else
-							if (imgui.Button(tab.Tabs[T_i]:gsub('Alt','##Alt'),{reserved/#tab.Tabs,tabsH-2})) then
-								tab.NextTab = tab.Tabs[T_i]; 
+							if (imgui.Button(tn:gsub('Alt','##Alt'),{w,tabsH-2})) then
+								tab.NextTab = tn;
 							end
 						end
+						cursOff1 = cursOff1 + w
 					end
-				
+
+					-- Icon buttons sit in the same bar. We keep the 3
+					-- style pushes alive through them so the entire
+					-- ImageButton frame (incl. the frame_padding gap
+					-- around the image) renders in chat-plate colour.
+					local _bgcol = {_br, _bg, _bb, _ba}
 					imgui.SetCursorPos({reserved+4,imgui.GetCursorPosY()-(tabsH+1.6)});
-			
+
 					if(fcw1.TextureIDGuideMe ~= nil) then
-						if (imguiWrap.ImageButton('TextureIDGuideMe',fcw1.TextureIDGuideMe,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
-						
+						if (imguiWrap.ImageButton('TextureIDGuideMe',fcw1.TextureIDGuideMe,{tabsH-8,tabsH-8},{0,0},{1,1},-1,_bgcol,{1,1,1,0.7})) then
+
 							fcw1.GuideMeOpened[1] = not fcw1.GuideMeOpened[1];
 							if fcw1.GuideMeOpened[1] then	fcw1.NotepadOpened[1]  = false end
 						end
 						if (imgui.IsItemHovered(0)) then
-							imgui.BeginTooltip()
-							message = 'Open GuideMe'
-							imgui.SetTooltip(message)
-							imgui.EndTooltip()
+							imgui.SetTooltip('Open GuideMe')
 						end
 					end
 					imgui.SetCursorPos({imgui.GetCursorPosX()+reserved+4+(tabsH-8),imgui.GetCursorPosY()-(tabsH+1.6)});
-			
+
 					if(fcw1.TextureIDNotepad ~= nil) then
-						if (imguiWrap.ImageButton('TextureIDNotepad',fcw1.TextureIDNotepad,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
+						if (imguiWrap.ImageButton('TextureIDNotepad',fcw1.TextureIDNotepad,{tabsH-8,tabsH-8},{0,0},{1,1},-1,_bgcol,{1,1,1,0.7})) then
 							fcw1.NotepadOpened[1] = not fcw1.NotepadOpened[1]
 							if fcw1.NotepadOpened[1] then	fcw1.GuideMeOpened[1] = false end
 						end
 						if (imgui.IsItemHovered(0)) then
-							imgui.BeginTooltip()
-							message = 'Open Notepad'
-							imgui.SetTooltip(message)
-							imgui.EndTooltip()
+							imgui.SetTooltip('Open Notepad')
 						end
 					end
-				
+
 					imgui.SetCursorPos({imgui.GetCursorPosX()+reserved+4+(tabsH*2-8),imgui.GetCursorPosY()-(tabsH+1.6)});
 					if(fcw1.TextureIDSettings ~= nil) then
-						if (imguiWrap.ImageButton('TextureIDSettings',fcw1.TextureIDSettings,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
+						if (imguiWrap.ImageButton('TextureIDSettings',fcw1.TextureIDSettings,{tabsH-8,tabsH-8},{0,0},{1,1},-1,_bgcol,{1,1,1,0.7})) then
 							allSettings.settingsOpened[1] = not allSettings.settingsOpened[1];
 						end
 						if (imgui.IsItemHovered(0)) then
-							imgui.BeginTooltip()
-							message = 'Open Settings'
-							imgui.SetTooltip(message)
-							imgui.EndTooltip()
+							imgui.SetTooltip('Open Settings')
 						end
 					end
-				
+
 					imgui.SetCursorPos({imgui.GetCursorPosX()+reserved+4+(tabsH*3-8),imgui.GetCursorPosY()-(tabsH+1.6)});
 					if(fcw1.TextureIDCompact ~= nil) then
-						if (imguiWrap.ImageButton('TextureIDCompact',fcw1.TextureIDCompact,{tabsH-8,tabsH-8},{0,0},{1,1},-1,{0,0,0,0},{1,1,1,0.7})) then
+						if (imguiWrap.ImageButton('TextureIDCompact',fcw1.TextureIDCompact,{tabsH-8,tabsH-8},{0,0},{1,1},-1,_bgcol,{1,1,1,0.7})) then
 							allSettings.CompactTabs = true;
 							-- Invalidate cached tab-bar positions: PosChanged
 							-- on its own is wiped by line ~560 at the top of
@@ -1042,18 +1260,16 @@ function M.register()
 							SaveSettings();
 						end
 						if (imgui.IsItemHovered(0)) then
-							imgui.BeginTooltip()
-							message = 'Compact TabBar Mode'
-							imgui.SetTooltip(message)
-							imgui.EndTooltip()
+							imgui.SetTooltip('Compact TabBar Mode')
 						end
 					end
-				
-			
-				
+					imgui.PopStyleColor(3)  -- pop the 3 base overrides
+
+
+
 					-- if(fcw1.TextureIDCompact ~= nil) then
 							-- SaveSettings();
-				
+
 				else
 					imgui.PushStyleVar(FLAG_StyleVarFrameBorder, 0);
 				
@@ -1136,17 +1352,55 @@ function M.register()
 				if (b.ChatBufferN[1]>0) then
 					if (b.ChatBufferIdx[1] < b.ChatBufferN[1] and not fcw1.Scrolling and not fcw1.Dragging and not fcw3.Scrolling) then
 						fcw1.PositionLinesRequest[1] = true;
-					
+
+						if allSettings.InstantChatScroll[1] then
+							-- Instant-scroll fast path: drain the entire
+							-- backlog in this frame.  UpdateLines is already
+							-- non-animated; the animation only comes from
+							-- waiting between calls (see ChatShift below).
+							-- Reset ChatShift / ChatShiftScale to idle so a
+							-- later toggle-off resumes cleanly.
+							local bufRoot = b.ChatBuffer[b.ChatBufferMode[1]][2]
+							while b.ChatBufferIdx[1] < b.ChatBufferN[1] do
+								local bufferIdx = #bufRoot.text - (b.ChatBufferN[1] - b.ChatBufferIdx[1] - 1)
+								if bufferIdx > #bufRoot.text or bufRoot.text[bufferIdx] == nil then
+									ResetLines(1)
+									break
+								end
+								UpdateLines(1,
+									bufRoot.text    [bufferIdx],
+									bufRoot.color   [bufferIdx],
+									bufRoot.auxText [bufferIdx],
+									bufRoot.auxColor[bufferIdx])
+								b.ChatBufferIdx[1] = b.ChatBufferIdx[1] + 1
+							end
+							-- UpdateLines sets visible(false) on every slot
+							-- it writes so the animated path's PositionLines
+							-- can re-enable one slot per frame.  Instant
+							-- mode wrote N slots in this frame, so we have
+							-- to re-enable the full visible range or the
+							-- intermediate lines stay hidden until the
+							-- next refresh-trigger event (scroll, tab
+							-- switch, ...).
+							for C_i = 1, allSettings.ChatLines do
+								fo.Chat[1][C_i]:set_visible(true)
+								fo.Aux [1][C_i]:set_visible(true)
+							end
+							fo.Aux [1][fcw1.ChatHead]:set_opacity(1)
+							fo.Chat[1][fcw1.ChatHead]:set_opacity(1)
+							fcw1.ChatShift      = _fh
+							fcw1.ChatShiftScale = fcw1.ChatShiftScale_Min
+						else
 						if fcw1.ChatShiftScale < fcw1.ChatShiftScale_Target then
-							fcw1.ChatShiftScale = fcw1.ChatShiftScale +1;		
+							fcw1.ChatShiftScale = fcw1.ChatShiftScale +1;
 						else
 							fcw1.ChatShiftScale =fcw1.ChatShiftScale_Target
 						end
-					
-					
+
+
 						local doupdate = false;
 						if(fcw1.ChatShift >= 0 ) then
-						
+
 							fcw1.ChatShift = fcw1.ChatShift - ((_now-fcw1.OsClockLast))*(fcw1.ChatShiftScale);
 							if fcw1.ChatShift <= 0 then
 								doupdate = true;
@@ -1157,9 +1411,9 @@ function M.register()
 							end
 							--PrepareLines(1);
 						end
-						
-						
-						if doupdate then 
+
+
+						if doupdate then
 							local bufferIdx = #b.ChatBuffer[b.ChatBufferMode[1]][2].text -(b.ChatBufferN[1]-b.ChatBufferIdx[1]-1);
 							if bufferIdx > #b.ChatBuffer[b.ChatBufferMode[1]][2].text or b.ChatBuffer[b.ChatBufferMode[1]][2].text[bufferIdx] == nil then
 								ResetLines(1);
@@ -1178,7 +1432,8 @@ function M.register()
 								fcw1.ChatShift = _fh;
 							end
 						end
-					
+						end -- /InstantChatScroll else
+
 					else
 						if fcw1.ChatShiftScale > fcw1.ChatShiftScale_Target then
 							fcw1.ChatShiftScale = fcw1.ChatShiftScale - 2;
@@ -1242,7 +1497,7 @@ function M.register()
 			
 				if allSettings.SelectedTab2 == 'All' and allSettings.HideCombatFromAll[1] then b.ChatBufferN[2]=b.ChatBufferN_AllAlt;  end
 			
-				if (not uiw.LegacyChatOpen and not fcw1.HideChat and not fcw1.Closing and fcw1.autoHideFade < 1 and not fcw3.BigMode) then
+				if ((not uiw.LegacyChatOpen or allSettings.ShowWithLegacy[1]) and not fcw1.HideChat and not fcw1.Closing and fcw1.autoHideFade < 1 and not fcw3.BigMode) then
 				
 				
 					imgui.SetNextWindowSize({ fcw2.BG_W, ro.RectBG[2].settings.height+16 } );
@@ -1268,7 +1523,7 @@ function M.register()
 						fcw1.NotepadClosedTmp = false
 						fcw1.GuideMeClosedTmp = false
 						if allSettings.GuideMeSecondWindow[1] then fcw1.GuideMeClosedTmp = false; end
-						fcw1.MoveChat = (mvc.Menu1 or mvc.Menu2 or mvc.Menu3 or mvc.Menu4 or mvc.Menu5 or mvc.Menu6 or uiw.DialogShown) and allSettings.LockWindowPos[1] and allSettings.EnabledChatMove[1];
+						fcw1.MoveChat = (mvc.Menu1 or mvc.Menu2 or mvc.Menu3 or mvc.Menu4 or mvc.Menu5 or mvc.Menu6 or mvc.Menu7 or uiw.DialogShown) and allSettings.LockWindowPos[1] and allSettings.EnabledChatMove[1];
 						if fcw1.MoveChat and positionStartX < mvc.targetposX
 						and fcw2.Anchor_Y > mvc.targetposY then
 							positionStartX = mvc.targetposX;
@@ -1291,6 +1546,10 @@ function M.register()
 				
 					fcw2.Anchor_X = positionStartX;--+(fcw1.BG_W/(_fh*10));--60);
 					fcw2.Anchor_Y = positionStartY+(fcw2.BG_H*0.8);
+					-- Capture BG-plate top-left for the compass UDP broadcast,
+					-- mirroring fcw1.BG_X / fcw1.BG_Y.
+					fcw2.BG_X = positionStartX
+					fcw2.BG_Y = positionStartY
 					fcw2.PosChanged = false;
 					if fcw2.Anchor_X == 0 or math_abs(fcw2.Anchor_X - fcw2.PrevAnchor_X) > 0.1 or
 					fcw2.Anchor_Y == 0 or math_abs(fcw2.Anchor_Y - fcw2.PrevAnchor_Y) > 0.1 
@@ -1520,7 +1779,7 @@ function M.register()
 					end
 				
 					windowFlags = bit_bor(FLAG_WinNoDecoration, FLAG_WinNoBackground);
-				
+
 					imgui.Begin('FancyChat_ChatTabs2_'+fcw1.PlayerName, true, windowFlags);
 					--font.FontSize = 450/_fh;
 				
@@ -1528,22 +1787,50 @@ function M.register()
 					PushColorStyles(tab.ButtonColorStylesNormal);
 
 					if not allSettings.CompactTabs then
+						local _c  = allSettings.rectSettings.fill_color
+						local _ba = bit.band(bit.rshift(_c, 24), 0xFF) / 255
+						local _br = bit.band(bit.rshift(_c, 16), 0xFF) / 255
+						local _bg = bit.band(bit.rshift(_c,  8), 0xFF) / 255
+						local _bb = bit.band(_c,                0xFF) / 255
+						imgui.PushStyleColor(ImGuiCol_Button,        {_br, _bg, _bb, _ba})
+						imgui.PushStyleColor(ImGuiCol_ButtonHovered, {0.5, 0.5, 0.5, _ba})
+						imgui.PushStyleColor(ImGuiCol_ButtonActive,  {0,   0,   0,   _ba})
+
 						local reserved = tabsW -1.5
 						local cursY = imgui.GetCursorPosY()-7
 						local cursx = imgui.GetCursorPosX()-4
+						-- Half-width L1 / L2: when SplitLinkshellTab is on, the
+						-- two tabs together occupy the same visual slot a
+						-- single Linkshell tab would have, so the other tabs
+						-- aren't squeezed.  Each L1 / L2 counts as 0.5
+						-- "visual slots"; every other tab counts as 1.
+						local visualSlots2 = 0
 						for T_i = 1, #tab.Tabs do
-							imgui.SetCursorPos({cursx+(reserved/#tab.Tabs)*(T_i-1),cursY});
-							if (tab.Tabs[T_i] == allSettings.SelectedTab2) then
-								PushColorStyles(tab.ButtonColorStylesSelected);
-								imgui.Button(tab.Tabs[T_i]:gsub('Alt','##Alt'),{reserved/#tab.Tabs,tabsH-2});
-								PopColorStyles(tab.ButtonColorStylesSelected);
+							local tn = tab.Tabs[T_i]
+							visualSlots2 = visualSlots2 + ((tn == 'L1' or tn == 'L2') and 0.5 or 1)
+						end
+						local unitW2 = reserved / visualSlots2
+						local cursOff2 = 0
+						for T_i = 1, #tab.Tabs do
+							local tn = tab.Tabs[T_i]
+							local w  = ((tn == 'L1' or tn == 'L2') and (unitW2 * 0.5) or unitW2)
+							imgui.SetCursorPos({cursx + cursOff2, cursY});
+							if (tn == allSettings.SelectedTab2) then
+								imgui.PushStyleColor(ImGuiCol_Text,          {0.1, 0.1, 0.1, 0.9})
+								imgui.PushStyleColor(ImGuiCol_Button,        {0.8, 0.8, 0.8, _ba})
+								imgui.PushStyleColor(ImGuiCol_ButtonActive,  {1,   1,   1,   _ba})
+								imgui.PushStyleColor(ImGuiCol_ButtonHovered, {0.7, 0.7, 0.7, _ba})
+								imgui.Button(tn:gsub('Alt','##Alt'),{w,tabsH-2});
+								imgui.PopStyleColor(4)
 							else
-								if (imgui.Button(tab.Tabs[T_i]:gsub('Alt','##Alt'),{reserved/#tab.Tabs,tabsH-2})) then
-									tab.NextTab2 = tab.Tabs[T_i]; 
+								if (imgui.Button(tn:gsub('Alt','##Alt'),{w,tabsH-2})) then
+									tab.NextTab2 = tn;
 								end
 							end
+							cursOff2 = cursOff2 + w
 						end
-				
+						imgui.PopStyleColor(3)
+
 					else
 						imgui.PushStyleVar(FLAG_StyleVarFrameBorder, 0);
 				
@@ -1582,29 +1869,58 @@ function M.register()
 
 						if (b.ChatBufferIdx[2] < b.ChatBufferN[2] and not fcw2.Scrolling and not fcw2.Dragging and not fcw3.Scrolling) then
 							fcw2.PositionLinesRequest[1] = true;
-						
+
+							if allSettings.InstantChatScroll[1] then
+								-- Instant-scroll fast path: drain the entire
+								-- backlog in this frame.  Same shape as the
+								-- window-1 fast path above.
+								local bufRoot = b.ChatBuffer[b.ChatBufferMode[2]][2]
+								while b.ChatBufferIdx[2] < b.ChatBufferN[2] do
+									local bufferIdx = #bufRoot.text - (b.ChatBufferN[2] - b.ChatBufferIdx[2] - 1)
+									if bufferIdx > #bufRoot.text or bufRoot.text[bufferIdx] == nil then
+										ResetLines(2)
+										break
+									end
+									UpdateLines(2,
+										bufRoot.text    [bufferIdx],
+										bufRoot.color   [bufferIdx],
+										bufRoot.auxText [bufferIdx],
+										bufRoot.auxColor[bufferIdx])
+									b.ChatBufferIdx[2] = b.ChatBufferIdx[2] + 1
+								end
+								-- Re-enable visibility on every visible slot
+								-- (see window-1 fast path for rationale).
+								for C_i = 1, allSettings.ChatLines do
+									fo.Chat[2][C_i]:set_visible(true)
+									fo.Aux [2][C_i]:set_visible(true)
+								end
+								fo.Aux [2][fcw2.ChatHead]:set_opacity(1)
+								fo.Chat[2][fcw2.ChatHead]:set_opacity(1)
+								fcw2.ChatShift      = _fh
+								fcw2.ChatShiftScale = fcw2.ChatShiftScale_Min
+							else
 							if fcw2.ChatShiftScale < fcw2.ChatShiftScale_Target then
 								fcw2.ChatShiftScale = fcw2.ChatShiftScale +1;
 							else
 								fcw2.ChatShiftScale =fcw2.ChatShiftScale_Target
 							end
-						
+
 							local doupdate = false;
 							if(fcw2.ChatShift >= 0 ) then
 								fcw2.ChatShift = fcw2.ChatShift - ((_now-fcw2.OsClockLast))*(fcw2.ChatShiftScale);
 							--	else
-									if fcw2.ChatShift <= 0 then 
+									if fcw2.ChatShift <= 0 then
 										doupdate = true;
 										if  b.ChatBufferN[2] - b.ChatBufferIdx[2] > 1 then
-									
+
 											fcw2.ChatShift = _fh - math_min(-1*fcw2.ChatShift, _fh);
 										--else
 										end
 						--			else
-									
+
 									end
 								--PrepareLines(2);
-							end	
+							end
 							if doupdate then
 								local bufferIdx = #b.ChatBuffer[b.ChatBufferMode[2]][2].text -(b.ChatBufferN[2]-b.ChatBufferIdx[2]-1);
 								if bufferIdx > #b.ChatBuffer[b.ChatBufferMode[2]][2].text or b.ChatBuffer[b.ChatBufferMode[2]][2].text[bufferIdx] == nil then
@@ -1616,7 +1932,7 @@ function M.register()
 												b.ChatBuffer[b.ChatBufferMode[2]][2].auxText[bufferIdx],
 												b.ChatBuffer[b.ChatBufferMode[2]][2].auxColor[bufferIdx]
 												);
-								
+
 									b.ChatBufferIdx[2] = b.ChatBufferIdx[2]+1;
 								end
 								fo.Aux[2][fcw2.ChatHead]:set_opacity(1)
@@ -1626,6 +1942,7 @@ function M.register()
 								end
 								--else
 							end
+							end -- /InstantChatScroll else
 						else
 						
 							if fcw2.ChatShiftScale > fcw2.ChatShiftScale_Target then
@@ -1921,11 +2238,19 @@ function M.register()
 													ptr = tonumber(ffi.cast('uint32_t', tex)),
 													w   = w,
 													h   = h,
+													refcount = 0,
 												}
 												set.zoneMapTextures[entry.path] = cached
 											end
 										end
 										if cached then
+											-- Refcount the cache entry so the
+											-- texture is released as soon as
+											-- the last window using it closes.
+											-- Without this the cache grows for
+											-- the whole session and hangs on
+											-- to every map ever opened.
+											cached.refcount = (cached.refcount or 0) + 1
 											-- `or 0` makes this resilient if
 											-- state.lua's default wasn't picked
 											-- up by the live `set` table (e.g.
@@ -2082,8 +2407,71 @@ function M.register()
 			imgui.End()
 			imgui.PopStyleColor(3)
 			if not mw.opened[1] then
+				-- Release the shared texture when the last window
+				-- referencing it closes.  Setting the cache entry to
+				-- nil drops the cdata; gc_safe_release attached by
+				-- utils.LoadTextureFromFile then runs on the next GC
+				-- cycle and frees the D3D texture.
+				local entry = set.zoneMapTextures[mw.url]
+				if entry then
+					entry.refcount = (entry.refcount or 1) - 1
+					if entry.refcount <= 0 then
+						set.zoneMapTextures[mw.url] = nil
+					end
+				end
 				table.remove(set.zoneMapWindows, wi)
 			end
+		end
+
+		-- Broadcast chat anchor data for BOTH chat windows to the Compass
+		-- addon EVERY frame. Compass picks which window to anchor to.
+		-- Packet format: 12 comma-separated ints =
+		--   w1_x,w1_y,w1_w,w1_h,w1_visible,w1_extra,
+		--   w2_x,w2_y,w2_w,w2_h,w2_visible,w2_extra
+		if fcw1.BG_X ~= nil then
+			local dock_on_2 = allSettings.GuideMeSecondWindow[1] == true
+			local guide_open = fcw1.GuideMeOpened[1] and fcw1.GuideMeDocked
+			                   and not fcw1.GuideMeClosedTmp
+			local note_open  = fcw1.NotepadOpened[1] and fcw1.NotepadDocked
+			                   and not fcw1.NotepadClosedTmp
+
+			-- Window 1
+			local w1_visible = ((not uiw.LegacyChatOpen or allSettings.ShowWithLegacy[1])
+				and not fcw1.HideChat
+				and not fcw1.Closing
+				and fcw1.autoHideFade < 1
+				and not fcw3.BigMode) and 1 or 0
+			local w1_extra = 0
+			-- Guideme/notepad add to fcw1 ONLY when not docked on window 2.
+			if not dock_on_2 then
+				if guide_open then w1_extra = math.max(w1_extra, (fcw1.BG_H or 0) + 100) end
+				if note_open  then w1_extra = math.max(w1_extra, (fcw1.BG_H or 0) + 100) end
+			end
+			-- Item preview is always above fcw1.
+			if fcw1.itemPreviewActive then
+				w1_extra = math.max(w1_extra, fcw1.LastInfoH or 0)
+			end
+
+			-- Window 2
+			local w2_x, w2_y = fcw2.BG_X or 0, fcw2.BG_Y or 0
+			local w2_w, w2_h = fcw2.BG_W or 0, fcw2.BG_H or 0
+			local w2_visible = (allSettings.SecondChat and allSettings.SecondChat[1]
+				and (not uiw.LegacyChatOpen or allSettings.ShowWithLegacy[1])
+				and not fcw1.HideChat
+				and not fcw1.Closing
+				and fcw1.autoHideFade < 1
+				and not fcw3.BigMode) and 1 or 0
+			local w2_extra = 0
+			-- Guideme/notepad add to fcw2 ONLY when docked on window 2.
+			if dock_on_2 then
+				if guide_open then w2_extra = math.max(w2_extra, w2_h + 100) end
+				if note_open  then w2_extra = math.max(w2_extra, w2_h + 100) end
+			end
+			-- No item preview on window 2.
+
+			_broadcast_chat_anchor(
+				fcw1.BG_X, fcw1.BG_Y, fcw1.BG_W or 0, fcw1.BG_H or 0, w1_visible, w1_extra,
+				w2_x,       w2_y,       w2_w,           w2_h,           w2_visible, w2_extra)
 		end
 
 	end);
@@ -2097,7 +2485,7 @@ function M.register()
 
 	    -- isRenderingBackBuffer is a flag that will be true when the game is currently rendering to the back buffer.
 		--and fcw1.LoggedLobby ~= 1
-		if (fcw1.PlayerName ~= '---' and fcw1.LoggedLobby ~= 1 and not fcw1.Zoning and fcw1.LoggedIn and #settings.name > 0 and fcw1.RenderFOs and not fcw1.HideChat and not uiw.LegacyChatOpen and not fcw1.Closing and fcw1.autoHideFade < 1) then
+		if (fcw1.PlayerName ~= '---' and fcw1.LoggedLobby ~= 1 and not fcw1.Zoning and fcw1.LoggedIn and #settings.name > 0 and fcw1.RenderFOs and not fcw1.HideChat and (not uiw.LegacyChatOpen or allSettings.ShowWithLegacy[1]) and not fcw1.Closing and fcw1.autoHideFade < 1) then
 			if not fcw1.WasRendered then
 				for C_i = 1, allSettings.ChatLines do
 					fo.Chat[1][C_i]:set_visible(true)
@@ -2116,14 +2504,46 @@ function M.register()
 				PositionLines(1);
 				if fcw1.RequestAuxFix then FixAux(1) end
 				if allSettings.SecondChat[1] then PositionLines(2); if fcw2.RequestAuxFix then FixAux(2) end end
-				local updateColor = bit_band(allSettings.rectSettings.fill_color -(fcw1.autoHideFade * allSettings.rectSettings.fill_color), 0xFF000000)
-				if ro.RectBG[1].settings.fill_color ~= updateColor then
-					ro.RectBG[1]:set_fill_color(math_min(math_max(updateColor,0x00000000)),0xFF000000);
-					SetChatOpacity(math_max(1-fcw1.autoHideFade,0),1)
+				-- Auto-hide fade modulates the plate's ALPHA only so the
+				-- user-picked RGB (Settings -> Chat Window -> Plate BG
+				-- Color) is preserved through the fade.  The previous
+				-- formula masked the whole word to 0xFF000000, which
+				-- silently zeroed the RGB byte triple - invisible when
+				-- the plate was always black, but turned the plate fully
+				-- transparent once a non-black colour could be picked.
+				local cfgColor  = allSettings.rectSettings.fill_color
+				local cfgAlpha  = bit_band(bit.rshift(cfgColor, 24), 0xFF)
+				local fadeAlpha = bit.tobit(cfgAlpha * math_max(1 - fcw1.autoHideFade, 0))
+				if fadeAlpha < 0   then fadeAlpha = 0   end
+				if fadeAlpha > 255 then fadeAlpha = 255 end
+				local updateColor = bit.bor(
+					bit.lshift(fadeAlpha, 24),
+					bit_band(cfgColor, 0x00FFFFFF))
+				local fadeOpacity = math_max(1 - fcw1.autoHideFade, 0)
+				-- Belt-and-suspenders: when no fade is in progress,
+				-- slam the plate back to the configured colour
+				-- verbatim, ignoring whatever the fade math produced.
+				-- updateColor at fade=0 SHOULD equal cfgColor, but
+				-- this guards against any path that left fade math in
+				-- a weird state (device-loss frames, settings reload
+				-- mid-fade, etc.).
+				local plateColor = (fcw1.autoHideFade == 0) and cfgColor or updateColor
+				ro.RectBG[1]:set_fill_color(plateColor)
+				-- Per-line opacity: only push a NEW value through
+				-- SetChatOpacity when it actually changed.  Calling it
+				-- every frame would overwrite the per-line opacity that
+				-- PositionLines (lib/buffer.lua) applies for the chat
+				-- scroll animation (fading top line when ChatShift > 0).
+				if fcw1.lastFadeOpacity ~= fadeOpacity then
+					SetChatOpacity(fadeOpacity, 1)
+					fcw1.lastFadeOpacity = fadeOpacity
 				end
-				if allSettings.SecondChat[1] and ro.RectBG[2].settings.fill_color ~= updateColor then
-					ro.RectBG[2]:set_fill_color(math_min(math_max(updateColor,0x00000000)),0xFF000000);
-					SetChatOpacity(math_max(1-fcw1.autoHideFade,0),2)
+				if allSettings.SecondChat[1] then
+					ro.RectBG[2]:set_fill_color(plateColor)
+					if fcw2.lastFadeOpacity ~= fadeOpacity then
+						SetChatOpacity(fadeOpacity, 2)
+						fcw2.lastFadeOpacity = fadeOpacity
+					end
 				end
 			else
 				if fcw3.RequestAuxFix then FixAux(3, fcw3.ChatLines) end

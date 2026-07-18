@@ -15,7 +15,23 @@ M.uiw = defaults.default_uiw()
 M.mvc = {
 	Menu1 = false, Menu2 = false, Menu3 = false,
 	Menu4 = false, Menu5 = false, Menu6 = false,
+	Menu7 = false,
 	targetposY = 0, targetposX = 0,
+}
+
+-- Combat-filter snapshot.  Refreshed once per render frame by
+-- combat_packets.refresh_snapshot() so that the packet_in dispatch
+-- can classify actors without making any native entity/party/target
+-- calls (those races with FFXI's main thread were the source of the
+-- EXCEPTION_ACCESS_VIOLATION crashes observed in combat).  Initial
+-- values are safe zeros / empty tables: every actor classifies as
+-- OTHERS until the first render frame fires.
+M.combatSnap = {
+	self_id      = 0,   -- player's ServerId
+	pet_id       = 0,   -- pet's ServerId (0 if no pet)
+	party_set    = {},  -- {[ServerId] = true} for party slots 1-5
+	alliance_set = {},  -- {[ServerId] = true} for alliance slots 6-17
+	target_set   = {},  -- {[ServerId] = true} for engaged-target IDs
 }
 
 -- The three FancyChat windows.
@@ -32,7 +48,6 @@ M.tab = {
 
 -- Settings UI scratch state.
 M.set = {
-	isCEXI              = true,
 	colorTextW          = 1,
 	alertList           = {},
 	alertBuffer         = T{},
@@ -44,6 +59,14 @@ M.set = {
 	ChatLines           = 8,
 	CustomTabModes      = T{},
 	SecondChat          = T{false},
+	-- Working-copy mirror of allSettings.InstantChatScroll for the
+	-- "Restart & apply" group in the Chat Window tab.  Edits land
+	-- here only; the Restart & apply handler commits it back into
+	-- allSettings before triggering /addon reload.
+	InstantChatScroll   = T{false},
+	-- Same restart-required group: working-copy mirror of
+	-- allSettings.SplitLinkshellTab.
+	SplitLinkshellTab   = T{false},
 	AdjWin1             = T{false},
 	AdjWin2             = T{false},
 	-- Save / Load colorset popups (Settings -> Font Colors).  Mutually
@@ -64,6 +87,9 @@ M.set = {
 	-- frame).  Flipped back to false when the file reappears or the
 	-- user picks a different (existing) filter.
 	filterFileMissing   = false,
+	-- Parallel missing-flag for the non-combat ("Other") filter
+	-- file.  Same semantics as filterFileMissing above.
+	otherFilterFileMissing = false,
 	-- Floating /sea popup state (see render.lua for draw + dismissal).
 	zoneTip = {
 		visible   = false,
@@ -116,6 +142,7 @@ M.dw = {
 	testPTR          = nil,
 	frameID          = 1,
 	addr             = 0,
+	menuname		 = '',
 }
 
 -- Text-parser working state.
@@ -123,11 +150,14 @@ M.par = {
 	LoginTime		= 0,
 	tabmode         = nil,
 	checkAgain      = {0, ''},
-	emojiChannels   = {6, 14, 205, 213, 214, 217},
 	allowed         = {0, 0},
 	dumping         = false,
 	LastMsgLength   = 0,
 	customFilters   = {},
+	-- Parallel runtime list for filters/other/*.txt (non-combat
+	-- chat lines).  Same shape as customFilters.  Loaded at addon
+	-- init and on every Selected-filter change in the Settings UI.
+	otherFilters    = {},
 	timePrinted     = true,
 	InEvent         = false,
 	LastMsgInConv   = false,
@@ -173,6 +203,11 @@ M.b = {
 	ChatBufferN_Combat    = 0,
 	ChatBufferN_Shout     = 0,
 	ChatBufferN_Custom    = 0,
+	-- Counters used only when allSettings.SplitLinkshellTab[1] is on.
+	-- Slots 9 (L1) and 10 (L2) in ChatBuffer; slot 4 / ChatBufferN_Linkshell
+	-- stay at zero in split mode.
+	ChatBufferN_L1        = 0,
+	ChatBufferN_L2        = 0,
 	CleanupThresh         = 100,
 	ChatBufferIdx         = T{0, 0, 0},
 	ChatBufferN           = T{0, 0, 0},

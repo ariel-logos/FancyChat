@@ -3,7 +3,6 @@ require('win32types');
 
 local ffi      = require('ffi');
 local d3d      = require('d3d8');
-local emojis   = require('emojis');
 
 local C        = ffi.C;
 local d3d8dev  = d3d.get_device();
@@ -26,6 +25,14 @@ ffi.cdef[[
     HGLOBAL GlobalAlloc(unsigned int uFlags, size_t dwBytes);
     void* GlobalLock(HGLOBAL hMem);
     int GlobalUnlock(HGLOBAL hMem);
+
+    // Foreground-window detection for the alt-tab auto-hide guard
+    // (lib/render.lua auto-hide state machine).  When the game window
+    // isn't currently in focus we want to freeze the idle timer so the
+    // chat doesn't fade out behind the user's back.
+    HWND GetForegroundWindow();
+    unsigned int GetWindowThreadProcessId(HWND hWnd, unsigned int* lpdwProcessId);
+    unsigned int GetCurrentProcessId();
 
     size_t strlen(const char* str);
     void memcpy(void* dest, const void* src, size_t n);
@@ -589,6 +596,23 @@ utils.SetClipboardText = function(text)
 	user32.CloseClipboard()
 end
 
+-- ----------------------------------------------------------------
+-- IsGameFocused: returns true when the foreground window belongs to
+-- the same process this Lua state is running in (i.e. FFXI / Ashita).
+-- Used by the auto-hide state machine in lib/render.lua to suppress
+-- the idle-fade while the user is alt-tabbed into another window.
+-- Cheap Win32 calls, safe to invoke every frame.
+-- ----------------------------------------------------------------
+local _pid_out = ffi.new('unsigned int[1]')
+local _own_pid = kernel32.GetCurrentProcessId()
+utils.IsGameFocused = function()
+	local hwnd = user32.GetForegroundWindow()
+	if hwnd == nil then return true end          -- be safe: assume focused
+	_pid_out[0] = 0
+	user32.GetWindowThreadProcessId(hwnd, _pid_out)
+	return _pid_out[0] == _own_pid
+end
+
 -- ================================================================
 -- Texture helpers
 -- ================================================================
@@ -628,14 +652,30 @@ end
 local FFXIC_BASE  = 'https://ffxiclopedia.fandom.com'
 local BGWIKI_BASE = 'https://www.bg-wiki.com'
 
+-- Canonicalise a zone name into the slug both wikis use in their
+-- article URLs:
+--   * spaces become underscores
+--   * [S] / [V] / [P1] bracketed suffixes become (S) / (V) / (P1)
+--     (both BG-Wiki AND FFXIClopedia URLs use parens, even though
+--     FFXIClopedia displays brackets in page titles)
+--   * '#' must be percent-escaped or browsers parse it as a URL
+--     fragment marker (e.g. "Mine Shaft #2716")
+local function wikiSlug(zoneName)
+	return (zoneName
+		:gsub(' ', '_')
+		:gsub('%[([^%]]+)%]', '(%1)')
+		:gsub('#', '%%23'))
+end
+
 utils.GetZoneWikiUrl = function(zoneName)
 	if not zoneName then return nil end
-	return FFXIC_BASE..'/wiki/'..zoneName:gsub(' ', '_')
+	return FFXIC_BASE..'/wiki/'..wikiSlug(zoneName)
 end
 
 utils.GetBgWikiZoneUrl = function(zoneName)
 	if not zoneName then return nil end
-	return BGWIKI_BASE..'/wiki/'..zoneName:gsub(' ', '_')
+	-- BG-Wiki article paths live under /ffxi/, not /wiki/.
+	return BGWIKI_BASE..'/ffxi/'..wikiSlug(zoneName)
 end
 
 -- Underscores/hyphens -> spaces; split CamelCase + letter|digit boundaries.
@@ -1118,17 +1158,24 @@ end
 
 utils.ParseUrlLink = function(text)
 	local url = ''
-	if not text:find('https') and not text:find('www.') and not text:find('localhost') then
+	if not text:find('http') and not text:find('www.') and not text:find('localhost') then
 		return url
 	end
 
 	local P = '!"$%&\'()*+,./;<=>?@%[\\%]^`{|}'
 	local url_pattern = '(([/%s]?)([^%s'..P..'][^%s'..P..'][^%s'..P..']*%.)([^%s'..P..'][^%s'..P..'][^%s'..P..']*%.)([^%s][^%s][^%s]*))'
 
-	local matched, leadingspace, part1, part2, part3 = string.match(
-		(text:gsub('https://www.', 'www.')):gsub('https://', 'www.'),
-		url_pattern
-	)
+	-- Normalise both https:// and http:// (with or without a leading
+	-- "www.") down to a bare "www." prefix so the three-segment url_pattern
+	-- above matches "http://foo.com/..." the same way it matches
+	-- "www.foo.com/...".  Order matters: strip https before http so that
+	-- the http substring inside https doesn't get double-replaced.
+	local normalised = text
+		:gsub('https://www%.', 'www.')
+		:gsub('https://',      'www.')
+		:gsub('http://www%.',  'www.')
+		:gsub('http://',       'www.')
+	local matched, leadingspace, part1, part2, part3 = string.match(normalised, url_pattern)
 
 	if matched then
 		local hasletters = part1:match('[A-z]') and part2:match('[A-z]') and part3:match('[A-z]')
@@ -1357,10 +1404,10 @@ utils.FFXI_MAP = {
 	['\x81\xAA'] = utf8.char(0x2191),   -- ↑
 	['\x81\xAB'] = utf8.char(0x2193),   -- ↓
 	['\x81\x99'] = utf8.char(0x2606),   -- ☆
-	['\x81\x9A'] = utf8.char(0x2605),   -- ★  (CEXI custom)
+	['\x81\x9A'] = utf8.char(0x2605),   -- ★
 	['\x81\x9C'] = utf8.char(0x0A66),   -- ০  (FFXI: drawn as 'O' in client font)
-	['\x81\x9E'] = utf8.char(0x25C7),   -- ◇  (CEXI custom)
-	['\x81\x9F'] = utf8.char(0x25C6),   -- ◆  (CEXI custom)
+	['\x81\x9E'] = utf8.char(0x25C7),   -- ◇
+	['\x81\x9F'] = utf8.char(0x25C6),   -- ◆
 	['\x81\xAC'] = utf8.char(0x2014),   -- —
 	['\x81\xF4'] = utf8.char(0x266A),   -- ♪
 	-- ---- 0x83 lead ----
@@ -2420,15 +2467,25 @@ end
 -- ================================================================
 -- Custom-filter file loader
 -- ================================================================
+--
+-- Filter files live in two sibling subfolders under filters/:
+--   filters/combat/*.txt -- applied to combat-log messages
+--   filters/other/*.txt  -- applied to non-combat messages
+-- The three helpers below all take a `kind` argument ('combat' or
+-- 'other') so the same logic drives both filter tabs.
 
--- Enumerate every .txt file in the combatfilters/ subfolder so the
--- Settings UI can offer a picker.  Sorted alphabetically.  Uses
--- `dir /b` which is a Windows built-in — fine here because the addon
--- only ever runs under Ashita / Windows.  Returns an empty table if
--- the folder doesn't exist or has no .txt files.
-utils.ListCombatFilters = function()
+local function filterDir(kind)
+	return addon.path..'\\filters\\'..kind
+end
+
+-- Enumerate every .txt file in filters/<kind>/ so the Settings UI
+-- can offer a picker.  Sorted alphabetically.  Uses `dir /b` which is
+-- a Windows built-in — fine here because the addon only ever runs
+-- under Ashita / Windows.  Returns an empty table if the folder
+-- doesn't exist or has no .txt files.
+utils.ListFilters = function(kind)
 	local filters = T{}
-	local p = io.popen('dir /b /a-d "'..addon.path..'\\combatfilters\\*.txt" 2>nul')
+	local p = io.popen('dir /b /a-d "'..filterDir(kind)..'\\*.txt" 2>nul')
 	if p then
 		for filename in p:lines() do
 			table.insert(filters, filename)
@@ -2439,46 +2496,56 @@ utils.ListCombatFilters = function()
 	return filters
 end
 
--- Cheap existence check for the active filter file.  Used by the CL
+-- Cheap existence check for the active filter file.  Used by the
 -- Filters tab + lifecycle init to detect "active filter was deleted
 -- behind our back" and react gracefully (red warning + auto-disable
 -- the master toggle so filtering doesn't silently no-op).
-utils.CombatFilterExists = function(filename)
+utils.FilterFileExists = function(kind, filename)
 	if filename == nil or filename == '' then return false end
-	local f = io.open(addon.path..'/combatfilters/'..filename, 'rb')
+	local f = io.open(filterDir(kind):gsub('\\', '/')..'/'..filename, 'rb')
 	if f == nil then return false end
 	f:close()
 	return true
 end
 
--- Load and parse a single filter file from combatfilters/.  `filename`
--- defaults to the legacy 'custom_combat_filters.txt' so older settings
--- without a SelectedCombatFilter slot still work.  Missing files are
--- non-fatal — return an empty list so the addon keeps running with
--- no custom filters applied (e.g. user deleted/renamed the file via
--- the Settings UI).
-utils.LoadCustomFilters = function(filename)
-	local custmFilters = T{}
+-- Load and parse a single filter file from filters/<kind>/.  Missing
+-- files are non-fatal — return an empty list so the addon keeps
+-- running with no filters applied (e.g. user deleted/renamed the
+-- file via the Settings UI).
+--
+-- File-format note: scope suffixes ('_y' / '_p') only apply to the
+-- 'combat' kind, where the parser has the isYou / isParty / isAlliance
+-- determination needed to honour them.  For the 'other' kind every
+-- line is taken verbatim as the filter pattern and stored with the
+-- default '_z' (all) scope.  A literal underscore inside a non-combat
+-- filter (e.g. "you_didn't_catch") therefore stays part of the word
+-- and isn't mis-parsed as a scope marker.
+utils.LoadFilters = function(kind, filename)
+	local result = T{}
 	filename = filename or 'example.txt'
 
-	local f = io.open(addon.path..'/combatfilters/'..filename, 'rb')
+	local f = io.open(filterDir(kind):gsub('\\', '/')..'/'..filename, 'rb')
 	if f == nil then
-		return custmFilters
+		return result
 	end
 	for line in f:lines() do
 		if line:sub(1, 2) ~= '##' and not line:match('^%s*\n?$') then
-			local p2 = line:find('%_')
-			if p2 then
-				local l1 = line:sub(1, p2 - 1)
-				local l2 = line:sub(p2, #line)
-				table.insert(custmFilters, {l1:trimex(), l2:trimex()})
+			if kind == 'combat' then
+				local p2 = line:find('%_')
+				if p2 then
+					local l1 = line:sub(1, p2 - 1)
+					local l2 = line:sub(p2, #line)
+					table.insert(result, {l1:trimex(), l2:trimex()})
+				else
+					table.insert(result, {line:trimex(), '_z'})
+				end
 			else
-				table.insert(custmFilters, {line:trimex(), '_z'})
+				table.insert(result, {line:trimex(), '_z'})
 			end
 		end
 	end
 	f:close()
-	return custmFilters
+	return result
 end
 
 -- ================================================================
@@ -2496,6 +2563,21 @@ utils.RevertShiftJIS = function(text)
 		text = text:gsub(chars, utils.ShiftJISback[i][3])
 	end
 	return text
+end
+
+-- ================================================================
+-- 24h -> 12h timestamp conversion (no AM/PM).  Subtracts 12 from
+-- the leading two-digit hour when it is greater than 12, preserving
+-- the two-digit zero-padded shape (e.g. "[14:30]" -> "[02:30]").
+-- Hours <= 12 (including 00) are left untouched.
+-- ================================================================
+utils.fmt_ts_12h = function(ts)
+	return (ts:gsub('^(%[?)(%d%d)', function(open, hh)
+		local h = tonumber(hh)
+		if h and h > 12 then
+			return open..string.format('%02d', h - 12)
+		end
+	end))
 end
 
 
@@ -2521,76 +2603,6 @@ utils.stringsplit = function(input, sep)
 		table.insert(result, str)
 	end
 	return result
-end
-
--- ================================================================
--- Emoji-name parsing (":smile:" -> codepoint).  Rewrites the text
--- in-place, leaving emoji-supplemental glyphs surrounded by '*' so
--- they remain visible in fallback fonts.
--- ================================================================
-
-utils.parseEmoji = function(text)
-	text = text:gsub(':1st_place_medal:', ':first_place_medal:')
-	text = text:gsub(':2nd_place_medal:', ':second_place_medal:')
-	text = text:gsub(':3rd_place_medal:', ':third_place_medal:')
-
-	local idx = 1
-	while idx < #text or idx < 4092 do
-		local b = text:find(':', idx, true)
-		if not b then break end
-
-		local e = text:find(':', b + 1, true)
-		if not e or e - 1 <= 0 then break end
-
-		local cp = emojis[1][text:sub(b + 1, e - 1)]
-		if cp then
-			if cp >= 0x1FA70 and cp <= 0x1FAFF then
-				text = text:sub(1, b - 1) .. '*' .. text:sub(b + 1, e - 1) .. '*' .. text:sub(e + 1, #text)
-			else
-				text = text:sub(1, b - 1) .. utf8.char(cp) .. text:sub(e + 1, #text)
-			end
-			idx = e
-		end
-		idx = b + 1
-	end
-
-	return text
-end
-
--- ================================================================
--- Wrap multi-byte UTF-8 characters in MC color sequences so
--- emojis render in the highlight color used for them.
--- ================================================================
-
-utils.emojiCols = function(text)
-	local out = {}
-	local idx = 1
-	local len = #text
-
-	while idx <= len do
-		local b = text:byte(idx)
-
-		-- 4-byte UTF-8 (U+10000..U+10FFFF) - e.g. 😀
-		if b >= 0xF0 and b <= 0xF4 and idx + 3 <= len then
-			out[#out + 1] = utils.MC(0xFFFBD043)
-			out[#out + 1] = text:sub(idx, idx + 3)
-			out[#out + 1] = utils.MC('reset')
-			idx = idx + 4
-
-		-- 3-byte UTF-8 (U+0800..U+FFFF) - e.g. ❤ ☀ ♻ ✨
-		elseif b >= 0xE0 and b <= 0xEF and idx + 2 <= len then
-			out[#out + 1] = utils.MC(0xFFFBD043)
-			out[#out + 1] = text:sub(idx, idx + 2)
-			out[#out + 1] = utils.MC('reset')
-			idx = idx + 3
-
-		else
-			out[#out + 1] = text:sub(idx, idx)
-			idx = idx + 1
-		end
-	end
-
-	return table.concat(out)
 end
 
 -- ================================================================

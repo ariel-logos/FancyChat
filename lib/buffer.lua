@@ -64,6 +64,8 @@ function M.ChangeTab(fo_id, tabName)
 		if tabName == 'Tell'      then b.ChatBufferMode[fo_id] = 6; return b.ChatBufferN_Tell      end
 		if tabName == 'Shout'     then b.ChatBufferMode[fo_id] = 7; return b.ChatBufferN_Shout     end
 		if tabName == 'Custom'    then b.ChatBufferMode[fo_id] = 8; return b.ChatBufferN_Custom    end
+		if tabName == 'L1'        then b.ChatBufferMode[fo_id] = 9; return b.ChatBufferN_L1        end
+		if tabName == 'L2'        then b.ChatBufferMode[fo_id] = 10; return b.ChatBufferN_L2       end
 		return b.ChatBufferIdx[fo_id]
 	end)()
 

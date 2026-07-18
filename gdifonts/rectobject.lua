@@ -27,16 +27,34 @@ local default_settings = {
     z_order = 0,
 };
 
+-- Convert a 32-bit colour value that's stored as a signed Lua number
+-- (i.e. high alpha byte makes the Lua double negative) to its positive
+-- uint32 equivalent.  Works around a LuaJIT FFI JIT-trace bug where the
+-- first negative-signed input to a trace that previously only saw
+-- positive ints can be silently converted to 0 when assigned to a
+-- uint32_t field.  The Lua-double range comfortably holds all of
+-- [0, 2^32-1], so going through positive numbers avoids the bug.
+-- Detection point: during FancyChat's auto-hide fade-in, the alpha
+-- modulation walks from 0 upward.  All alphas below 0x80 land in
+-- positive Lua-number territory and JIT the trace for "non-negative
+-- int -> uint32".  The FIRST cross into 0x80+ (negative Lua number)
+-- mis-converts to 0, blanking the plate texture for one frame and
+-- producing the "plate vanishes after fade-in completes" symptom.
+local function uint32_of(n)
+    if n < 0 then return n + 4294967296 end
+    return n
+end
+
 local function CreateRectData(settings)
     local data = ffi.new('GdiRectData_t');
-    data.Width = settings.width;
-    data.Height = settings.height;
-    data.Diameter = settings.corner_rounding;
-    data.OutlineColor = settings.outline_color;
-    data.OutlineWidth = settings.outline_width;
-    data.FillColor = settings.fill_color;
+    data.Width         = settings.width;
+    data.Height        = settings.height;
+    data.Diameter      = settings.corner_rounding;
+    data.OutlineColor  = uint32_of(settings.outline_color);
+    data.OutlineWidth  = settings.outline_width;
+    data.FillColor     = uint32_of(settings.fill_color);
     data.GradientStyle = settings.gradient_style;
-    data.GradientColor = settings.gradient_color;
+    data.GradientColor = uint32_of(settings.gradient_color);
     return data;
 end
 

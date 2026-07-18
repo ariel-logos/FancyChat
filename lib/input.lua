@@ -174,7 +174,18 @@ function M.register()
 			AshitaCore:GetChatManager():QueueCommand(-1, '/sendkey enter down')
 			local cmd = AshitaCore:GetChatManager():GetInputTextRaw()
 			if #cmd > 0 and not cmd:find('^%s*$') then
-				--updateCommandList(cmd)   -- debug_window disabled
+				-- Push the submitted command to typed-history slot [1].
+				-- (Replaces the old updateCommandList() call from the
+				-- now-removed debug window.)  Prepend so the most
+				-- recent entry is at index 1, matching the cycling code
+				-- which steps idx 0 -> 1 -> 2 ... for "Prev".  Skip if
+				-- identical to the current head (debounces the case
+				-- where the keyboard path also fires for the same line).
+				local hist = fcw[1].LastCommands[1]
+				if hist[1] ~= cmd then
+					table.insert(hist, 1, cmd)
+					while #hist > 30 do hist[#hist] = nil end
+				end
 			end
 			gamepadButtons.pressedEnter = true
 			gamepadButtons.buttonsCD = os.clock()
@@ -260,12 +271,18 @@ function M.register()
 		end
 
 		-- Pressing Enter while typing in the chat input commits the line
-		-- to the per-character command history.
+		-- to the per-character command history.  Block runs every frame
+		-- Enter is held, so the de-dup (hist[1] ~= cmd) keeps the list
+		-- clean of repeated pushes for a single key-down.
 		if AshitaCore:GetChatManager():IsInputOpen() == 0x11
 			and (keyptr[28] ~= 0 or keyptr[156] ~= 0) then
 			local cmd = AshitaCore:GetChatManager():GetInputTextRaw()
 			if #cmd > 0 and not cmd:find('^%s*$') then
-				--updateCommandList(cmd)   -- debug_window disabled
+				local hist = fcw[1].LastCommands[1]
+				if hist[1] ~= cmd then
+					table.insert(hist, 1, cmd)
+					while #hist > 30 do hist[#hist] = nil end
+				end
 			end
 		end
 

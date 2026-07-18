@@ -1,0 +1,23 @@
+## You can filter NON-combat chat messages by adding, in the list below, words that
+## would appear in unwanted lines.  Combat lines (damage, healing, status effects,
+## etc.) are handled by the separate Combat Filters tab, NOT by this file.
+##
+## Typical use cases: shout spam, repeat NPC dialog, system announcements, etc.
+##
+## Words must be present in the original message, not the one processed by FancyChat
+## Word matching is non case sensitive
+##
+## You can use a double # to comment lines
+## Empty lines are allowed
+##
+## Experimental: support for lua pattern matching syntax ("lua regex")
+## es. %s %d ? .- .* (see https://gist.github.com/spr2-dev/46ca9f4a6f933fa266bccd87fd15d09a)
+##
+## !!! Very long lists could cause performance issues !!!
+
+
+## Examples (commented out; uncomment to enable)
+##
+## You are unable
+## Apururu
+## You didn't catch

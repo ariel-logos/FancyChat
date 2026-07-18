@@ -56,10 +56,10 @@ end
 function M.default_fcw()
 	return T{
 		T{
-			-- cexi
 			LastCommands = T{
 				{}, 0,
-				{'/fish','/sit','/heal','/invite','/decline','/join','/follow','/map','/logout','/shutdown'},
+				{'/heal', '/sit', '/logout', '/leave', '/invite <t>', '/check <t>',
+				 '/search all', '/playtime'},
 				1
 			},
 			HasDoneServMes		  = false,
@@ -93,6 +93,7 @@ function M.default_fcw()
 			MoveChatPos2          = 0,
 			MoveChatPos3          = 0,
 			MoveChatPos4          = 0,
+			MoveChatPos5          = 0,
 			MoveChat              = false,
 			PrevMoveChat          = false,
 			InitDone              = false,
@@ -262,6 +263,14 @@ function M.default_chat_buffer()
 		{'Tell',      T{text = T{},             color = T{}, auxText = T{}, auxColor = T{}, url = T{}}},
 		{'Shout',     T{text = T{},             color = T{}, auxText = T{}, auxColor = T{}, url = T{}}},
 		{'Custom',    T{text = T{},             color = T{}, auxText = T{}, auxColor = T{}, url = T{}}},
+		-- Slots 9 + 10 are used only when SplitLinkshellTab is enabled.
+		-- They mirror slot 4's shape; the existing slot 4 stays unused
+		-- in split mode and these stay unused otherwise.  Decision is
+		-- made once at Init() based on the persisted setting, so the
+		-- per-message routing is a single static branch and not a
+		-- per-line gate.
+		{'L1',        T{text = T{},             color = T{}, auxText = T{}, auxColor = T{}, url = T{}}},
+		{'L2',        T{text = T{},             color = T{}, auxText = T{}, auxColor = T{}, url = T{}}},
 	}
 end
 
@@ -280,20 +289,43 @@ function M.default_settings()
 		MoveChatATMenu       = T{true},
 		CustomFilters        = T{false},
 		SelectedCombatFilter = 'example.txt',
+		-- Parallel slots for the non-combat ("Other") filter list,
+		-- backed by filters/other/*.txt.  Same shape as the combat
+		-- pair above so the Filters tab can drive both with one
+		-- factored helper.
+		OtherFilters         = T{false},
+		SelectedOtherFilter  = 'example.txt',
 		autoDumpChat         = T{false},
-		CustomTabModes       = T{false, false, false, false, false},  -- npc, ls, party, tell, shout
+		-- Slots 1-5: NPC, LS (used when SplitLinkshellTab is off),
+		-- Party, Tell, Shout.  Slots 6-7: L1, L2 (used only when
+		-- SplitLinkshellTab is on; ignored otherwise).  The UI shows
+		-- either slot 2 OR slots 6+7 depending on the split state.
+		CustomTabModes       = T{false, false, false, false, false, false, false},  -- npc, ls, party, tell, shout, L1, L2
 		ItemPreview          = T{true},
 		AutoHideWindow       = T{false},
 		AutoHideTimeMax      = 10,
 		Notes                = T{},
 		CSMode               = {'Hide 2nd', 2},
 		CompactCombat        = {true},
+		-- When true, new chat lines appear immediately at the bottom
+		-- with no scroll-up animation.  Read at the top of the per-
+		-- frame catch-up block in render.lua.  Bound to a "requires
+		-- restart" checkbox in the Chat Window tab; the toggle goes
+		-- through `set.InstantChatScroll` so it's only committed on
+		-- "Restart & apply".
+		InstantChatScroll    = T{false},
 		CombatSplitChar      = {'Greater >', 0x003E},  -- alternatives: 0x7E ~, 0x2022 •, 0x2043 ⁃
 		GuideMeSecondWindow  = T{false},
 		GuideMeFontScale     = 1,
 		EnableFastScroll     = T{true},
 		EnabledChatMove      = T{false},
 		LockWindowPos        = T{false},
+		-- When true, FancyChat stays visible even while the legacy
+		-- FFXI chat window is open (clicked / typing).  Default off,
+		-- which preserves the original "legacy open => FC hidden"
+		-- exclusive behaviour.  Checked by the visibility gates in
+		-- render.lua alongside uiw.LegacyChatOpen.
+		ShowWithLegacy       = T{false},
 		HelpButton           = T{true},
 		CompactTabs          = false,
 		PlayerName           = '---',
@@ -341,14 +373,47 @@ function M.default_settings()
 		-- controllers whose physical buttons map to different XInput
 		-- numbers than an Xbox pad would.
 		XboxController       = T{false},
+		-- When true, the Linkshell tab is replaced with two separate
+		-- L1 / L2 tabs and linkshell-1 / linkshell-2 traffic is routed
+		-- into the corresponding buffer slot only.  Persisted; the
+		-- routing decision is made once at addon load (Init()) so
+		-- toggling requires a Restart & apply.  Lives in the Chat
+		-- Window tab's restart-required group.
+		SplitLinkshellTab    = T{false},
 		blockAll             = T{false},
 		blockCombat          = T{false},
 		timeStamp            = T{true},
+		TimeStamp12h         = T{false},
 		timeStampLine        = {false},
 		timeStampLineFreq    = {'10 minutes', 600},
 		hideNonParty         = T{true},
 		hideNonYou           = T{false},
 		hideAlliance         = T{true},
+		-- Packet-based filter (alternative to the three booleans above).
+		-- When PacketFilterEnabled2 is true, the parser consults the
+		-- combat-packets classifier and applies the hierarchy level
+		-- below; the three text-based hide flags are ignored.  Level
+		-- semantics: 1=show all (Others) | 2=hide Others | 3=also
+		-- hide Alliance | 4=also hide non-pet party | 5=also hide
+		-- Pet (show only You).  TARGET (the mob you/party are
+		-- engaged with) is always shown regardless of level.
+		--
+		-- KEY MIGRATION NOTE: this was originally `PacketFilterEnabled`
+		-- with a default of true.  After spell-interrupt crashes
+		-- (combat_packets pcall fix), we want to force existing players
+		-- back to text-mode filtering by default and let them opt back
+		-- into packet mode.  Renaming the key causes RepairSettings to
+		-- prune the old saved value on next load, so the new default
+		-- (false) takes effect.  Players who deliberately re-enable
+		-- packet mode via the UI then save the new key.
+		PacketFilterEnabled2 = T{false},
+		PacketFilterLevel    = 1,
+		-- When true, restricts the TARGET scope to actions whose
+		-- target list contains the local player.  Other TARGET
+		-- packets (mob hitting a party member, etc.) get blocked.
+		-- Useful for solo-ish "only show what's happening to ME"
+		-- play.  Ignored when packet-based filtering is off.
+		PacketFilterTargetMeOnly = T{false},
 		heartEmoji           = T{false},
 		EnableFCColorMarking = T{true},
 		selectedNotification = 'notification_1',
@@ -438,7 +503,6 @@ function M.default_colors()
 		dmggot       = {0xFFFA4343, 0xFFFFA269},
 		spelldmgdone = {0xFFADFF33, 0xFF5EE0DE},
 		spelldmggot  = {0xFFFC2B43, 0xFFE6874C},
-		cexi         = {0xFF00FFB3, 0xFFFF0055},
 	}
 end
 
@@ -467,7 +531,6 @@ M.color_descriptions = {
 	dmggot       = {'Damage Taken',  	   'Highlights damage taken by you or your missed attacks.'},
 	spelldmgdone = {'Spell Dmg Done',      'Highlights spell damage done'},
 	spelldmggot  = {'Spell Dmg Taken',     'Highlights spell damage taken'},
-	cexi         = {'CEXI',                'CEXI content messages'},
 	ability      = {'Ability/Spell',       'Highlights an ability or spell used by an Entity'},
 	you          = {'You',                 'Color highlighting youin combat text.'},
 	actor1       = {'Friend Entity',       'Color highlighting the friendly entity in combat text.\n(i.e. the player, party members, etc.'},

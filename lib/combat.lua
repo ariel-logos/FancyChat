@@ -179,6 +179,7 @@ function M.CombatText(msg, chn)
 
 	if msg:find('ranged attack') then
 		A, Ext = msg:match('^(.*)(%\'s.*)$')
+		if not A or not Ext then return msg end
 		if Ext:find('miss') then
 			if A == fcw[1].PlayerName then par.DamageGot = true end
 			A = classifyA(A)
@@ -188,6 +189,7 @@ function M.CombatText(msg, chn)
 			return msg
 		elseif Ext:find('pummeling') then
 			B, DMG = Ext:match('^.*pummeling (.*) for (.*) points of damage!$')
+			if not B or not DMG then return msg end
 			A = classifyA(A)
 
 			B = classifyB(B)
@@ -437,7 +439,9 @@ function M.CombatText(msg, chn)
 
 	if c > 0 then
 		if not msg:find('^[Tt]he') then
-			msg = '['..msg:sub(1, msg:find(' ') - 1)..']'..msg:sub(msg:find(' '), #msg)
+			local sp = msg:find(' ')
+			if not sp then return msg end
+			msg = '['..msg:sub(1, sp - 1)..']'..msg:sub(sp, #msg)
 		else
 			msg = msg:gsub('^[Tt]he ', '')
 		end
@@ -551,6 +555,7 @@ function M.CombatSpellText(msg, chn)
 		-- "X casts Y on Z."
 		if msg:find(' casts? ') and msg:find(' on ') then
 			A, S, B = msg:match('^(.*) casts? ([^%.]*) on (.*)%.%s?$')
+			if not A or not S or not B then return msg end
 			A = classifyA(A)
 
 			B = classifyB(B)
@@ -682,7 +687,9 @@ function M.CombatSpellText(msg, chn)
 
 	if c > 0 then
 		if not msg:find('^[Tt]he') then
-			msg = '['..msg:sub(1, msg:find(' ') - 1)..']'..msg:sub(msg:find(' '), #msg)
+			local sp = msg:find(' ')
+			if not sp then return msg end
+			msg = '['..msg:sub(1, sp - 1)..']'..msg:sub(sp, #msg)
 		else
 			msg = msg:gsub('^[Tt]he ', '')
 		end

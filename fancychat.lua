@@ -4,7 +4,7 @@ addon.author    = 'Arielfy';
 addon.desc      = 'Fancy Chat!';
 addon.link      = '';
 
-local ver = '0.9.260515'
+local ver = '1.0.260718R'
 addon.version = ver
 
 --[[

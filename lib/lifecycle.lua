@@ -32,27 +32,51 @@ function M.SaveSettings()
 end
 _G.SaveSettings = M.SaveSettings
 
--- Validate that allSettings.SelectedCombatFilter still exists on disk.
--- Sets set.filterFileMissing accordingly so the CL Filters tab can
--- render its red warning, and on the transition  exists -> missing
--- auto-disables allSettings.CustomFilters[1] (the master "Enable
--- Combat Log chat filters" toggle) + prints a one-shot /echo notice.
--- Idempotent: safe to call from any detection point (tab open, Refresh,
--- Reload, master-toggle-on, init).  When the file reappears the flag
--- is cleared on the next call, no notice (only the missing transition
--- is loud).
-function M.CheckActiveCombatFilter()
-	local fname       = allSettings.SelectedCombatFilter
-	local exists      = utils.CombatFilterExists(fname)
-	local was_missing = set.filterFileMissing
-	set.filterFileMissing = not exists
+-- Validate that the active filter file for `kind` ('combat' or
+-- 'other') still exists on disk.  Sets the matching missing-flag on
+-- `set` so the Filters tab can render its red warning, and on the
+-- transition  exists -> missing  auto-disables the master toggle for
+-- that kind + prints a one-shot /echo notice.
+-- Idempotent: safe to call from any detection point (tab open,
+-- Refresh, Reload, master-toggle-on, init).  When the file reappears
+-- the flag is cleared on the next call, no notice (only the missing
+-- transition is loud).
+local FILTER_KIND_KEYS = {
+	combat = {
+		selected = 'SelectedCombatFilter',
+		master   = 'CustomFilters',
+		missing  = 'filterFileMissing',
+		label    = 'combat',
+	},
+	other = {
+		selected = 'SelectedOtherFilter',
+		master   = 'OtherFilters',
+		missing  = 'otherFilterFileMissing',
+		label    = 'other',
+	},
+}
+
+function M.CheckActiveFilter(kind)
+	local k = FILTER_KIND_KEYS[kind]
+	if not k then return end
+	local fname       = allSettings[k.selected]
+	local exists      = utils.FilterFileExists(kind, fname)
+	local was_missing = set[k.missing]
+	set[k.missing] = not exists
 	if not exists and not was_missing then
-		if allSettings.CustomFilters[1] then
-			allSettings.CustomFilters[1] = false
+		if allSettings[k.master][1] then
+			allSettings[k.master][1] = false
 			M.SaveSettings()
 		end
-		print('FancyChat: filter file "'..tostring(fname)..'" no longer exists - chat filtering disabled.')
+		print('FancyChat: '..k.label..' filter file "'..tostring(fname)..'" no longer exists - chat filtering disabled.')
 	end
+end
+_G.CheckActiveFilter = M.CheckActiveFilter
+
+-- Back-compat shim: anything that imported the old global keeps
+-- working.  Equivalent to CheckActiveFilter('combat').
+function M.CheckActiveCombatFilter()
+	M.CheckActiveFilter('combat')
 end
 _G.CheckActiveCombatFilter = M.CheckActiveCombatFilter
 
@@ -85,6 +109,43 @@ _G.DumpChat = M.DumpChat
 function M.Init()
 	local dsize = imgui.GetIO().DisplaySize
 
+	-- Rebuild tab.Tabs once per Init based on the SplitLinkshellTab
+	-- setting.  In split mode the single 'Linkshell' tab is replaced
+	-- with two consecutive 'L1' / 'L2' entries (kept at the same
+	-- position so the tab order stays consistent).  This is the
+	-- restart-required half of the toggle - flipping it requires
+	-- /addon reload which re-runs Init().
+	if allSettings.SplitLinkshellTab[1] then
+		local newTabs = T{}
+		for i = 1, #tab.Tabs do
+			if tab.Tabs[i] == 'Linkshell' then
+				newTabs[#newTabs + 1] = 'L1'
+				newTabs[#newTabs + 1] = 'L2'
+			else
+				newTabs[#newTabs + 1] = tab.Tabs[i]
+			end
+		end
+		tab.Tabs = newTabs
+		-- Replace 'Linkshell' in the persisted SelectedTab / SelectedTab2
+		-- with 'L1' so the user doesn't land on a no-longer-existent tab
+		-- after toggling the setting on.
+		if allSettings.SelectedTab  == 'Linkshell' then allSettings.SelectedTab  = 'L1' end
+		if allSettings.SelectedTab2 == 'Linkshell' then allSettings.SelectedTab2 = 'L1' end
+		if tab.NextTab  == 'Linkshell' then tab.NextTab  = 'L1' end
+		if tab.NextTab2 == 'Linkshell' then tab.NextTab2 = 'L1' end
+	else
+		-- Inverse correction: if the user is turning split OFF and had
+		-- previously selected L1 / L2, fall back to plain 'Linkshell'.
+		if allSettings.SelectedTab  == 'L1' or allSettings.SelectedTab  == 'L2' then
+			allSettings.SelectedTab = 'Linkshell'
+		end
+		if allSettings.SelectedTab2 == 'L1' or allSettings.SelectedTab2 == 'L2' then
+			allSettings.SelectedTab2 = 'Linkshell'
+		end
+		if tab.NextTab  == 'L1' or tab.NextTab  == 'L2' then tab.NextTab  = 'Linkshell' end
+		if tab.NextTab2 == 'L1' or tab.NextTab2 == 'L2' then tab.NextTab2 = 'Linkshell' end
+	end
+
 	fo.BigMode = gdi:create_object(allSettings.fontSettings, false)
 	fo.BigMode:set_font_height(allSettings.fontSettings.font_height - 2)
 	fo.BigMode:set_text('Big Mode')
@@ -93,7 +154,7 @@ function M.Init()
 	ro.BigMode = gdi:create_rect(allSettings.rectSettings, false)
 	ro.BigMode:set_fill_color(0x00000000)
 
-	fcw[3].BG_W      = allSettings.chatLineMaxL * allSettings.fontSettings.font_height * 0.58
+	fcw[3].BG_W      = allSettings.chatLineMaxL * allSettings.fontSettings.font_height * 0.59
 	fcw[3].BG_H      = math.floor(dsize.y * 0.8)
 	fcw[3].ChatLines = math.floor(fcw[3].BG_H / allSettings.fontSettings.font_height)
 	fcw[3].HLeft     = fcw[3].BG_H - (fcw[3].ChatLines * allSettings.fontSettings.font_height)
@@ -106,17 +167,17 @@ function M.Init()
 		if allSettings.SecondChat[1] then ChangeTab(2, tab.NextTab2) end
 	end
 
-	fcw[1].BG_W = allSettings.chatLineMaxL * allSettings.fontSettings.font_height * 0.58
+	fcw[1].BG_W = allSettings.chatLineMaxL * allSettings.fontSettings.font_height * 0.59
 	fcw[1].BG_H = math.floor(allSettings.fontSettings.font_height * allSettings.ChatLines * fcw[1].BGScale)
 	ro.RectBG[1]:set_fill_color(allSettings.rectSettings.fill_color)
-	ro.RectBG[1]:set_width(allSettings.chatLineMaxL * allSettings.fontSettings.font_height * 0.58)
+	ro.RectBG[1]:set_width(allSettings.chatLineMaxL * allSettings.fontSettings.font_height * 0.59)
 	ro.RectBG[1]:set_height(allSettings.fontSettings.font_height * (allSettings.ChatLines + 1) + (allSettings.fontSettings.font_height / 5))
 
 	if allSettings.SecondChat[1] then
-		fcw[2].BG_W = allSettings.chatLineMaxL * allSettings.fontSettings.font_height * 0.58
+		fcw[2].BG_W = allSettings.chatLineMaxL * allSettings.fontSettings.font_height * 0.59
 		fcw[2].BG_H = math.floor(allSettings.fontSettings.font_height * allSettings.ChatLines * fcw[2].BGScale)
 		ro.RectBG[2]:set_fill_color(allSettings.rectSettings.fill_color)
-		ro.RectBG[2]:set_width(allSettings.chatLineMaxL * allSettings.fontSettings.font_height * 0.58)
+		ro.RectBG[2]:set_width(allSettings.chatLineMaxL * allSettings.fontSettings.font_height * 0.59)
 		ro.RectBG[2]:set_height(allSettings.fontSettings.font_height * (allSettings.ChatLines + 1) + (allSettings.fontSettings.font_height / 5))
 	end
 
@@ -147,13 +208,17 @@ _G.Init = M.Init
 
 function M.register()
 
-	-- =====================================================================
-	-- Addon load: scan FFXiMain.dll for required pointers, load saved
-	-- settings, instantiate GDI font / rect objects for both chat windows.
-	-- =====================================================================
-	ashita.events.register('load', 'load_cb', function ()
-
-		-- Memory pointer scans -------------------------------------------------
+	-- ---------------------------------------------------------------------
+	-- FFXiMain.dll pattern scans, extracted so they can be re-run after
+	-- the game finishes initialising.  Pulled out of the load callback
+	-- because on some FFXi distributions the DLL is patched / relocated
+	-- at runtime after Ashita addons
+	-- finish loading; the scans that ran during 'load' would resolve
+	-- against a not-yet-final code layout, leaving menu-overlap
+	-- detection silently broken until /addon reload from in-game.
+	-- See the matching d3d_present rescan registration below.
+	-- ---------------------------------------------------------------------
+	local function scan_memory_pointers()
 		dw.testPTR        = ashita.memory.find('FFXiMain.dll', 0, '8B480C85C974??8B510885D274??3B05', 16, 0)
 		dw.testPTR        = ashita.memory.read_uint32(dw.testPTR)
 
@@ -189,6 +254,32 @@ function M.register()
 		uiw.MenuPtr      = ashita.memory.read_uint32(uiw.MenuPtr)
 
 		uiw.EventPtr     = ashita.memory.find('FFXiMain.dll', 0, 'A0????????84C0741AA1????????85C0741166A1????????663B05????????0F94C0C3', 0, 0)
+	end
+
+	-- One-shot re-scan latch.  Flipped to true after the d3d_present
+	-- handler below sees a populated player entity and re-runs the
+	-- pattern scans (auto-equivalent of the user typing /addon reload
+	-- once they're logged in).
+	local _pointers_rescanned = false
+	ashita.events.register('d3d_present', 'ptr_rescan_cb', function ()
+		if _pointers_rescanned then return end
+		local pe = GetPlayerEntity()
+		if pe and pe.ServerId and pe.ServerId ~= 0 then
+			scan_memory_pointers()
+			_pointers_rescanned = true
+		end
+	end)
+
+	-- =====================================================================
+	-- Addon load: scan FFXiMain.dll for required pointers, load saved
+	-- settings, instantiate GDI font / rect objects for both chat windows.
+	-- =====================================================================
+	ashita.events.register('load', 'load_cb', function ()
+
+		-- Initial scan; may resolve against a not-yet-final code layout
+		-- if Ashita brought the addon up before FFXi's runtime patches
+		-- settled.  The d3d_present-driven re-scan above corrects that.
+		scan_memory_pointers()
 
 		-- Settings load + repair ----------------------------------------------
 		-- Snapshot the *defaults* schema (deep copy) BEFORE settings.load
@@ -247,22 +338,35 @@ function M.register()
 		ResetAutoHideTimer()
 		set.alertList     = utils.stringsplit(allSettings.alertwords, ',')
 		set.alertBuffer[1] = allSettings.alertwords
-		par.customFilters = utils.LoadCustomFilters(allSettings.SelectedCombatFilter)
-		-- Detection point: addon load.  If the persisted active filter
+		par.customFilters = utils.LoadFilters('combat', allSettings.SelectedCombatFilter)
+		par.otherFilters  = utils.LoadFilters('other',  allSettings.SelectedOtherFilter)
+		-- Detection point: addon load.  If a persisted active filter
 		-- file was deleted while the addon was offline, this raises
-		-- set.filterFileMissing and forces the master toggle off so we
-		-- don't boot up in the silently-broken "enabled but empty" state.
-		M.CheckActiveCombatFilter()
+		-- the matching missing flag and forces the master toggle off
+		-- so we don't boot up in the silently-broken "enabled but
+		-- empty" state.
+		M.CheckActiveFilter('combat')
+		M.CheckActiveFilter('other')
 
 		fcw[1].PlayerName = allSettings.PlayerName
 
+		-- Schema migration: older saved configs predate the L1 / L2
+		-- Custom-tab slots ([6] = L1, [7] = L2).  Pad with `false` so
+		-- the parser's matching branch and the Settings UI checkboxes
+		-- can address those slots without a NIL guard.  Idempotent.
+		while #allSettings.CustomTabModes < 7 do
+			allSettings.CustomTabModes[#allSettings.CustomTabModes + 1] = false
+		end
+
 		-- Mirror persisted settings into the live `set.*` working copy used
 		-- by the Settings UI's pending-edit fields.
-		set.SecondChat[1] = allSettings.SecondChat[1]
-		set.ChatLineMaxL  = allSettings.chatLineMaxL
-		set.PlateBGColor  = allSettings.rectSettings.fill_color
-		set.FontHeight    = allSettings.fontSettings.font_height
-		set.ChatLines     = allSettings.ChatLines
+		set.SecondChat[1]        = allSettings.SecondChat[1]
+		set.ChatLineMaxL         = allSettings.chatLineMaxL
+		set.PlateBGColor         = allSettings.rectSettings.fill_color
+		set.FontHeight           = allSettings.fontSettings.font_height
+		set.ChatLines            = allSettings.ChatLines
+		set.InstantChatScroll[1] = allSettings.InstantChatScroll[1]
+		set.SplitLinkshellTab[1] = allSettings.SplitLinkshellTab[1]
 		for ct = 1, #allSettings.CustomTabModes do
 			set.CustomTabModes[ct] = allSettings.CustomTabModes[ct]
 		end
@@ -411,6 +515,7 @@ function M.register()
 		fcw[1].MoveChatPos2 = (dsize.x * 220) / uiw.UISizeX
 		fcw[1].MoveChatPos3 = (dsize.x * 260) / uiw.UISizeX
 		fcw[1].MoveChatPos4 = (dsize.x * 305) / uiw.UISizeX
+		fcw[1].MoveChatPos5 = (dsize.x * 136) / uiw.UISizeX
 
 		fcw[1].PositionLinesRequest = {true, true}
 		PositionLines(1)
@@ -439,7 +544,15 @@ function M.register()
 	-- Packet 0x000B: zone-out begin.  Suspend rendering.
 	-- Packet 0x000A: zone-in complete.  Resume.
 	-- =====================================================================
+	local combat_packets = require('lib.combat_packets')
 	ashita.events.register('packet_in', 'zonename_packet_in', function(e)
+		-- Packet-based combat filter: if enabled in settings, the
+		-- 0x0028 action packet is inspected and may have its chat
+		-- message fields zeroed (preserving animations) and the
+		-- 0x0029 action-message packet may be blocked entirely.
+		-- dispatch() routes both packet IDs.
+		combat_packets.dispatch(e)
+
 		-- "Is the server actually talking to us?" signal for the
 		-- /servmes injection in render.lua.  We count non-injected
 		-- (i.e., real-from-server) packets up to a cap; once the
@@ -462,6 +575,16 @@ function M.register()
 		elseif e.id == 0x000A then
 			fcw[1].Zoning = false
 			uiw.DialogShown = false
+			-- Late-stage pointer re-scan: 0x000A fires when zone-in
+			-- is fully complete, which on some clients is AFTER any
+			-- client-side patches to FFXiMain.dll have settled.  The load-time scan and
+			-- the d3d_present-based rescan can fire earlier - between
+			-- character-select and zone-in - and resolve against a
+			-- not-yet-patched code layout.  Rescanning on every zone
+			-- transition guarantees the pointers match the current
+			-- code state, which is what makes menu-overlap detection
+			-- work without the user having to Restart & apply.
+			scan_memory_pointers()
 		elseif e.id == 0x00E0 and not fcw[1].HasDoneServMes and fcw[1].WaitingServMes == 0 then
 			fcw[1].WaitingServMes = os.clock()
 		end

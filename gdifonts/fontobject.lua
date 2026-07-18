@@ -35,19 +35,29 @@ local default_settings = {
     z_order = 0,
 };
 
+-- See rectobject.lua for the rationale - same LuaJIT FFI JIT-trace
+-- bug: negative-signed Lua numbers (high alpha byte) can be silently
+-- converted to 0 when assigned to a uint32_t field after the trace
+-- specialised for positive ints.  Wrap colour writes through this
+-- so the trace always sees a positive Lua double.
+local function uint32_of(n)
+    if n < 0 then return n + 4294967296 end
+    return n
+end
+
 local function CreateFontData(settings)
     local data = ffi.new('GdiFontData_t');
-    data.BoxHeight = settings.box_height;
-    data.BoxWidth = settings.box_width;
-    data.FontHeight = settings.font_height;
-    data.OutlineWidth = settings.outline_width;
-    data.FontFlags = settings.font_flags;
-    data.FontColor = settings.font_color;
-    data.OutlineColor = settings.outline_color;
+    data.BoxHeight     = settings.box_height;
+    data.BoxWidth      = settings.box_width;
+    data.FontHeight    = settings.font_height;
+    data.OutlineWidth  = settings.outline_width;
+    data.FontFlags     = settings.font_flags;
+    data.FontColor     = uint32_of(settings.font_color);
+    data.OutlineColor  = uint32_of(settings.outline_color);
     data.GradientStyle = settings.gradient_style;
-    data.GradientColor = settings.gradient_color;
-    data.FontFamily = settings.font_family;
-    data.FontText = settings.text;
+    data.GradientColor = uint32_of(settings.gradient_color);
+    data.FontFamily    = settings.font_family;
+    data.FontText      = settings.text;
     return data;
 end
 

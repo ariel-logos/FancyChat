@@ -25,7 +25,7 @@ help.loremText=		{
 						{
 							'Disclaimer',
 							'A few things worth knowing up front:',
-							'- FancyChat is not designed to coexist with other addons that modify, reformat, or recolour chat messages. Running two chat-handling addons together can produce visual conflicts (duplicated lines, mangled formatting) and FancyChat will not be changed to fix them. That said, some other addons may happen to be compatible - you can try your luck by loading FancyChat as one of the last entries in your Ashita default script.',
+							'- FancyChat is not designed to coexist with other addons that modify, reformat, or recolour chat messages. Running two chat-handling addons together produces visual conflicts (duplicated lines, mangled formatting) that are not supported. Pick one chat addon and unload the others.',
 							'- Some features rely on screen sizes and ratios close to a standard 16:9 layout. On heavily non-standard resolutions you may need to nudge things back into place via Position Offsets in the Chat Window settings.',
 							'- A few features are marked as experimental in their settings labels. They are available to use but may not always behave perfectly in every corner case.',
 						}
@@ -92,7 +92,7 @@ help.chatwindowCompactCombat = {
 								'When Compact Combat Log is enabled (Settings -> Extra), FancyChat reformats combat messages into a tighter layout that uses small icons for the action type - a sword for melee hits, a bow icon for ranged attacks, a magic glyph for spells, a critical-hit marker, etc. - and highlights the actor names.',
 								'A line of the form "Eleanor hits Treant Sapling for 23 points of damage." becomes a compact line that visually reads "Eleanor [sword-icon] Treant Sapling > 23 DMG" - the action icon and the small ">" arrow between actor and damage are both custom glyphs from the bundled gameicons.ttf font. Actor name colours come from the Actor 1 / Actor 2 / You entries in Settings -> Font Colors.',
 								'Actor names are coloured according to who they are: yourself, a party member, an alliance member, or an unrelated player / monster - each gets its own slot in the Font Colors palette.',
-								'FancyChat is the only combat-log formatter that should be active - running another chat-modifying addon at the same time is not officially supported, though you can try your luck by loading FancyChat last in your default script (see Tips -> Compatibility with other chat addons).',
+								'FancyChat is the only combat-log formatter that should be active - running another chat-modifying addon at the same time is not supported (see Tips -> Compatibility with other chat addons).',
 								'The "Colorblind mode" option in Extra swaps the damage-done / damage-taken colours to a red-green-friendly palette.'
 						  }
 help.chatwindowZoneSearch = {
@@ -198,7 +198,7 @@ help.tipsRestoreLegacy = {
 
 help.tipsCleanCombat = {
 	'Cleaning up combat-log spam',
-	'If a particular type of combat message is cluttering your chat (effect-wears-off, no-effect, etc.):\n1. Settings -> Extra -> enable "Hide alliance combat log" and "Hide non-party combat log" to focus the combat tab on you and your party.\n2. For more surgical filtering, use Settings -> CL Filters: pick a filter file in the Active filter file dropdown (or click Open Folder to add a new .txt under combatfilters/), click Edit Selected Filter to add filter words one per line, then click Reload Selected Filter and tick "Enable Combat Log chat filters". Each filter can be scoped to apply to all messages, all-but-you, or all-but-party.',
+	'If a particular type of combat message is cluttering your chat (effect-wears-off, no-effect, etc.):\n1. Settings -> Extra -> enable "Hide alliance combat log" and "Hide non-party combat log" to focus the combat tab on you and your party.\n2. For more surgical filtering, use Settings -> Filters -> Combat Filters: pick a filter file in the Active filter file dropdown (or click Open Folder to add a new .txt under filters/combat/), click Edit Selected Filter to add filter words one per line, then click Reload Selected Filter and tick "Enable Combat Log chat filters". Each filter can be scoped to apply to all messages, all-but-you, or all-but-party.  For non-combat chat spam (NPC dialog, system, tells), switch to the Other Filters sub-tab, which works the same way but reads from filters/other/.',
 	'Note that filtering matches against the original FFXI message text exactly as it arrives, before FancyChat\'s own formatting is applied.',
 };
 
@@ -220,19 +220,18 @@ help.tipsDataLocation = {
 	'Everything FancyChat saves to disk lives under the addon folder ("addons/fancychat/"). All data files are scoped per character - each character on your account has its own settings, palette, notes, and saved logs.',
 	'- Settings file: stores tab choices, font sizes, shortcut keys, your alert words, your notepad entries, and similar preferences. Saved automatically every time you change anything in the Settings panel.',
 	'- Color sets: "addons/fancychat/chatcolors/colorset_*". Written by the Font Colors -> Export Colors button (which prompts you for a filename - default suggestion is "colorset_<character>_<N>", auto-incrementing). You can keep many palettes per character. Import Colors opens a picker that lists every colorset file in the folder, so sharing means just dropping a friend\'s file in and importing it.',
-	'- Combat filter files: "addons/fancychat/combatfilters/*.txt". User-managed plain-text lists of words to hide from the combat log. Multiple files supported - pick the active one in Settings -> CL Filters.',
+	'- Filter files: "addons/fancychat/filters/combat/*.txt" (combat-log spam) and "addons/fancychat/filters/other/*.txt" (non-combat chat spam). User-managed plain-text lists of words to hide. Multiple files per folder supported - pick the active one in Settings -> Filters -> Combat Filters / Other Filters.',
 	'- Saved chat logs: "config/addons/fancychat/logs/<character>/<timestamp>/". Written by the Tools -> Save Chat Logs button or the "/fancychat savelogs" command. One subfolder per save, one .txt per chat tab.',
-	'- Sound effects: "addons/fancychat/notifications/". Ships with six fixed sounds (notification_1.wav through notification_6.wav, each with a "B" boosted variant for the Volume Boost option). The Notification / Alert dropdowns offer exactly those six slots - the folder is NOT scanned for new filenames. To customise a sound, REPLACE one of the existing .wav files with your own (keeping the filename); adding "notification_7.wav" or similar will not make it appear in the dropdown.',
+	'- Sound effects: "addons/fancychat/notifications/*.wav". Drop your own .wav files here to add them to the Notification / Alert dropdowns. Filenames matching "notification_<n>.wav" are picked up automatically on the next addon start.',
 	'- Zone maps: "addons/fancychat/maps/<Zone Name>/<Section>/". The pre-downloaded zone maps used by the Ctrl+left-click Zone Search popup. Adding your own image files into the right subfolder (Maps, Fishing, Weather, Treasure, Notorious_Monsters) makes them appear in the popup automatically.',
 	'To back up everything, copy the whole "addons/fancychat/" folder. To migrate to a new install, drop it in place. To share a palette, a filter file, or a custom map with another player, send them just the corresponding subfolder.',
 };
 
 help.tipsAddonCompatibility = {
 	'Compatibility with other chat addons',
-	'FancyChat is NOT designed to be used alongside other addons that modify, reformat, or recolour chat messages. Combat-log enhancers such as simplelog, alternative chat replacements, or anything that rewrites incoming chat lines is not officially supported - meaning FancyChat will not be changed on its side to make them work.',
-	'Running two chat-handling addons at the same time can produce visual conflicts (duplicated lines, broken colours, mangled formatting, missing spaces, etc.) and is not a configuration FancyChat tries to recover from.',
-	'That said, some other addons may happen to be compatible - feel free to try your luck. For best odds, load FancyChat as one of the LAST entries in your Ashita default script so it gets the final pass over the chat stream.',
-	'If conflicts arise anyway, unload the other chat-modifying addon ("/addon unload <name>") or remove it from your default load list. If you prefer that other addon, unload FancyChat instead.',
+	'FancyChat is NOT designed to be used alongside other addons that modify, reformat, or recolour chat messages. Combat-log enhancers such as simplelog, alternative chat replacements, or anything that rewrites incoming chat lines is not supported.',
+	'Running two chat-handling addons at the same time will produce visual conflicts (duplicated lines, broken colours, mangled formatting, missing spaces, etc.) and is not a configuration FancyChat tries to recover from.',
+	'If you want to use FancyChat, unload other chat-modifying addons first ("/addon unload <name>") or remove them from your default load list. If you prefer a different chat addon, unload FancyChat instead.',
 };
 
 help.tipsSections = { help.tipsRestoreLegacy, help.tipsCleanCombat, help.tipsHidden, help.tipsSecondChat, help.tipsDataLocation, help.tipsAddonCompatibility };
@@ -284,16 +283,19 @@ help.settingsExtra = {
 						'- Colorblind mode for damage done/taken text: changes the damage-done / damage-taken text colours for users with red-green colour blindness.',
 						'- Fast scroll chat history: lets you Shift+Left/Right scroll the chat history multiple lines at a time while hovering the chat window.',
 						'- Dock GuideMe/Notes on the second chat window: when the second chat window is enabled, dock the GuideMe and Notepad panels there instead of the main window.',
+						'- Heart emoji: replaces the text "<3" with the heart emoji.',
 					 };
 help.settingsCLFilters = {
-							'CL Filters',
-							'Define a list of custom words that, when found in a combat-log message, will hide that message from the chat. Useful for cleaning up status-effect spam (e.g. "wears off", "no effect").',
-							'Filter files live in the combatfilters/ subfolder of the addon. You can keep multiple .txt files there (e.g. one for raids, one for solo play) and switch between them using the Active filter file dropdown. The selected file is remembered between sessions.',
-							'Edit Selected Filter opens the currently picked file in your default text editor. Each line is one filter; comments and per-line scope flags are documented inside the file. Word matching is case-insensitive and the filter is applied against the original FFXI combat message text.',
+							'Filters',
+							'Define lists of custom words that hide matching chat messages.  Two parallel sub-tabs:',
+							'- Combat Filters: filters combat-log lines (damage, status effects, etc.). Files live in filters/combat/.',
+							'- Other Filters: filters every non-combat line (NPC dialog, system, tells, shouts, etc.). Files live in filters/other/.',
+							'Both sub-tabs share the same UI: an Active filter file dropdown that lists every .txt file in the corresponding folder, an Edit / Reload / Open Folder row, and a master enable checkbox. The selected file is remembered between sessions.',
+							'Edit Selected Filter opens the currently picked file in your default text editor. Each line is one filter. Combat Filters additionally accept per-line scope suffixes (_z all, _y all but you, _p all but party) -- Other Filters take every line verbatim. Word matching is case-insensitive and the filter is applied against the original FFXI message text.',
 							'Reload Selected Filter re-reads the active file without restarting the addon, so you can tweak filters live.',
-							'Open Folder opens combatfilters/ in Windows Explorer so you can add new filter files, rename existing ones, or copy templates.',
-							'Enable Combat Log chat filters is the master switch - when off, the file is ignored and no filtering happens. When on, the table at the bottom of the tab shows every active filter and the scope it applies to (All / All but you / All but party).',
-							'Note: very long filter lists can affect performance because every combat line is scanned against every filter.',
+							'Open Folder opens the matching filters/ subfolder in Windows Explorer so you can add new filter files, rename existing ones, or copy templates.',
+							'The Enable checkbox is each sub-tab\'s master switch - when off, that filter set is ignored. When on, the table at the bottom shows every active filter and the scope it applies to.',
+							'Note: very long filter lists can affect performance because every message is scanned against every filter.',
 						 };
 help.settingsTools = {
 						'Tools',

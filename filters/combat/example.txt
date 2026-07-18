@@ -26,18 +26,13 @@
 ## messent on the same channel so they cannot individually filtered
 ## (for example only showing yours)
  
-effect wears off _y
-gains the effect of _y
-is afflicted _y
-no effect _y
-Additional effect: .- HP
-%sRoll _y
-
-## Spells
-
-## Spikes
-##
+ 
 ## Examples:
-## spikes deal
 
-spikes deal
+## spikes deal
+## effect wears off _y
+## gains the effect of _y
+## is afflicted _y
+## no effect _y
+## Additional effect: .- HP
+## %sRoll _y
