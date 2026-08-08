@@ -51,6 +51,7 @@ ffi.cdef[[
         IDirect3DTexture8* Texture;
     } GdiFontReturn_t;
 
+    void SetFontFolder(const char* folder);
     uint32_t* CreateFontManager(IDirect3DDevice8* pDevice);
     void DestroyFontManager(uint32_t* pManager);
     GdiFontReturn_t CreateTexture(uint32_t* pManager, GdiFontData_t* data);
@@ -62,6 +63,15 @@ ffi.cdef[[
     void DisableTextureDump(uint32_t* pManager);
 ]]
 
+-- Hand the DLL the real gdifonts/ folder path (this file's directory)
+-- BEFORE any font texture is created.  Without this the DLL falls back
+-- to guessing <exe_dir>\..\addons\fancychat\gdifonts, which only works
+-- on installs where the addons folder sits next to the game executable
+-- AND the addon folder is named exactly "fancychat".  pcall'd so an
+-- older gdifonttexture.dll without the export doesn't error the load.
+pcall(function()
+    renderer.SetFontFolder(string.gsub(libPath, 'include.lua', ''));
+end);
 local interface = renderer.CreateFontManager(d3d.get_device());
 local objects = T{};
 
