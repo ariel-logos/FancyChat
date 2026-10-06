@@ -59,7 +59,12 @@ end
 imguiWrap.Image = function(tex_id, size, uv0, uv1, tint_col, border_col)
 	if imguiWrap.isNewVer then
 		if tint_col then
-			imgui.ImageWithBg(tex_id, size, uv0, uv1, border_color or {0,0,0,0}, tint_col)
+			-- NOTE: was `border_color` (an undefined global, always
+			-- nil) instead of the border_col parameter, so a caller's
+			-- border colour was silently dropped on this path.  Call
+			-- sites that omit border_col still resolve to {0,0,0,0},
+			-- so behaviour is unchanged for them.
+			imgui.ImageWithBg(tex_id, size, uv0, uv1, border_col or {0,0,0,0}, tint_col)
 		else
 			imgui.Image(tex_id, size, uv0, uv1)
 		end

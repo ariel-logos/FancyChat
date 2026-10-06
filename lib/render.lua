@@ -46,6 +46,133 @@ local function _compass_pid_to_port()
     x = bit.bxor(bit.rshift(x, 16), x)
     return 49152 + bit.band(x, 0x3FFF)
 end
+-- ===================================================================
+-- Chat input bar text pipeline.
+--
+-- One function, at file scope, because the caret must be run through
+-- the IDENTICAL transform on a PREFIX of the buffer to learn which
+-- rendered column it lands on.  Two copies of this chain would drift
+-- apart the first time either was touched.
+-- ===================================================================
+
+-- Auto-translate CATEGORY BROWSER preview.  While the category list is
+-- open the input line carries the highlighted entry wrapped in SJIS
+-- full-width brackets (81 79 / 81 7A -> the CJK brackets), e.g.
+-- "do [Races]".  That is menu navigation, not typed content, so drop
+-- the whole marked region rather than mirroring it.  Returning nil from
+-- a gsub function leaves non-matching regions untouched, so real
+-- phrases are unaffected.
+local function drop_category(inner)
+    if inner:find('\129\121', 1, true) then
+        return ''
+    end
+    return nil
+end
+
+-- FFXI input bytes -> the UTF-8 string the bar draws.
+--
+-- The DISPLAY buffer marks auto-translate regions with 0x7F control
+-- codes rather than the 0xEF envelope incoming chat uses:
+--     7F 66 ... 7F 66   phrase while still previewing
+--     7F 69 ... 7F 64   phrase once committed
+-- TranscodeFFXI treats a leading 0x7F as a sentinel and DROPS it with
+-- its operand, so these markers (and thus the brackets) disappeared
+-- while the phrase text survived.  Rewrite both region forms into the
+-- mapped 0xEF 0x27/0x28 pair so the transcoder emits real bracket
+-- glyphs, then discard any remaining 0x7F codes.
+--
+-- 0x7F 0xFF is among those discarded.  It is NOT the caret, despite
+-- once being labelled as one here: a capture of the live buffer carries
+-- TWO of them on a single line - one ahead of the preview block and one
+-- at the very end - so it brackets a colour region.  The caret comes
+-- from the client directly; see the call site.
+local function input_bar_transcode(bytes)
+    bytes = bytes:gsub('\127\102(.-)\127\102', drop_category)
+    bytes = bytes:gsub('\127\105(.-)\127\100', drop_category)
+
+    bytes = bytes:gsub('\127\102(.-)\127\102', '\239\39%1\239\40')
+    bytes = bytes:gsub('\127\105(.-)\127\100', '\239\39%1\239\40')
+    bytes = bytes:gsub('\127.', '')
+
+    -- Expand raw auto-translate tokens (0xFD-delimited) into the
+    -- 0xEF 0x27/0x28 envelope + phrase text - the same form incoming
+    -- chat carries - so TranscodeFFXI renders them as the usual
+    -- bracket glyphs.  Any token ParseAutoTranslate can't resolve
+    -- falls back to a placeholder instead of leaking raw bytes.
+    bytes = AshitaCore:GetChatManager():ParseAutoTranslate(bytes, true)
+    -- A token ParseAutoTranslate could not resolve survives as raw
+    -- 0xFD bytes and collapses to a 4-glyph placeholder.  Report that,
+    -- because it makes this transform LOSSY: the caret measures the raw
+    -- buffer while the bar draws the display buffer, and only the
+    -- display side still carries the full bracketed phrase, so a column
+    -- counted through a placeholder would be wrong by the length of the
+    -- phrase rather than by a glyph.
+    local atFallback
+    bytes, atFallback = bytes:gsub('\253....\253', '{AT}')
+    local out = utils.TranscodeFFXI(bytes, false, false)
+
+    -- Belt-and-braces for the category browser: if its entry reached
+    -- here wrapped in a control code other than the two handled above,
+    -- strip it by its CJK brackets - first the auto-translate-wrapped
+    -- form, then a bare one.
+    local cjk_open  = utf8.char(0x3010)
+    local cjk_close = utf8.char(0x3011)
+    if out:find(cjk_open, 1, true) then
+        out = out:gsub(utf8.char(0x276E)..cjk_open..'.-'..cjk_close..utf8.char(0x276F), '')
+        out = out:gsub(cjk_open..'.-'..cjk_close, '')
+    end
+    return out, atFallback == 0
+end
+
+-- Byte offset of every glyph start in `s`, terminated with #s+1 so a
+-- window can be sliced with BOTH ends bounded and a glyph index turned
+-- back into a byte offset.  The bar needs an exact glyph count for its
+-- width self-calibration, and now has to cut from either end - which
+-- the old tail-only helper could not do.
+local function utf8_glyph_starts(s)
+    local starts = {}
+    local i, n = 1, #s
+    while i <= n do
+        local b = s:byte(i)
+        local step = 1
+        if b >= 0xF0 then step = 4
+        elseif b >= 0xE0 then step = 3
+        elseif b >= 0xC0 then step = 2 end
+        starts[#starts + 1] = i
+        i = i + step
+    end
+    starts[#starts + 1] = n + 1
+    return starts
+end
+
+-- One glyph, drawn at whichever end of the window is cut.
+local INPUT_BAR_ELLIPSIS = utf8.char(0x2026)
+
+-- Input-bar text color per typed chat command -> allSettings.colors
+-- key.  Looked up live so user color edits apply immediately.
+-- Commands with no dedicated color (plain /say, /echo, ...) fall
+-- through to white, matching the chat's own 'local' mode color.
+local _inputBarChanColor = {
+    ['/t']          = 'tell',
+    ['/tell']       = 'tell',
+    ['/r']          = 'tell',
+    ['/p']          = 'party',
+    ['/party']      = 'party',
+    ['/sh']         = 'shout',
+    ['/shout']      = 'shout',
+    ['/yell']       = 'shout',
+    ['/l']          = 'linkshell1',
+    ['/linkshell']  = 'linkshell1',
+    ['/l1']         = 'linkshell1',
+    ['/linkshell1'] = 'linkshell1',
+    ['/l2']         = 'linkshell2',
+    ['/linkshell2'] = 'linkshell2',
+    ['/em']         = 'emote',
+    ['/emote']      = 'emote',
+    ['/unity']      = 'unity',
+    ['/u']          = 'unity',
+}
+
 local function _broadcast_chat_anchor(
     w1x, w1y, w1w, w1h, w1v, w1e,
     w2x, w2y, w2w, w2h, w2v, w2e)
@@ -143,6 +270,30 @@ local COLOR_BORDER_OVERLAY  = imGetColorU32({ 1.0, 1.0, 1.0, 0.75 })
 
 local M = {}
 
+-- ===================================================================
+-- "Hide chat when UI is hidden" (Settings -> Chat Window).
+-- ===================================================================
+
+local function interface_is_hidden()
+	local code = uiw.UiHiddenPtr
+	if code == nil or code == 0 then return false end
+	-- [code + 0x0A] is the mov ecx,imm32 operand: the static UI object.
+	local uiObj = ashita.memory.read_uint32(code + 0x0A)
+	if uiObj == 0 then return false end
+	return ashita.memory.read_uint8(uiObj + 0xB4) == 1
+end
+
+
+local function ui_hide_active(clock)
+	if not (allSettings.HideWhenUIHidden and allSettings.HideWhenUIHidden[1])
+		or not interface_is_hidden() then
+		uiw.UiHideAt = nil
+		return false
+	end
+	uiw.UiHideAt = uiw.UiHideAt or (clock + 0.08)
+	return clock >= uiw.UiHideAt
+end
+
 -- Pokes the auto-hide fade timer; called by every module on activity.
 function M.ResetAutoHideTimer()
 	fcw[1].autoHideTime = os.time()
@@ -171,6 +322,21 @@ function M.register()
 		end
 		-- Per-frame caches (avoids repeated lookups).
 		local fcw1, fcw2, fcw3 = fcw[1], fcw[2], fcw[3]
+
+		-- The input bar's visibility is decided far below, PAST three early
+		-- returns that fire at character select, during the login handoff
+		-- and while logged out.  Default it off here so a frame that never
+		-- reaches that decision cannot leave the bar - and a caret frozen
+		-- mid-blink, which is what made this visible - painted over the
+		-- loading screen.  The block below switches it straight back on
+		-- within the SAME callback, and d3d_endscene runs before present,
+		-- so nothing draws between the two points.
+		if fcw1.InputBarActive then
+			if ro.InputBarBG    ~= nil then ro.InputBarBG:set_visible(false)    end
+			if fo.InputBar      ~= nil then fo.InputBar:set_visible(false)      end
+			if fo.InputBarCaret ~= nil then fo.InputBarCaret:set_visible(false) end
+			fcw1.InputBarActive = false
+		end
 		local _fh  = allSettings.fontSettings.font_height
 		local _now = os.clock()
 		-- Reset per-frame flag for the compass anchor broadcast.
@@ -205,6 +371,15 @@ function M.register()
 			
 			if fcw1.PlayerName == '' and settings.name ~= '' then
 				AshitaCore:GetChatManager():QueueCommand(-1, "/addon reload fancychat")
+				-- Latched until the queued reload rebuilds all state.
+				-- Keeps the window-position persistence (posOwned1/2
+				-- below) inert for EVERY frame of the login gap - on
+				-- the frame after this one the else branch would write
+				-- allSettings.PlayerName into the still-stale settings
+				-- table and posOwned would otherwise turn true a few
+				-- frames early, flashing the previous character's
+				-- window position.
+				fcw1.ReloadPending = true
 			else
 				fcw1.PlayerName = settings.name
 				allSettings.PlayerName = settings.name
@@ -258,8 +433,17 @@ function M.register()
 				par.timePrinted = true
 			end
 		
-			if allSettings.R0warning[1] and uiw.NetStatObj[1] > 0 then
-				local netstat_now = ashita.memory.read_uint32(uiw.NetStatObj[1])
+			-- Resolve the netstat address fresh each frame: the zone
+			-- struct pointer inside the NetStatBase slot is null until
+			-- zone-in completes, so the old scan-time snapshot could
+			-- point at garbage for the whole session.
+			local netstatAddr = 0
+			if uiw.NetStatBase ~= nil and uiw.NetStatBase ~= 0 then
+				local zoneObj = ashita.memory.read_uint32(uiw.NetStatBase)
+				if zoneObj ~= 0 then netstatAddr = zoneObj + uiw.NetStatOffset end
+			end
+			if allSettings.R0warning[1] and netstatAddr ~= 0 then
+				local netstat_now = ashita.memory.read_uint32(netstatAddr)
 				-- Connected -> R0 transition: latch the timestamp so the
 				-- warning below can check how long the drop has lasted.
 				if netstat_now == 0 and uiw.NetStatObj[2] > 0 then
@@ -282,18 +466,90 @@ function M.register()
 				end
 			end
 
-			uiw.NetStatObj[2] = ashita.memory.read_uint32(uiw.NetStatObj[1])
-	
+			if netstatAddr ~= 0 then
+				uiw.NetStatObj[2] = ashita.memory.read_uint32(netstatAddr)
+			end
+
 			fcw1.PlayerName = settings.name;
+
+			-- ============================================================
+			-- Per-frame refresh of game-memory-derived values (deref-at-
+			-- read).  These used to be one-shot snapshots taken at load
+			-- time; on clients whose runtime patching / UI initialisation
+			-- settles AFTER the login-time addon reload, the snapshots
+			-- froze garbage and "Prevent obstructing FFXI UI" (plus the
+			-- legacy-chat-open detection) stayed silently dead until a
+			-- manual Restart & apply.  Re-reading the operand chains
+			-- every frame self-heals the moment the game settles.
+			-- ============================================================
+			if uiw.UISizeYPtr ~= nil and uiw.UISizeYPtr ~= 0 then
+				local slot = ashita.memory.read_uint32(uiw.UISizeYPtr + 0x01)
+				if slot ~= 0 then
+					local v = ashita.memory.read_uint32(slot)
+					if v > 0 then uiw.UISizeY = v end
+				end
+			end
+			if uiw.UISizeXPtr ~= nil and uiw.UISizeXPtr ~= 0 then
+				local slot = ashita.memory.read_uint32(uiw.UISizeXPtr + 0x01)
+				if slot ~= 0 then
+					local v = ashita.memory.read_uint32(slot - 0x10)
+					if v > 0 then uiw.UISizeX = v end
+				end
+			end
+			if uiw.DrawMessageWindowPtr ~= nil and uiw.DrawMessageWindowPtr ~= 0 then
+				uiw.WinPtr1 = ashita.memory.read_uint32(uiw.DrawMessageWindowPtr + 0x01)
+				uiw.WinPtr2 = ashita.memory.read_uint32(uiw.DrawMessageWindowPtr + 0x0B)
+			end
+			-- Menu-avoidance offsets, scaled from the LIVE UI size (was
+			-- a load-time-only derivation in lifecycle.lua, permanently
+			-- stale whenever UISizeX was captured mid-login).  UISizeX
+			-- is seeded 640 in defaults.lua so this can never divide by
+			-- zero/nil before the first valid read above.
+			do
+				local dsp = imgui.GetIO().DisplaySize
+				fcw1.MoveChatPos1 = (dsp.x * 400) / uiw.UISizeX
+				fcw1.MoveChatPos2 = (dsp.x * 220) / uiw.UISizeX
+				fcw1.MoveChatPos3 = (dsp.x * 260) / uiw.UISizeX
+				fcw1.MoveChatPos4 = (dsp.x * 305) / uiw.UISizeX
+				fcw1.MoveChatPos5 = (dsp.x * 136) / uiw.UISizeX
+			end
 		
-			par.InEvent = ashita.memory.read_uint8(ashita.memory.read_uint32(uiw.EventPtr + 1)) == 1
+			-- Guarded: ashita.memory.find returns 0 on a failed match,
+			-- which would turn this into a read at address 1.
+			par.InEvent = false
+			if uiw.EventPtr ~= nil and uiw.EventPtr ~= 0 then
+				local evSlot = ashita.memory.read_uint32(uiw.EventPtr + 1)
+				par.InEvent = (evSlot ~= 0) and (ashita.memory.read_uint8(evSlot) == 1)
+			end
+			-- Talking to an NPC counts as activity: without this the
+			-- auto-hide timer keeps running through a conversation and
+			-- fades the chat out mid-dialogue.
 			if par.InEvent then ResetAutoHideTimer() end
 
-			uiw.MemValue = bit_band(ashita.memory.read_uint32(ashita.memory.read_uint32(uiw.WinPtr1)+0x42),0x0000FFFF);
+			uiw.UiOwnedHide = ui_hide_active(_now)
+			fcw1.HideChat   = fcw1.UserHideChat or uiw.UiOwnedHide
+
+			-- Guarded: WinPtr1 is refreshed per frame from a code
+			-- operand and can legitimately be 0 before the client
+			-- settles; skip the read (keeping the previous MemValue /
+			-- LegacyChatOpen state) rather than chase a null chain.
+			if uiw.WinPtr1 ~= nil and uiw.WinPtr1 ~= 0 then
+				local winObj1 = ashita.memory.read_uint32(uiw.WinPtr1)
+				if winObj1 ~= 0 then
+					uiw.MemValue = bit_band(ashita.memory.read_uint32(winObj1+0x42),0x0000FFFF);
+				end
+			end
 			if (uiw.MemValue ~= 0) then
 				local margin = 15;
 				if (uiw.LastMemValue ~= -1 and uiw.LastMemValue >= uiw.MemValue and uiw.MemValue < uiw.UISizeY-19-margin) then
-					if not uiw.LegacyChatOpen then
+						-- Only when the PLAYER opened the legacy window.  When
+					-- "Hide chat when UI is hidden" released the pin, the
+					-- window drifting open is our own doing, and replaying
+					-- the backlog into the native log plus wiping
+					-- OriginalBuffer would cost the player their history
+					-- (savelogs and the unload auto-dump both read it)
+					-- once per cutscene.
+					if not uiw.LegacyChatOpen and not uiw.UiOwnedHide then
 						if allSettings.autoDumpChat[1] then
 							DumpChat()
 						end
@@ -331,11 +587,28 @@ function M.register()
 			end
 		
 
-			local MenuName = ''; 
-			local MenuID = ashita.memory.read_uint32(uiw.MenuPtr)
+			local MenuName = '';
+			-- Deref-at-read: uiw.MenuPtr holds the CODE address of the
+			-- menu instruction's disp32 operand.  Re-read the operand
+			-- (static slot address) and then the live menu object every
+			-- frame, so post-load operand patching self-heals instead
+			-- of freezing a scan-time snapshot (the root cause of
+			-- "Prevent obstructing FFXI UI" being dead after login on
+			-- late-settling clients).
+			local menuStatic = 0
+			if uiw.MenuPtr ~= nil and uiw.MenuPtr ~= 0 then
+				menuStatic = ashita.memory.read_uint32(uiw.MenuPtr)
+			end
+			local MenuID = 0
+			if menuStatic ~= 0 then
+				MenuID = ashita.memory.read_uint32(menuStatic)
+			end
 			if MenuID ~= 0 then
-				MenuName = ashita.memory.read_string(ashita.memory.read_uint32(MenuID + 4) + 0x46, 16);
-				MenuName = string.gsub(MenuName, '\x00', ''):trimex()
+				local menuHdr = ashita.memory.read_uint32(MenuID + 4)
+				if menuHdr ~= 0 then
+					MenuName = ashita.memory.read_string(menuHdr + 0x46, 16);
+					MenuName = string.gsub(MenuName, '\x00', ''):trimex()
+				end
 				
 				--uiw.MenuExt = ashita.memory.read_uint32(uiw.MenuPtr-0x40)
 				if allSettings.EnabledChatMove[1] and allSettings.MoveChatATMenu[1] and (MenuName:match('menu[%s]+fep')) then mvc.Menu6 = true; else mvc.Menu6 = false; end
@@ -365,7 +638,9 @@ function M.register()
 				uiw.MenuList = {}
 			else
 			
-				local MenuExt = ashita.memory.read_uint32(uiw.MenuPtr-0x3C)
+				-- Adjacent static relative to the RESOLVED slot address
+				-- (menuStatic), not the code address uiw.MenuPtr now holds.
+				local MenuExt = (menuStatic ~= 0) and ashita.memory.read_uint32(menuStatic-0x3C) or 0
 				local MenuLabel = {MenuName:gsub('[%s]+',''), MenuExt,''};
 				--print(MenuLabel[1]..'-'..MenuLabel[2], 2, false);   -- debug_window disabled
 				dw.menuname = MenuLabel[1]..'-'..MenuLabel[2]
@@ -376,15 +651,15 @@ function M.register()
 					-- uiw.MenuDescPTR2 = ashita.memory.read_uint32(uiw.MenuDescPTR2+0x40);
 					-- uiw.MenuDesc =  ashita.memory.read_string(uiw.MenuDescPTR2,64);
 					-- MenuLabel[3] = uiw.MenuDesc;
-					local UpperMenuPTR2 = ashita.memory.read_uint32(uiw.UpperMenuPTR+0x04)
-
-					local UpperMenuPTR3 = ashita.memory.read_uint32(UpperMenuPTR2+0x14)
-
-					local UpperMenuPTR4 = ashita.memory.read_uint32(UpperMenuPTR3+0x10)
-
-					local UpperMenuPTR5 = ashita.memory.read_uint32(UpperMenuPTR4+0x2C)
-
-					UpperMenuString = ashita.memory.read_string(UpperMenuPTR5,16)
+					-- Same slot as the menu static (the old UpperMenuPTR
+					-- was a scan-time copy of the identical operand),
+					-- resolved fresh + zero-guarded at every level so a
+					-- torn read can't chase a null chain.
+					local UpperMenuPTR2 = (menuStatic ~= 0) and ashita.memory.read_uint32(menuStatic+0x04) or 0
+					local UpperMenuPTR3 = (UpperMenuPTR2 ~= 0) and ashita.memory.read_uint32(UpperMenuPTR2+0x14) or 0
+					local UpperMenuPTR4 = (UpperMenuPTR3 ~= 0) and ashita.memory.read_uint32(UpperMenuPTR3+0x10) or 0
+					local UpperMenuPTR5 = (UpperMenuPTR4 ~= 0) and ashita.memory.read_uint32(UpperMenuPTR4+0x2C) or 0
+					UpperMenuString = (UpperMenuPTR5 ~= 0) and ashita.memory.read_string(UpperMenuPTR5,16) or ''
 
 					MenuLabel[3] = UpperMenuString;
 				end
@@ -479,7 +754,11 @@ function M.register()
 				
 		
 			if (par.InEvent or MenuName:match('menu[%s]+query'))  or uiw.DialogCDStart ~= 0 or uiw.DialogPromptStart ~= 0 then
-				if 	ashita.memory.read_uint32(uiw.DialogPtr) == 1
+				-- Dialog flag: uiw.DialogPtr is the code address of an
+				-- 'A0 disp32' instruction; re-read the operand per use.
+				local dlgSlot = (uiw.DialogPtr ~= nil and uiw.DialogPtr ~= 0)
+					and ashita.memory.read_uint32(uiw.DialogPtr + 0x01) or 0
+				if 	dlgSlot ~= 0 and ashita.memory.read_uint32(dlgSlot) == 1
 				then
 					par.LastMsgInConv = false;
 					uiw.DialogShown = true;
@@ -509,7 +788,7 @@ function M.register()
 						uiw.DialogPromptStart = 0;
 						uiw.DialogShown = false;
 					else
-						if ashita.memory.read_uint32(uiw.DialogPtr) == 1 then
+						if dlgSlot ~= 0 and ashita.memory.read_uint32(dlgSlot) == 1 then
 						uiw.DialogPromptStart = 0;end
 					end
 				end
@@ -689,15 +968,72 @@ function M.register()
 			
 			
 			
+				-- Apply this character's saved window position, once per
+				-- login / character switch.  allSettings owns the
+				-- position (see Window1Pos in defaults.lua); imgui.ini
+				-- is no longer trusted with it.
+				--
+				-- posOwned1: only operate when the settings table is
+				-- verifiably scoped to the logged-in character.  During
+				-- the frames between a login and the queued
+				-- '/addon reload fancychat' (line ~207), our allSettings
+				-- alias still holds the PREVIOUS scope's content (the
+				-- settings lib swapped its cache to a new table we
+				-- don't see until the reload re-runs settings.load).
+				-- In that gap fcw1.PlayerName is '' and the stale
+				-- table's PlayerName doesn't match settings.name, so
+				-- this stays false and neither apply, adopt nor save
+				-- can act on the wrong character's data.
+				local posOwned1 = settings.logged_in
+					and not fcw1.ReloadPending
+					and fcw1.PlayerName == settings.name
+					and allSettings.PlayerName == fcw1.PlayerName;
+				if posOwned1 and allSettings.Window1Pos[1] >= 0
+					and fcw1.PosAppliedFor ~= fcw1.PlayerName then
+					imgui.SetNextWindowPos({ allSettings.Window1Pos[1], allSettings.Window1Pos[2] });
+					fcw1.PosAppliedFor = fcw1.PlayerName;
+				end
 				imgui.SetNextWindowSize({ fcw1.BG_W, ro.RectBG[1].settings.height+16 });
 				imgui.SetNextWindowSizeConstraints({ fcw1.BG_W, ro.RectBG[1].settings.height+16 }, { FLT_MAX, FLT_MAX, });
-			
+
 				imgui.Begin('FancyChat_ChatBG_'+fcw1.PlayerName, true, bit_bor(fcw1.windowFlagsChatBG, allSettings.LockWindowPos[1] and FLAG_WinNoMove or 0));
 			-- Setting variables to position the chat window elements --
-			
-			
-			
-		
+
+				-- Position persistence.  First logged-in frame with no
+				-- saved value adopts whatever position ImGui restored
+				-- (legacy imgui.ini entry or default spawn).  After
+				-- that, a user drag is committed on mouse-release.
+				-- SaveSettings() writes the file immediately, so a
+				-- crash later loses nothing.
+				do
+					-- Clamp to >= 0 so a window parked past the left or
+					-- top screen edge can never save a negative value -
+					-- negative coordinates are reserved for the {-1,-1}
+					-- "never saved" sentinel, and a saved -1 would both
+					-- re-trigger adoption every frame (a SaveSettings
+					-- per frame) and be discarded by the apply gate on
+					-- the next login.
+					local winX, winY = imgui.GetWindowPos();
+					winX = math_floor(winX);
+					winY = math_floor(winY);
+					if winX < 0 then winX = 0 end
+					if winY < 0 then winY = 0 end
+					if posOwned1 then
+						if allSettings.Window1Pos[1] < 0 then
+							allSettings.Window1Pos[1] = winX;
+							allSettings.Window1Pos[2] = winY;
+							fcw1.PosAppliedFor = fcw1.PlayerName;
+							SaveSettings();
+						elseif fcw1.PosAppliedFor == fcw1.PlayerName
+							and (winX ~= allSettings.Window1Pos[1] or winY ~= allSettings.Window1Pos[2])
+							and not imIsMouseDown(FLAG_MouseLeft) then
+							allSettings.Window1Pos[1] = winX;
+							allSettings.Window1Pos[2] = winY;
+							SaveSettings();
+						end
+					end
+				end
+
 				local positionStartX, positionStartY = imgui.GetCursorScreenPos();
 				positionStartX = positionStartX + allSettings.WindowPosOffset[1];
 				positionStartY = positionStartY + allSettings.WindowPosOffset[2];
@@ -1500,12 +1836,47 @@ function M.register()
 				if ((not uiw.LegacyChatOpen or allSettings.ShowWithLegacy[1]) and not fcw1.HideChat and not fcw1.Closing and fcw1.autoHideFade < 1 and not fcw3.BigMode) then
 				
 				
+					-- Same per-character position persistence as window 1
+					-- (see the Window1Pos block above for the rationale
+					-- behind posOwned and the coordinate clamp);
+					-- Window2Pos + fcw2.PosAppliedFor are the window-2
+					-- counterparts.
+					local posOwned2 = settings.logged_in
+						and not fcw1.ReloadPending
+						and fcw1.PlayerName == settings.name
+						and allSettings.PlayerName == fcw1.PlayerName;
+					if posOwned2 and allSettings.Window2Pos[1] >= 0
+						and fcw2.PosAppliedFor ~= fcw1.PlayerName then
+						imgui.SetNextWindowPos({ allSettings.Window2Pos[1], allSettings.Window2Pos[2] });
+						fcw2.PosAppliedFor = fcw1.PlayerName;
+					end
 					imgui.SetNextWindowSize({ fcw2.BG_W, ro.RectBG[2].settings.height+16 } );
 					imgui.SetNextWindowSizeConstraints({ fcw2.BG_W, ro.RectBG[2].settings.height+16 }, { FLT_MAX, FLT_MAX, } );
-				
+
 					imgui.Begin('FancyChat_ChatBG2_'+fcw1.PlayerName, true, bit_bor(fcw1.windowFlagsChatBG, allSettings.LockWindowPos[1] and FLAG_WinNoMove or 0));
-				
+
 				-- Setting variables to position the chat window elements --
+					do
+						local winX, winY = imgui.GetWindowPos();
+						winX = math_floor(winX);
+						winY = math_floor(winY);
+						if winX < 0 then winX = 0 end
+						if winY < 0 then winY = 0 end
+						if posOwned2 then
+							if allSettings.Window2Pos[1] < 0 then
+								allSettings.Window2Pos[1] = winX;
+								allSettings.Window2Pos[2] = winY;
+								fcw2.PosAppliedFor = fcw1.PlayerName;
+								SaveSettings();
+							elseif fcw2.PosAppliedFor == fcw1.PlayerName
+								and (winX ~= allSettings.Window2Pos[1] or winY ~= allSettings.Window2Pos[2])
+								and not imIsMouseDown(FLAG_MouseLeft) then
+								allSettings.Window2Pos[1] = winX;
+								allSettings.Window2Pos[2] = winY;
+								SaveSettings();
+							end
+						end
+					end
 					local positionStartX, positionStartY = imgui.GetCursorScreenPos();
 					positionStartX = positionStartX + allSettings.WindowPosOffset[3];
 					positionStartY = positionStartY + allSettings.WindowPosOffset[4];
@@ -2423,6 +2794,536 @@ function M.register()
 			end
 		end
 
+		-- ============================================================
+		-- Custom input chat bar: a styled gdi mirror of the native
+		-- chat input line, visible while the input is open (which is
+		-- exactly when the chat windows hide for the legacy chat, so
+		-- this block deliberately lives OUTSIDE those visibility
+		-- gates).  Draggable via the same invisible-ImGui-window
+		-- pattern as the chat windows; position persisted per
+		-- character in allSettings.InputBarPos with the Window1Pos
+		-- conventions (sentinel spawn, clamp >= 0, save on release).
+		-- Width / plate color+opacity / font size are live settings.
+		-- ============================================================
+		if allSettings.InputBar[1] and fo.InputBar ~= nil and ro.InputBarBG ~= nil
+			and fcw1.LoggedIn and not fcw1.Zoning and not uiw.UiOwnedHide
+			and (AshitaCore:GetChatManager():IsInputOpen() == 0x11
+				or set.InputBarTest[1]) then
+
+			local barFH = allSettings.InputBarFontHeight
+			-- Same width formula as the chat windows (chatLineMaxL *
+			-- font_height * 0.59), using the bar's own font height.
+			-- Hard-capped just under the DLL's 4096px texture canvas:
+			-- plate/text textures rasterize on that canvas and clip
+			-- silently past its edge, so extreme chars x font combos
+			-- (e.g. 200 x 40) must not exceed it.  The clip budget is
+			-- derived from barW, so the text follows the cap too.
+			local barW  = math_floor(allSettings.InputBarChars * barFH * 0.59)
+			if barW > 4000 then barW = 4000 end
+			-- Total plate height: snug fit plus the user's symmetric
+			-- vertical padding.  barH feeds the drag-window size, the
+			-- overlap tests and the spawn candidates, so they all
+			-- track the padded footprint automatically.
+			local barPad = allSettings.InputBarPadding
+			local barH  = barFH + 4 + (barPad * 2)
+			local ibOwned = settings.logged_in
+				and not fcw1.ReloadPending
+				and fcw1.PlayerName == settings.name
+				and allSettings.PlayerName == fcw1.PlayerName
+
+			-- Bar-vs-chat-plate overlap test, used by both the first-
+			-- spawn candidate picker below and the re-enable recheck.
+			local function overlapsPlates(x, y)
+				local function hit(px, py, pw, ph)
+					if px == nil or py == nil or pw == nil or ph == nil then return false end
+					return x < px + pw and x + barW > px
+					   and y < py + ph and y + barH > py
+				end
+				local h1 = (ro.RectBG[1] ~= nil) and ro.RectBG[1].settings.height or nil
+				if hit(fcw1.BG_X, fcw1.BG_Y, fcw1.BG_W, h1) then return true end
+				if allSettings.SecondChat[1] and ro.RectBG[2] ~= nil then
+					if hit(fcw2.BG_X, fcw2.BG_Y, fcw2.BG_W, ro.RectBG[2].settings.height) then
+						return true
+					end
+				end
+				return false
+			end
+
+			-- Re-enable recheck: the settings checkboxes raise this
+			-- flag when the feature (or test mode) is switched on.  If
+			-- the SAVED position now overlaps a chat plate, drop back
+			-- to the sentinel so the candidate spawn below re-places
+			-- the bar in clear space; a saved position in the open is
+			-- kept.  AppliedFor is cleared so the freshly spawned
+			-- position gets applied to the ImGui window (and so the
+			-- capture gate can't commit the stale window position).
+			if fcw1.InputBarRecheck then
+				fcw1.InputBarRecheck = nil
+				if ibOwned and allSettings.InputBarPos[1] >= 0
+					and overlapsPlates(allSettings.InputBarPos[1], allSettings.InputBarPos[2]) then
+					allSettings.InputBarPos[1] = -1
+					allSettings.InputBarPos[2] = -1
+					fcw1.InputBarPosAppliedFor = nil
+				end
+			end
+
+			-- First use on this character (or post-recheck respawn):
+			-- spawn at the first candidate position that does NOT
+			-- overlap either chat window's bg plate (with
+			-- ShowWithLegacy on, bar and chat are visible together,
+			-- and the saved spot is where the user will find the bar
+			-- from then on).  Candidates in preference order:
+			-- bottom-center, directly above window 1's plate, then
+			-- mid / upper center as fallbacks; if everything overlaps,
+			-- bottom-center wins anyway.  All coords clamped >= 0: a
+			-- negative saved X would collide with the {-1,-1} sentinel
+			-- and re-fire this branch (and SaveSettings) every frame
+			-- while breaking the apply/capture gates.
+			if ibOwned and allSettings.InputBarPos[1] < 0 then
+				local dsp = imgui.GetIO().DisplaySize
+				local cx = math_floor(dsp.x / 2 - barW / 2)
+				local candidates = {}
+				candidates[#candidates + 1] = { cx, math_floor(dsp.y * 0.8) }
+				if fcw1.BG_X ~= nil and fcw1.BG_Y ~= nil then
+					-- 48px clearance above the plate: the tab-row ImGui
+					-- window sits along the plate's top edge, and a bar
+					-- spawned inside its rect would lose mouse clicks
+					-- (and thus dragging) to it.
+					candidates[#candidates + 1] = { math_floor(fcw1.BG_X), math_floor(fcw1.BG_Y - barH - 48) }
+				end
+				candidates[#candidates + 1] = { cx, math_floor(dsp.y * 0.45) }
+				candidates[#candidates + 1] = { cx, math_floor(dsp.y * 0.12) }
+				local spawnX, spawnY
+				for _, cnd in ipairs(candidates) do
+					local sx, sy = cnd[1], cnd[2]
+					if sx < 0 then sx = 0 end
+					if sy < 0 then sy = 0 end
+					if spawnX == nil then spawnX, spawnY = sx, sy end
+					if not overlapsPlates(sx, sy) then
+						spawnX, spawnY = sx, sy
+						break
+					end
+				end
+				allSettings.InputBarPos[1] = spawnX
+				allSettings.InputBarPos[2] = spawnY
+				SaveSettings()
+			end
+			if ibOwned and allSettings.InputBarPos[1] >= 0
+				and fcw1.InputBarPosAppliedFor ~= fcw1.PlayerName then
+				imgui.SetNextWindowPos({ allSettings.InputBarPos[1], allSettings.InputBarPos[2] })
+				fcw1.InputBarPosAppliedFor = fcw1.PlayerName
+			end
+			imgui.SetNextWindowSize({ barW, barH + 8 })
+			imgui.SetNextWindowSizeConstraints({ barW, barH + 8 }, { FLT_MAX, FLT_MAX })
+			-- Draggability: governed by the bar's OWN lock setting,
+			-- deliberately independent from the chat windows'
+			-- LockWindowPos (which most users keep enabled for the
+			-- menu-avoidance feature).  The lock is authoritative in
+			-- test mode too - locked means locked; unticking the lock
+			-- checkbox is right next to the test-mode one.
+			local ibLocked = allSettings.InputBarLock[1]
+			imgui.Begin('FancyChat_InputBar_'+fcw1.PlayerName, true,
+				bit_bor(fcw1.windowFlagsChatBG, ibLocked and FLAG_WinNoMove or 0))
+			do
+				local winX, winY = imgui.GetWindowPos()
+				winX = math_floor(winX)
+				winY = math_floor(winY)
+				if winX < 0 then winX = 0 end
+				if winY < 0 then winY = 0 end
+				if ibOwned and allSettings.InputBarPos[1] >= 0
+					and fcw1.InputBarPosAppliedFor == fcw1.PlayerName
+					and (winX ~= allSettings.InputBarPos[1] or winY ~= allSettings.InputBarPos[2])
+					and not imIsMouseDown(FLAG_MouseLeft) then
+					allSettings.InputBarPos[1] = winX
+					allSettings.InputBarPos[2] = winY
+					SaveSettings()
+				end
+			end
+			local ibX, ibY = imgui.GetCursorScreenPos()
+			imgui.End()
+
+			-- Live style application (all setters are change-guarded
+			-- in gdifonts, so calling them per frame is free when the
+			-- settings haven't moved).
+			-- Background image (Settings -> Chat Window picker).  Only
+			-- the ALPHA of the colour setting tints the artwork so it
+			-- keeps its own colours while the Bar BG Opacity slider
+			-- still fades it; fill_color stays in sync for the plain
+			-- plate used when no image is selected or it won't load.
+			if allSettings.InputBarBGImage ~= '' then
+				-- Path cached per filename (see the chat plate block
+				-- in d3d_endscene for the rationale).
+				if fcw1.BarBGImageFor ~= allSettings.InputBarBGImage then
+					fcw1.BarBGImageFor = allSettings.InputBarBGImage
+					fcw1.BarBGImagePath = utils.ResolveBackground(addon.path, allSettings.InputBarBGImage)
+				end
+				ro.InputBarBG:set_image_path(fcw1.BarBGImagePath)
+				ro.InputBarBG:set_image_tint(utils.AlphaTint(allSettings.InputBarBGColor))
+			else
+				ro.InputBarBG:set_image_path('')
+			end
+			ro.InputBarBG:set_fill_color(allSettings.InputBarBGColor)
+			ro.InputBarBG:set_width(barW)
+			ro.InputBarBG:set_height(barH)
+			ro.InputBarBG:set_position_x(ibX - 4)
+			-- Centred on the INK, not on the nominal font box.  GDI+ lays
+			-- text out over ascent + descent + leading, which is taller
+			-- than barFH, and the letters sit high inside that box - so
+			-- splitting the slack around barFH alone leaves a wide gap
+			-- above the caps and a thin one under the baseline.
+			-- INK_BIAS shifts the plate down by a fraction of the font
+			-- height to compensate.  Proportional, so it holds at every
+			-- font size.  Raise it if the text still looks high in the
+			-- bar, lower it if it starts to look low.
+			local INK_BIAS = 0.10
+			local barTopPad = math_floor(((barH - barFH) / 2) - (barFH * INK_BIAS))
+			if barTopPad < 0 then barTopPad = 0 end
+			ro.InputBarBG:set_position_y(ibY - barTopPad)
+			fo.InputBar:set_font_height(barFH)
+			fo.InputBar:set_position_x(ibX + 4)
+			fo.InputBar:set_position_y(ibY)
+
+			-- Text mirror: auto-translate phrases sit in the raw input
+			-- buffer as 0xFD-delimited 6-byte tokens that TranscodeFFXI
+			-- has no mapping for (incoming chat wraps them differently),
+			-- so swap them for a placeholder first.  Then transcode the
+			-- remaining FFXI bytes, clip to the tail so the caret end
+			-- of long input stays visible (backing up over any UTF-8
+			-- continuation bytes so the slice can't split a multi-byte
+			-- glyph), and append a blinking caret.
+			-- Only mirror the input buffer while the input is actually
+			-- OPEN: when it's closed (test mode), GetInputTextRaw
+			-- still returns the LEFTOVER text from the previous typing
+			-- session, which would replace the test-mode placeholder
+			-- with a stale message.
+			local raw = ''
+			local cmgr = AshitaCore:GetChatManager()
+			if cmgr:IsInputOpen() == 0x11 then
+				-- Prefer the DISPLAY buffer: it is what the game is
+				-- actually rendering in the input line, so an
+				-- auto-translate phrase shows up while it is still
+				-- being previewed - the raw buffer only receives it
+				-- once it is committed.  Probed once (result cached
+				-- on fcw1) and falls back to the raw buffer if the
+				-- binding doesn't return a usable string.
+				if fcw1.InputBarDisplayOk == nil then
+					local ok, val = pcall(function() return cmgr:GetInputTextDisplay() end)
+					fcw1.InputBarDisplayOk = (ok and type(val) == 'string')
+				end
+				if fcw1.InputBarDisplayOk then
+					local ok, val = pcall(function() return cmgr:GetInputTextDisplay() end)
+					if ok and type(val) == 'string' then raw = val end
+				end
+				if raw == '' then
+					raw = cmgr:GetInputTextRaw() or ''
+				end
+			end
+			-- Text color follows the typed chat command (/tell, /p,
+			-- /l2, ...) using the same per-channel colors as the chat
+			-- lines render with; no or unknown command = white.
+			--
+			-- Matched against the RAW buffer, never the display one.  The
+			-- client plants a control code AT THE CARET in the display
+			-- buffer (0x7F 0xFF - visible in _inputdiag.txt, where RAW is 13
+			-- bytes and the marker sits at display byte 13), so with the
+			-- cursor inside the command the display text reads '/pa' +
+			-- marker + 'rty': the pattern stops at the control byte, the
+			-- capture is a command nobody recognises, and the colour drops
+			-- to white the moment the player arrows into the prefix.  The
+			-- raw buffer is pure typed text with no such markers.  Only
+			-- while the input is OPEN - closed, it still holds the previous
+			-- message, which would colour the test-mode placeholder.
+			local barColor = 0xFFFFFFFF
+			local barCmd = nil
+			if cmgr:IsInputOpen() == 0x11 then
+				barCmd = (cmgr:GetInputTextRaw() or ''):match('^%s*(/%a+%d?)')
+			end
+			if barCmd ~= nil then
+				local colKey = _inputBarChanColor[barCmd:lower()]
+				if colKey ~= nil and allSettings.colors[colKey] ~= nil then
+					barColor = allSettings.colors[colKey][1]
+				end
+			end
+			fo.InputBar:set_font_color(barColor)
+			local txt = input_bar_transcode(raw)
+
+			-- Caret column, taken from the CLIENT's own index rather than
+			-- inferred from keystrokes: IChatManager exposes
+			-- GetInputTextRawCaretPosition (Ashita.h:1431, and bound to Lua
+			-- in Addons.dll alongside GetInputTextRaw), so the arrow keys,
+			-- Home/End and mouse edits are all reflected for free.
+			--
+			-- That index counts RAW bytes, while the bar draws the DISPLAY
+			-- buffer, so the column is measured by running the raw PREFIX
+			-- through the very same transform and counting its glyphs.  The
+			-- two buffers agree ahead of the caret - an auto-translate
+			-- preview is inserted AT it - so the counts line up.
+			--
+			-- Measurement is deliberately disjoint from the render path: a
+			-- bad reading can only misplace the caret by a glyph, never
+			-- corrupt the markup, the glyph budget or the calibration.  Any
+			-- failure leaves caretCol nil, which the window code below
+			-- treats as "caret at the end" - byte-for-byte the old output.
+			-- Stand down while the auto-translate phrase BROWSER is open:
+			-- the raw caret sits ahead of the whole preview block, so
+			-- following it would scroll the phrase the player is actually
+			-- reading off the right-hand edge.  0x7F 0x66 opens that preview
+			-- region (see input_bar_transcode); raw still holds the
+			-- untransformed display bytes here.
+			local caretCol = nil
+			if cmgr:IsInputOpen() == 0x11 and not raw:find('\127\102', 1, true) then
+				if fcw1.InputBarCaretOk == nil then
+					local ok, val = pcall(function() return cmgr:GetInputTextRawCaretPosition() end)
+					fcw1.InputBarCaretOk = (ok and type(val) == 'number')
+				end
+				if fcw1.InputBarCaretOk then
+					local ok, pos = pcall(function() return cmgr:GetInputTextRawCaretPosition() end)
+					if ok and type(pos) == 'number' then
+						local rawBuf = cmgr:GetInputTextRaw() or ''
+						if pos < 0 then pos = 0 end
+						if pos > #rawBuf then pos = #rawBuf end
+						local pre, exact = input_bar_transcode(rawBuf:sub(1, pos))
+						if exact then
+							caretCol = #utf8_glyph_starts(pre) - 1
+							fcw1.InputBarCaretLast = caretCol
+						else
+							-- Measurement failed THIS FRAME: an
+							-- auto-translate token ParseAutoTranslate could
+							-- not resolve collapses to a 4-glyph
+							-- placeholder, so the column would be wrong by
+							-- the length of the phrase.  Hold the last good
+							-- column instead of falling through to
+							-- "caret at end".  Still clamped to `total`
+							-- below, and the next good frame replaces it.
+							caretCol = fcw1.InputBarCaretLast
+						end
+					end
+				end
+			end
+
+			-- Test mode with nothing typed: show a sample line so the
+			-- player can preview font size / colors while positioning.
+			if txt == '' and set.InputBarTest[1] then
+				txt = 'Chat input bar - test mode'
+				-- Sample text, not the player's line: nil means "caret at the
+				-- end", which keeps the preview tail-anchored as it always was.
+				caretCol = nil
+			end
+			-- Exact-fit clipping, SELF-CALIBRATED: the chars*fh*0.59
+			-- plate formula is only an estimate of Consolas' real
+			-- advance, and an over-estimate lets text overflow past
+			-- the plate before the character budget triggers.  So
+			-- measure the true per-glyph advance from the previously
+			-- rendered texture (rect.right / glyphs we set last
+			-- frame) and derive the budget from the plate's actual
+			-- pixel width.  Until the first measurement (or after a
+			-- font-size change) fall back to the 0.59 estimate.
+			if fo.InputBar.rect ~= nil
+				and fcw1.InputBarLastGlyphs ~= nil and fcw1.InputBarLastGlyphs > 0
+				and fcw1.InputBarLastAscii then
+				fcw1.InputBarGlyphW  = fo.InputBar.rect.right / fcw1.InputBarLastGlyphs
+				fcw1.InputBarGlyphFH = barFH
+			end
+			local glyphW = fcw1.InputBarGlyphW
+			if glyphW == nil or glyphW <= 0 or fcw1.InputBarGlyphFH ~= barFH then
+				glyphW = barFH * 0.59
+			end
+			-- Pixel budget: plate width minus the 4px left text pad
+			-- and a matching right margin; two glyphs reserved - one
+			-- for the blinking caret, one left EMPTY so the caret
+			-- never sits flush against the plate's right edge.
+			local maxChars = math_floor((barW - 8) / glyphW) - 2
+			if maxChars < 4 then maxChars = 4 end
+			-- Window the text to the budget.  Unlike the old tail-only
+			-- clip, the window has to FOLLOW THE CARET: with the arrow
+			-- keys the player can put the cursor anywhere in the line, and
+			-- a window pinned to the end would leave them typing somewhere
+			-- they cannot see.  The start column persists on fcw1, so the
+			-- view only scrolls when the caret would actually leave it -
+			-- editing mid-line does not slide the whole line about.
+			local starts = utf8_glyph_starts(txt)
+			local total  = #starts - 1
+			-- The caret is a column BETWEEN glyphs, so it has one more
+			-- legal position than there are glyphs.
+			local caret = caretCol or total
+			if caret > total then caret = total end
+			if caret < 0     then caret = 0     end
+
+			local win = maxChars
+			local function place(from)
+				local s = from
+				if caret < s       then s = caret       end
+				if caret > s + win then s = caret - win end
+				if s > total - win then s = total - win end
+				if s < 0           then s = 0           end
+				return s
+			end
+			local wStart = place(fcw1.InputBarWinStart or 0)
+			-- Cutting BOTH ends costs a second indicator glyph; pay for it
+			-- out of the window and re-place.  Shrinking can only ever cut
+			-- more, never less, so one retry settles it.  The win > 1 term is
+			-- belt-and-braces: the maxChars floor above already keeps win at
+			-- 4 or more, but the shrink must never reach zero if that floor
+			-- is ever lowered.
+			if wStart > 0 and wStart + win < total and win > 1 then
+				win = win - 1
+				wStart = place(wStart)
+			end
+			fcw1.InputBarWinStart = wStart
+
+			local wEnd = wStart + win
+			if wEnd > total then wEnd = total end
+			local sliceFrom = starts[wStart + 1]
+			local body = txt:sub(sliceFrom, starts[wEnd + 1] - 1)
+			local shownGlyphs = wEnd - wStart
+
+			-- Caret COLUMN within the visible window.  The caret itself is
+			-- a separate object drawn over the text, so it is deliberately
+			-- absent from `body` and from shownGlyphs: nothing in the line
+			-- shifts as the player arrows through it, and the width
+			-- calibration goes on counting real glyphs only.
+			local caretVisCol = caret - wStart
+			if wStart > 0 then
+				body = INPUT_BAR_ELLIPSIS..body
+				shownGlyphs = shownGlyphs + 1
+				caretVisCol = caretVisCol + 1
+			end
+			if wEnd < total then
+				-- A caret sitting exactly at the window's right edge would
+				-- land on the same column as this indicator, so give it a
+				-- column of its own.  The budget has room: the both-ends-cut
+				-- case already paid a glyph out of `win` above, and the plate
+				-- reserves two cells beyond maxChars.
+				if caret >= wEnd then
+					body = body..' '
+					shownGlyphs = shownGlyphs + 1
+				end
+				body = body..INPUT_BAR_ELLIPSIS
+				shownGlyphs = shownGlyphs + 1
+			end
+			txt = body
+			-- Colour the auto-translate brackets exactly like chat
+			-- lines do (parser.lua's MCList: open bracket green, close
+			-- bracket red), restoring the bar's channel colour after
+			-- each one.  Deliberately applied AFTER the clip and the
+			-- caret: an MC token is 14 bytes of markup that the
+			-- renderer consumes rather than draws, so injecting it
+			-- earlier would corrupt the glyph budget and the width
+			-- calibration (both of which count real glyphs only).
+			do
+				local at_open  = utf8.char(0x276E)
+				local at_close = utf8.char(0x276F)
+				if txt:find(at_open, 1, true) or txt:find(at_close, 1, true) then
+					local restore = utils.MC(barColor)
+					txt = txt:gsub(at_open,  utils.MC(0xFF0D9441)..at_open..restore)
+					txt = txt:gsub(at_close, utils.MC(0xFFBB2F38)..at_close..restore)
+				end
+			end
+			-- Leading spaces are cropped by the DLL: the texture is sized
+			-- from the glyph path's ink bounds and a space has no outline,
+			-- so blank advance ahead of the first inked glyph is cut off
+			-- (the trailing-space note below is the same crop at the other
+			-- end).  Strip them and reproduce them as an X offset using the
+			-- same measured advance the caret is placed with, so the text
+			-- and the caret stay on the same grid.
+			local leadN = #(txt:match('^( *)'))
+			if leadN > 0 then txt = txt:sub(leadN + 1) end
+			fo.InputBar:set_text(txt)
+			fo.InputBar:set_position_x(ibX + 4 + math_floor(leadN * glyphW))
+			-- Glyph count that produced the CURRENT texture; consumed
+			-- by next frame's advance measurement above.
+			-- Trailing spaces are NOT in the rasterised width: the DLL
+			-- compensates for spaces between runs, but the last run's
+			-- run off the end of the texture.  Counting them would
+			-- under-report the advance - "/party hello " is 13 glyphs
+			-- measured 12 wide, so glyphW becomes 12w/13 and the caret
+			-- at column 13 lands at 12w, exactly the right edge of the
+			-- last letter instead of after the space.  Calibrate on
+			-- what was actually drawn; the caret still multiplies its
+			-- own column by that advance, so it extrapolates correctly
+			-- past the trailing run.
+			local drawnGlyphs = shownGlyphs - leadN
+			local trailSp = txt:match('( +)$')
+			if trailSp ~= nil then drawnGlyphs = drawnGlyphs - #trailSp end
+			if drawnGlyphs < 1 then drawnGlyphs = 1 end
+			fcw1.InputBarLastGlyphs = drawnGlyphs
+			-- Gate for the BUDGET calibration above: a line carrying any
+			-- byte >= 0x80 (auto-translate brackets, the ellipsis, MC
+			-- colour markup) must not set the per-glyph average that
+			-- drives maxChars, or the character budget swings with
+			-- content.
+			fcw1.InputBarLastAscii = (txt:find('[\128-\255]') == nil)
+
+			-- The CARET, by contrast, wants THIS line's own advance, and
+			-- wants it from THIS frame.  set_text above marked the object
+			-- dirty, so asking its size now rasterises the new text
+			-- immediately rather than next frame - the texture is built
+			-- either way, this only moves it earlier within the frame.
+			--
+			-- Two things fall out.  The average matches the line being
+			-- drawn, so at the end of a line  column x advance  IS
+			-- rect.right by definition and the caret sits exactly at the
+			-- text's right edge, brackets or not.  And it cannot lag:
+			-- the rubber-band was never accuracy versus stability, it was
+			-- this value trailing the text by one frame - through an
+			-- auto-translate commit the caret was placed with the
+			-- PREVIOUS line's average, which walked it 6px and back.
+			local caretGlyphW = glyphW
+			do
+				local curW = fo.InputBar:get_text_size()
+				if (curW ~= nil) and (curW > 0) and (drawnGlyphs > 0) then
+					caretGlyphW = curW / drawnGlyphs
+				end
+			end
+			-- Overlay caret: placed by COLUMN, so it lands between
+			-- characters without being one.  Blinks by visibility rather
+			-- than by editing the string.
+			if fo.InputBarCaret ~= nil then
+				fo.InputBarCaret:set_font_height(barFH)
+				fo.InputBarCaret:set_font_color(barColor)
+				-- Two advances, because the text object itself starts
+				-- leadN cells in (see above): the stripped leading spaces
+				-- are plain Consolas cells at glyphW, everything after them
+				-- is on the rasterised line and takes its measured advance.
+				local caretX
+				if caretVisCol <= leadN then
+					caretX = caretVisCol * glyphW
+				else
+					caretX = (leadN * glyphW) + ((caretVisCol - leadN) * caretGlyphW)
+				end
+				fo.InputBarCaret:set_position_x(ibX + 4 + math_floor(caretX))
+				fo.InputBarCaret:set_position_y(ibY)
+				-- Blink phase is measured from the last CHANGE rather than
+				-- from an absolute clock, so any edit restarts the cycle
+				-- at its visible half: the caret is on the instant you
+				-- type, and never winks out mid-keystroke.  Keyed on the
+				-- rendered text AND the caret column, so arrowing around
+				-- inside an unchanged line counts too.
+				if (fcw1.InputBarBlinkTxt ~= txt)
+					or (fcw1.InputBarBlinkCol ~= caretVisCol) then
+					fcw1.InputBarBlinkTxt = txt
+					fcw1.InputBarBlinkCol = caretVisCol
+					fcw1.InputBarBlinkAt  = _now
+				end
+				-- floor(0 * 2) % 2 == 0, so the frame of the change is
+				-- always a visible one.
+				local blink = _now - (fcw1.InputBarBlinkAt or _now)
+				fo.InputBarCaret:set_visible(math_floor(blink * 2) % 2 == 0)
+
+			end
+			ro.InputBarBG:set_visible(true)
+			fo.InputBar:set_visible(true)
+			-- Consumed by d3d_endscene: the full gdi:render() call is
+			-- deliberately skipped while the legacy chat is open (i.e.
+			-- while typing), so the bar needs its own draw pass there.
+			fcw1.InputBarActive = true
+		elseif ro.InputBarBG ~= nil and fo.InputBar ~= nil then
+			ro.InputBarBG:set_visible(false)
+			fo.InputBar:set_visible(false)
+			if fo.InputBarCaret ~= nil then fo.InputBarCaret:set_visible(false) end
+			fcw1.InputBarActive = false
+		end
+
 		-- Broadcast chat anchor data for BOTH chat windows to the Compass
 		-- addon EVERY frame. Compass picks which window to anchor to.
 		-- Packet format: 12 comma-separated ints =
@@ -2528,6 +3429,40 @@ function M.register()
 				-- a weird state (device-loss frames, settings reload
 				-- mid-fade, etc.).
 				local plateColor = (fcw1.autoHideFade == 0) and cfgColor or updateColor
+				-- Optional background image (Settings -> Chat Window).
+				-- Tinted with plateColor's ALPHA only, so the artwork
+				-- keeps its own colours AND still fades out with the
+				-- auto-hide animation exactly like the plain plate.
+				local chatBGImage = allSettings.ChatBGImage
+				if chatBGImage ~= '' then
+					-- Cache the composed path: rebuilding it every
+					-- frame would re-intern a ~70-char string and, via
+					-- the rect object's cache lookup, re-run a
+					-- non-JIT-compilable normalisation inside the
+					-- render loop.
+					if fcw1.ChatBGImageFor ~= chatBGImage then
+						fcw1.ChatBGImageFor = chatBGImage
+						fcw1.ChatBGImagePath = utils.ResolveBackground(addon.path, chatBGImage)
+					end
+					local imgPath = fcw1.ChatBGImagePath
+					-- Live image opacity x the auto-hide fade, rather
+					-- than the restart-gated plate alpha.
+					local imgAlpha = math_floor(255 * (tonumber(allSettings.ChatBGImageOpacity) or 1) * fadeOpacity)
+					if imgAlpha < 0   then imgAlpha = 0   end
+					if imgAlpha > 255 then imgAlpha = 255 end
+					local imgTint = bit.bor(bit.lshift(imgAlpha, 24), 0x00FFFFFF)
+					ro.RectBG[1]:set_image_path(imgPath)
+					ro.RectBG[1]:set_image_tint(imgTint)
+					if allSettings.SecondChat[1] and ro.RectBG[2] ~= nil then
+						ro.RectBG[2]:set_image_path(imgPath)
+						ro.RectBG[2]:set_image_tint(imgTint)
+					end
+				else
+					ro.RectBG[1]:set_image_path('')
+					if allSettings.SecondChat[1] and ro.RectBG[2] ~= nil then
+						ro.RectBG[2]:set_image_path('')
+					end
+				end
 				ro.RectBG[1]:set_fill_color(plateColor)
 				-- Per-line opacity: only push a NEW value through
 				-- SetChatOpacity when it actually changed.  Calling it
@@ -2546,6 +3481,16 @@ function M.register()
 					end
 				end
 			else
+				-- Big Mode hides the normal chat plates by zeroing
+				-- their fill_color (d3d_present).  An image-backed
+				-- rect ignores fill_color entirely, so the artwork
+				-- would stay on screen behind the Big Mode overlay -
+				-- drop the image here so the plates fall back to the
+				-- (zeroed) colour plate and disappear as intended.
+				-- The block above re-applies it on the first frame
+				-- after Big Mode is switched off.
+				if ro.RectBG[1] ~= nil then ro.RectBG[1]:set_image_path('') end
+				if ro.RectBG[2] ~= nil then ro.RectBG[2]:set_image_path('') end
 				if fcw3.RequestAuxFix then FixAux(3, fcw3.ChatLines) end
 				PositionLines(3, fcw3.ChatLines)
 			end
@@ -2566,6 +3511,29 @@ function M.register()
 		else
 			--gdi:set_auto_render(false);
 			fcw1.WasRendered = false
+			-- The full gdi:render() above is skipped on these frames -
+			-- that skip IS the mechanism that hides the chat while the
+			-- legacy chat is open (typing), faded, hidden, etc.  The
+			-- input chat bar must render exactly then, so give it its
+			-- own minimal draw pass.  fcw1.InputBarActive is the
+			-- single source of truth, set by the d3d_present block.
+			-- Closing / Zoning / LoggedIn are tested here as well as in the
+			-- full-render gate above, because render_subset bypasses the
+			-- global object list and draws the handles it is handed - so it
+			-- is the one call that could still touch GDI objects after
+			-- gdi:destroy_interface() has torn the font manager down.
+			if fcw1.InputBarActive and not fcw1.Closing and not fcw1.Zoning
+				and fcw1.LoggedIn and ro.InputBarBG ~= nil and fo.InputBar ~= nil then
+				-- ARRAY ORDER, not z_order: render_subset draws the list as
+				-- given (gdifonts/include.lua), so this must stay
+				-- plate -> text -> caret or the layering silently inverts on
+				-- the typing path while staying correct on the full render.
+				if fo.InputBarCaret ~= nil then
+					gdi:render_subset({ ro.InputBarBG, fo.InputBar, fo.InputBarCaret })
+				else
+					gdi:render_subset({ ro.InputBarBG, fo.InputBar })
+				end
+			end
 		end;
 	
 	

@@ -5,6 +5,8 @@ require('common')
 local imgui     = require('imgui')
 local imguiWrap = require('imguiWrap')
 local utils     = require('utils')
+local gdi       = require('gdifonts.include')
+local ffi       = require('ffi')
 local help      = require('help')
 local state     = require('lib.state')
 
@@ -27,12 +29,307 @@ local M = {}
 -- its own kind on demand.
 local cachedFilterFiles = { combat = nil, other = nil }
 
+-- Filenames in images/backgrounds/, scanned on first use and
+-- refreshed on demand by either picker's refresh icon.  One folder
+-- serves both surfaces now that each maps the texture to its own
+-- shape (chat window centre-crops, input bar samples a top band), so
+-- art no longer has to be authored per destination.
+local cachedBackgrounds = nil
+
+-- Decoded textures for the dropdown hover previews, keyed by
+-- filename; `false` marks a file that failed to load so it isn't
+-- retried on every frame the settings panel is open.  The texture
+-- cdata is kept in the entry on purpose: dropping it would let the
+-- gc_safe_release finalizer free the texture while ImGui still draws
+-- from the raw pointer.  Cleared by the Refresh button.
+local bgPreviewCache = {}
+
+-- Set by Refresh, consumed at the START of the next panel draw.  The
+-- clear cannot happen inline: this frame's previews have already
+-- handed ImGui raw texture pointers, and ImGui renders its draw list
+-- after the addon callbacks return - dropping the cdata now could let
+-- the finalizer release those textures before they are drawn.
+local bgPreviewClearPending = false
+
+-- Keyed by filename: one folder means a name identifies a file
+-- uniquely.
+local function bg_preview(fname)
+	if (fname == nil) or (fname == '') then return nil end
+	local ckey = fname
+	local cached = bgPreviewCache[ckey]
+	if cached ~= nil then
+		return cached or nil
+	end
+	-- Capped: a hover preview never needs more than a few hundred
+	-- pixels, and these files are wallpapers - one 4445x6667 JPEG is a
+	-- 268 MB A8R8G8B8 surface once D3DX rounds to a power of two, and
+	-- hovering down the list would hold one per file in a 32-bit
+	-- process.  w/h still come back as the SOURCE dimensions, so the
+	-- crop maths below is unaffected.
+	local tex, w, h = utils.LoadTextureFromFile(
+		utils.ResolveBackground(addon.path, fname), BG_PREVIEW_MAXDIM)
+	if tex == nil then
+		bgPreviewCache[ckey] = false
+		return nil
+	end
+	local entry = {
+		tex = tex,
+		ptr = tonumber(ffi.cast('uint32_t', tex)),
+		w   = w,
+		h   = h,
+	}
+	bgPreviewCache[ckey] = entry
+	return entry
+end
+
+-- Square footprint of the picker's inline icon buttons.  Kept compact
+-- so a whole picker row - label, list, refresh and folder - fits
+-- inside the settings child (clamped to a 550px minimum width).
+local PREVIEW_W, PREVIEW_H = 24, 24
+-- Longest side of a decoded hover preview.  The tooltip draws at most
+-- 320px wide, so anything beyond this is memory for nothing.
+local BG_PREVIEW_MAXDIM = 512
+-- Width the input bar is PRETENDED to be when previewing it.  At its
+-- real width the bar is around 22.8:1, which previews as a 14px
+-- sliver; 200px puts it nearer 7:1 and readable.  Only the horizontal
+-- stretch is understated - the rows shown are unaffected, because the
+-- top band's crop is v1 = height / image height and does not involve
+-- the width at all.
+local BG_PREVIEW_BAR_W = 200
+-- Icon-button glyph size.  An ImageButton's total item box is the
+-- glyph plus FramePadding on each side, so the padding is forced to a
+-- known value while drawing them (below) and the glyph sized to make
+-- the whole button exactly PREVIEW_W x PREVIEW_H so the row lines
+-- up against the combo.
+local BG_ICON_PAD = 2
+local BG_ICON = PREVIEW_H - (BG_ICON_PAD * 2)
+
+-- Re-scan images/backgrounds/ and drop cached textures (plate +
+-- preview) so files added or edited on disk are picked up.  One folder
+-- serves both pickers, so refreshing from either updates both.
+local function bg_rescan()
+	cachedBackgrounds = utils.ListBackgrounds(addon.path)
+	gdi:clear_image_cache()
+	bgPreviewClearPending = true
+end
+
+-- Fit w x h entirely inside box_w x box_h, preserving aspect (a
+-- "contain" fit): the whole texture is visible, never cropped and
+-- never distorted; the unused axis is simply letterboxed.
+local function bg_fit(w, h, box_w, box_h)
+	if (w == nil) or (h == nil) or (w <= 0) or (h <= 0) then
+		return box_w, box_h
+	end
+	local scale = math.min(box_w / w, box_h / h)
+	local dw = math.floor(w * scale)
+	local dh = math.floor(h * scale)
+	if dw < 1 then dw = 1 end
+	if dh < 1 then dh = 1 end
+	return dw, dh
+end
+
+-- Pixel size of the surface an image will actually be drawn onto,
+-- mirroring the formulas in lib/render.lua / lib/lifecycle.lua.  Used
+-- to draw the hover preview at the destination's REAL proportions
+-- (6.4:1 for the chat plate, 22.8:1 for the input bar) instead of the
+-- file's own.
+local function bg_target_size(kind)
+	if kind == 'inputbar' then
+		local fh = tonumber(allSettings.InputBarFontHeight) or 18
+		local w  = math.floor((tonumber(allSettings.InputBarChars) or 60) * fh * 0.59)
+		if w > 4000 then w = 4000 end
+		return w, fh + 10 + ((tonumber(allSettings.InputBarPadding) or 0) * 2)
+	end
+	local fh = tonumber(allSettings.fontSettings.font_height) or 20
+	return (tonumber(allSettings.chatLineMaxL) or 100) * fh * 0.59,
+	       fh * ((tonumber(allSettings.ChatLines) or 8) + 1) + (fh / 5)
+end
+
+-- The region of the file the destination will actually SAMPLE,
+-- expressed as UVs, so a preview can show what ends up on screen
+-- rather than the whole file:
+--   chat window -> 'cover'   : centre-crop to the plate's aspect
+--   input bar   -> 'topband' : full width, the top `height` PIXELS
+-- Mirrors the two branches in gdifonts/rectobject.lua's render.
+local function bg_source_uv(kind, iw, ih, tw, th)
+	iw, ih = tonumber(iw) or 0, tonumber(ih) or 0
+	tw, th = tonumber(tw) or 0, tonumber(th) or 0
+	if (iw <= 0) or (ih <= 0) or (tw <= 0) or (th <= 0) then
+		return 0, 0, 1, 1
+	end
+	if kind == 'inputbar' then
+		local v1 = th / ih
+		if v1 > 1 then v1 = 1 end
+		return 0, 0, 1, v1
+	end
+	if ((iw * th) > (ih * tw)) then
+		local u0 = ((iw - (ih * tw / th)) / 2) / iw
+		return u0, 0, 1 - u0, 1
+	end
+	local v0 = ((ih - (iw * th / tw)) / 2) / ih
+	return 0, v0, 1, 1 - v0
+end
+
+-- Hover preview for one entry in the picker's dropdown.  Drawn at the
+-- DESTINATION's proportions with the destination's crop, so it is
+-- what the surface will look like, only smaller - which the old inline
+-- swatch could never be, its box being nowhere near 6.4:1 (chat) or
+-- 22.8:1 (bar).  Living in the dropdown also means every file can be
+-- compared by hovering down the list, instead of only after picking.
+local function bg_hover_preview(fname, kind)
+	if (fname == nil) or (fname == '') then return end
+	local prev = bg_preview(fname)
+	if prev == nil then
+		-- Escaped: imgui.SetTooltip is printf-style and a filename is
+		-- user data - a file called "100% opacity.png" would otherwise
+		-- read a garbage vararg.  Same precaution as the filter list.
+		imgui.SetTooltip(('Could not load "'..fname..'" from images\\backgrounds\\.'):replace('%', '%%'))
+		return
+	end
+	local tw, th = bg_target_size(kind)
+	-- Crop from the REAL destination size, shape from a friendlier one.
+	local u0, v0, u1, v1 = bg_source_uv(kind, prev.w, prev.h, tw, th)
+	local aspect_w = (kind == 'inputbar') and BG_PREVIEW_BAR_W or tw
+	local pw, ph = bg_fit(aspect_w, th, 320, 200)
+	imgui.BeginTooltip()
+	-- Source size only.  The filename is already the row being hovered,
+	-- and the drawn size is the plate's, so it repeated unchanged down
+	-- the whole list.  TextUnformatted, not Text: a filename would
+	-- otherwise reach a printf format string.
+	imgui.TextUnformatted(tostring(prev.w)..'x'..tostring(prev.h))
+	-- No border colour: on Ashita >= 4.3 imguiWrap routes that argument
+	-- into ImageWithBg's BACKGROUND slot, which would composite
+	-- transparent art over opaque grey and misrepresent exactly what
+	-- the alpha-tinted plate will look like.
+	imguiWrap.Image(prev.ptr, {pw, ph}, {u0, v0}, {u1, v1},
+		{1, 1, 1, 1}, {0, 0, 0, 0})
+	imgui.EndTooltip()
+end
+
+-- Background picker row: a label, a combo listing '(none)' plus every
+-- image in images/backgrounds/, and the two icon buttons.  Hovering an
+-- entry previews it at the destination's own proportions and crop;
+-- picking one applies and saves immediately.  Module-level so it can
+-- be dropped under whichever colour picker it belongs to.
+local function bg_picker(label, id, key, kind)
+	local dsize = imgui.GetIO().DisplaySize
+	if cachedBackgrounds == nil then
+		cachedBackgrounds = utils.ListBackgrounds(addon.path)
+	end
+	local files = cachedBackgrounds
+	local active = allSettings[key]
+	local cposY = imgui.GetCursorPosY()
+	imgui.SetCursorPosY(cposY + 10)
+	imgui.Text(label)
+	imgui.SameLine()
+	imgui.SetCursorPosY(cposY + 7)
+	imgui.SetCursorPosX((dsize.x / 4.3 - dsize.x / 8) * (1920 / dsize.x))
+	-- Narrower than the other controls in this column so the whole
+	-- row (list, refresh, folder) still fits inside the settings
+	-- child, which is clamped to a 550px minimum width.
+	imgui.PushItemWidth(dsize.x / 17)
+	local current = active
+	if current == '' then current = '(none)' end
+	if imgui.BeginCombo(id, current, ImGuiComboFlags_None) then
+		if imgui.Selectable('(none)', active == '') and active ~= '' then
+			allSettings[key] = ''
+			SaveSettings()
+		end
+		for _, fname in ipairs(files) do
+			-- Applied on selection: the hover preview above already
+			-- shows what each file will look like on the destination,
+			-- so a separate confirm step had nothing left to confirm.
+			if imgui.Selectable(fname, active == fname) and active ~= fname then
+				allSettings[key] = fname
+				SaveSettings()
+			end
+			if imgui.IsItemHovered() then
+				bg_hover_preview(fname, kind)
+			end
+		end
+		imgui.EndCombo()
+	end
+	imgui.PopItemWidth()
+
+	-- Inline icon buttons: re-scan the folder, and open it.  Icons
+	-- rather than text buttons so both fit on the picker's own row.
+	-- Forced padding so both buttons measure exactly
+	-- PREVIEW_W x PREVIEW_H and share the combo's baseline
+	-- (cposY + 7) rather than sitting lower.
+	imgui.PushStyleVar(ImGuiStyleVar_FramePadding, {BG_ICON_PAD, BG_ICON_PAD})
+
+	imgui.SameLine()
+	imgui.SetCursorPosY(cposY + 7)
+	-- PushID: on Ashita < 4.3 the wrapper's ImageButton has no id
+	-- parameter and old ImGui derives the widget's identity from the
+	-- TEXTURE POINTER.  Both pickers hand it the same refresh texture
+	-- inside one child window, so the two refresh buttons hashed to a
+	-- single ImGuiID - two widgets, one identity - and a press never
+	-- resolved into a click on either.  Scoping each in its picker's
+	-- id keeps them distinct on both wrapper paths.
+	imgui.PushID(id..'_refresh')
+	local doRescan = imguiWrap.ImageButton(id..'_refresh', fcw[1].TextureIDRefresh,
+		{BG_ICON, BG_ICON}, {0, 0}, {1, 1}, -1, {0, 0, 0, 0}, {1, 1, 1, 0.85})
+	local hovRescan = imgui.IsItemHovered()
+	imgui.PopID()
+	if doRescan then
+		bg_rescan()
+	end
+	if hovRescan then
+		imgui.SetTooltip('Re-scan images\\backgrounds\\ for new files and reload edited images.')
+	end
+
+	imgui.SameLine()
+	imgui.SetCursorPosY(cposY + 7)
+	imgui.PushID(id..'_folder')
+	local doOpen = imguiWrap.ImageButton(id..'_folder', fcw[1].TextureIDFolder,
+		{BG_ICON, BG_ICON}, {0, 0}, {1, 1}, -1, {0, 0, 0, 0}, {1, 1, 1, 0.85})
+	local hovOpen = imgui.IsItemHovered()
+	imgui.PopID()
+	if doOpen then
+		os.execute('start "" "'..addon.path..'\\images\\backgrounds\\"')
+	end
+	if hovOpen then
+		imgui.SetTooltip('Open the images\\backgrounds\\ folder.')
+	end
+
+	imgui.PopStyleVar()
+end
+
+
+
 function M.draw_settings_panel()
+
+	-- Deferred preview-texture release (see bgPreviewClearPending):
+	-- safe here because the frame that submitted those previews has
+	-- already been rendered.
+	if bgPreviewClearPending then
+		bgPreviewClearPending = false
+		local old = bgPreviewCache
+		bgPreviewCache = {}
+		-- Released explicitly rather than left to the gc_safe_release
+		-- finalizer, which may never run: the plate's own image cache
+		-- does the same, and leaving these to chance was letting the
+		-- larger copies accumulate.
+		for _, e in pairs(old) do
+			if (type(e) == 'table') and (e.tex ~= nil) then
+				pcall(function()
+					ffi.gc(e.tex, nil)
+					e.tex:Release()
+				end)
+			end
+		end
+	end
 
 	-- When the panel is closed, sync the persisted values back into
 	-- the `set.*` working copy so the next open shows the current
 	-- state and not stale pending edits.
 	if not allSettings.settingsOpened[1] then
+		-- Hover previews are only meaningful while the picker is on
+		-- screen; queue their release so a closed panel holds none.
+		if next(bgPreviewCache) ~= nil then
+			bgPreviewClearPending = true
+		end
 		set.SecondChat[1]        = allSettings.SecondChat[1]
 		set.ChatLineMaxL         = allSettings.chatLineMaxL
 		set.PlateBGColor         = allSettings.rectSettings.fill_color
@@ -117,9 +414,23 @@ function M.draw_settings_panel()
 			imgui.SameLine()
 			imgui.SetCursorPosY(cposY + 7)
 			imgui.SetCursorPosX((dsize.x / 4.3 - dsize.x / 8) * (1920 / dsize.x))
-			if imgui.SliderFloat('##plateBGAlphaSlider', plateBGAlpha, 0, 1.0, '%.2f',
-				bit.bor(ImGuiSliderFlags_AlwaysClamp, ImGuiSliderFlags_NoRoundToFormat)) then
-				plateBGchanged = true
+			-- One slider, two targets.  With a background image active
+			-- it drives that image's opacity (ChatBGImageOpacity),
+			-- which applies LIVE; with no image it edits the plate
+			-- colour's alpha as before, which is staged and only takes
+			-- effect on "Restart & apply".
+			if allSettings.ChatBGImage ~= '' then
+				local imgAlpha = T{tonumber(allSettings.ChatBGImageOpacity) or 1.0}
+				if imgui.SliderFloat('##plateBGAlphaSlider', imgAlpha, 0, 1.0, '%.2f',
+					bit.bor(ImGuiSliderFlags_AlwaysClamp, ImGuiSliderFlags_NoRoundToFormat)) then
+					allSettings.ChatBGImageOpacity = imgAlpha[1]
+					SaveSettings()
+				end
+			else
+				if imgui.SliderFloat('##plateBGAlphaSlider', plateBGAlpha, 0, 1.0, '%.2f',
+					bit.bor(ImGuiSliderFlags_AlwaysClamp, ImGuiSliderFlags_NoRoundToFormat)) then
+					plateBGchanged = true
+				end
 			end
 
 			-- Background colour picker.  ColorButton renders just the
@@ -135,22 +446,38 @@ function M.draw_settings_panel()
 			imgui.SameLine()
 			imgui.SetCursorPosY(cposY + 7)
 			imgui.SetCursorPosX((dsize.x / 4.3 - dsize.x / 8) * (1920 / dsize.x))
-			local swatchColor = T{plateBGRGB[1], plateBGRGB[2], plateBGRGB[3], 1.0}
-			if imgui.ColorButton('##plateBGSwatch', swatchColor,
-				ImGuiColorEditFlags_NoAlpha, {dsize.x / 7.5, 20}) then
-				imgui.OpenPopup('##plateBGColorPopup')
-			end
-			if imgui.BeginPopup('##plateBGColorPopup') then
-				if imgui.ColorPicker3('##plateBGColorPickerWidget', plateBGRGB,
-					bit.bor(ImGuiColorEditFlags_NoLabel,
-					        ImGuiColorEditFlags_NoAlpha)) then
-					plateBGchanged = true
+			-- With a background image active the plate's RGB is ignored
+			-- (only its alpha tints the artwork), so the swatch is
+			-- replaced by a note rather than left as a control that
+			-- silently does nothing.
+			if allSettings.ChatBGImage ~= '' then
+				imgui.TextDisabled('Not available while an image is set')
+				if imgui.IsItemHovered() then
+					imgui.SetTooltip('Clear the Chat Background image below to pick a plate colour again.\nOpacity still applies to the image.')
 				end
-				imgui.Separator()
-				if imgui.Button('Confirm##plateBGColorConfirm', {-1, 0}) then
-					imgui.CloseCurrentPopup()
+				-- Zero-width spacer of the ColorButton's height: keeps
+				-- this line as tall as the swatch it replaces so the
+				-- controls below don't shift when the text appears.
+				imgui.SameLine()
+				imgui.Dummy({0, 20})
+			else
+				local swatchColor = T{plateBGRGB[1], plateBGRGB[2], plateBGRGB[3], 1.0}
+				if imgui.ColorButton('##plateBGSwatch', swatchColor,
+					ImGuiColorEditFlags_NoAlpha, {dsize.x / 7.5, 20}) then
+					imgui.OpenPopup('##plateBGColorPopup')
 				end
-				imgui.EndPopup()
+				if imgui.BeginPopup('##plateBGColorPopup') then
+					if imgui.ColorPicker3('##plateBGColorPickerWidget', plateBGRGB,
+						bit.bor(ImGuiColorEditFlags_NoLabel,
+						        ImGuiColorEditFlags_NoAlpha)) then
+						plateBGchanged = true
+					end
+					imgui.Separator()
+					if imgui.Button('Confirm##plateBGColorConfirm', {-1, 0}) then
+						imgui.CloseCurrentPopup()
+					end
+					imgui.EndPopup()
+				end
 			end
 
 			if plateBGchanged then
@@ -160,6 +487,14 @@ function M.draw_settings_panel()
 					bit.lshift(bit.tobit(plateBGRGB[2]   * 255),  8),
 					bit.tobit(plateBGRGB[3] * 255))
 			end
+
+			-- Chat plate background image.  Unlike the colour controls
+			-- around it this is NOT restart-gated: picking from the
+			-- list commits immediately.  Its own opacity slider is used
+			-- rather than the plate alpha above, which only reaches
+			-- allSettings via "Restart & apply".
+			bg_picker('Chat Background', '##ChatBGImagePicker', 'ChatBGImage', 'chatwindow')
+
 
 			local chatlines = T{set.ChatLines}
 			cposY = imgui.GetCursorPosY()
@@ -386,6 +721,14 @@ function M.draw_settings_panel()
 				SaveSettings()
 			end
 			imgui.PopItemWidth()
+
+			imgui.Dummy({0, 5})
+			if imgui.Checkbox('Hide chat when UI is hidden', {allSettings.HideWhenUIHidden[1]}) then
+				allSettings.HideWhenUIHidden[1] = not allSettings.HideWhenUIHidden[1]
+				SaveSettings()
+			end
+			AddTooltip('Hides FancyChat whenever the game hides its own interface - during cutscenes, and when you use the hide-UI hotkey. The chat comes straight back as soon as the interface does.', 4)
+
 			imgui.Dummy({0, 5})
 			if imgui.Checkbox('Use half window length for docked UI elements', {allSettings.UseHalfLength[1]}) then
 				allSettings.UseHalfLength[1] = not allSettings.UseHalfLength[1]
@@ -418,6 +761,151 @@ function M.draw_settings_panel()
 			imgui.SetCursorPosY(imgui.GetCursorPosY() - 18)
 			imgui.Dummy({27, 0}) imgui.SameLine()
 			imgui.Text('[ Experimental ]\n[ Reposition chats if FFXI UI elements overlap ]\n[ Works with the most common game UI elements ]\n[ Only works with chat positions locked ]')
+
+			-- ------------------------------------------------------------
+			-- Chat input bar (live settings - no restart needed).
+			-- ------------------------------------------------------------
+			imgui.Dummy({0, 25})
+			imgui.Text('Chat input bar')
+			AddTooltip('A movable, styled mirror of the chat input line, shown while the chat input is open. Drag it to reposition; the position is saved per character.', 0)
+			imgui.Dummy({0, 5})
+			if imgui.Checkbox('Enable input chat bar', {allSettings.InputBar[1]}) then
+				allSettings.InputBar[1] = not allSettings.InputBar[1]
+				if allSettings.InputBar[1] then
+					-- Ask render.lua to re-check the saved position
+					-- against the chat plates and re-place the bar if
+					-- it would spawn overlapping them.
+					fcw[1].InputBarRecheck = true
+				end
+				SaveSettings()
+			end
+			imgui.SameLine()
+			if imgui.Checkbox('Test mode##InputBarTest', {set.InputBarTest[1]}) then
+				set.InputBarTest[1] = not set.InputBarTest[1]
+				if set.InputBarTest[1] then
+					fcw[1].InputBarRecheck = true
+				end
+			end
+			imgui.SameLine()
+			cposY = imgui.GetCursorPosY()
+			AddTooltip('Keeps the bar visible without opening the chat input, so you can drag it into place and preview width/color/font changes. Not saved - resets on addon reload.', 4)
+			imgui.SameLine() imgui.SetCursorPosY(cposY)
+			if imgui.Checkbox('Lock bar position##InputBarLock', {allSettings.InputBarLock[1]}) then
+				allSettings.InputBarLock[1] = not allSettings.InputBarLock[1]
+				SaveSettings()
+			end
+			AddTooltip('Prevents dragging the input bar. Independent from the chat windows\' Lock Window Position option.', 4)
+
+			imgui.PushItemWidth(dsize.x / 8)
+			local ibW = T{allSettings.InputBarChars}
+			cposY = imgui.GetCursorPosY()
+			imgui.SetCursorPosY(cposY + 10)
+			imgui.Text('Bar Width')
+			imgui.SameLine()
+			imgui.SetCursorPosY(cposY + 7)
+			imgui.SetCursorPosX((dsize.x / 4.3 - dsize.x / 8) * (1920 / dsize.x))
+			if imgui.SliderInt('##InputBarWidthSlider', ibW, 30, 200, '%d', ImGuiSliderFlags_AlwaysClamp) then
+				allSettings.InputBarChars = ibW[1]
+				SaveSettings()
+			end
+
+			local ibFH = T{allSettings.InputBarFontHeight}
+			cposY = imgui.GetCursorPosY()
+			imgui.SetCursorPosY(cposY + 10)
+			imgui.Text('Bar Font Size')
+			imgui.SameLine()
+			imgui.SetCursorPosY(cposY + 7)
+			imgui.SetCursorPosX((dsize.x / 4.3 - dsize.x / 8) * (1920 / dsize.x))
+			if imgui.SliderInt('##InputBarFontSlider', ibFH, 10, 40, '%d', ImGuiSliderFlags_AlwaysClamp) then
+				allSettings.InputBarFontHeight = ibFH[1]
+				SaveSettings()
+			end
+
+			local ibPad = T{allSettings.InputBarPadding}
+			cposY = imgui.GetCursorPosY()
+			imgui.SetCursorPosY(cposY + 10)
+			imgui.Text('Bar Height Padding')
+			imgui.SameLine()
+			imgui.SetCursorPosY(cposY + 7)
+			imgui.SetCursorPosX((dsize.x / 4.3 - dsize.x / 8) * (1920 / dsize.x))
+			if imgui.SliderInt('##InputBarPadSlider', ibPad, 0, 30, '%d', ImGuiSliderFlags_AlwaysClamp) then
+				allSettings.InputBarPadding = ibPad[1]
+				SaveSettings()
+			end
+
+			-- Bar plate opacity + color: same decompose/recompose scheme
+			-- as the main plate above, but live-applied to
+			-- allSettings.InputBarBGColor (single ARGB value).
+			local ibColor = allSettings.InputBarBGColor
+			local ibAlpha = T{tonumber(bit.rshift(ibColor, 24)) / 255}
+			local ibRGB   = T{
+				bit.band(bit.rshift(ibColor, 16), 0xFF) / 255,
+				bit.band(bit.rshift(ibColor,  8), 0xFF) / 255,
+				bit.band(ibColor,                 0xFF) / 255,
+			}
+			local ibChanged = false
+
+			cposY = imgui.GetCursorPosY()
+			imgui.SetCursorPosY(cposY + 10)
+			imgui.Text('Bar BG Opacity')
+			imgui.SameLine()
+			imgui.SetCursorPosY(cposY + 7)
+			imgui.SetCursorPosX((dsize.x / 4.3 - dsize.x / 8) * (1920 / dsize.x))
+			if imgui.SliderFloat('##InputBarAlphaSlider', ibAlpha, 0, 1.0, '%.2f',
+				bit.bor(ImGuiSliderFlags_AlwaysClamp, ImGuiSliderFlags_NoRoundToFormat)) then
+				ibChanged = true
+			end
+
+			cposY = imgui.GetCursorPosY()
+			imgui.SetCursorPosY(cposY + 10)
+			imgui.Text('Bar BG Color')
+			imgui.SameLine()
+			imgui.SetCursorPosY(cposY + 7)
+			imgui.SetCursorPosX((dsize.x / 4.3 - dsize.x / 8) * (1920 / dsize.x))
+			-- Same as the chat plate above: an active bar image ignores
+			-- this colour's RGB, so show a note instead of the swatch.
+			if allSettings.InputBarBGImage ~= '' then
+				imgui.TextDisabled('Not available while an image is set')
+				if imgui.IsItemHovered() then
+					imgui.SetTooltip('Clear the Bar Background image below to pick a bar colour again.\nOpacity still applies to the image.')
+				end
+				-- Same height guard as the chat plate block above.
+				imgui.SameLine()
+				imgui.Dummy({0, 20})
+			else
+				local ibSwatch = T{ibRGB[1], ibRGB[2], ibRGB[3], 1.0}
+				if imgui.ColorButton('##InputBarSwatch', ibSwatch,
+					ImGuiColorEditFlags_NoAlpha, {dsize.x / 7.5, 20}) then
+					imgui.OpenPopup('##InputBarColorPopup')
+				end
+				if imgui.BeginPopup('##InputBarColorPopup') then
+					if imgui.ColorPicker3('##InputBarColorPickerWidget', ibRGB,
+						bit.bor(ImGuiColorEditFlags_NoLabel,
+						        ImGuiColorEditFlags_NoAlpha)) then
+						ibChanged = true
+					end
+					imgui.Separator()
+					if imgui.Button('Confirm##InputBarColorConfirm', {-1, 0}) then
+						imgui.CloseCurrentPopup()
+					end
+					imgui.EndPopup()
+				end
+			end
+
+			if ibChanged then
+				allSettings.InputBarBGColor = bit.bor(
+					bit.lshift(bit.tobit(ibAlpha[1] * 255), 24),
+					bit.lshift(bit.tobit(ibRGB[1]   * 255), 16),
+					bit.lshift(bit.tobit(ibRGB[2]   * 255),  8),
+					bit.tobit(ibRGB[3] * 255))
+				SaveSettings()
+			end
+
+			-- Input bar background image.  The Bar BG Opacity slider
+			-- above still controls how strongly it shows, since that
+			-- setting is already live for the bar.
+			bg_picker('Bar Background', '##InputBarBGImagePicker', 'InputBarBGImage', 'inputbar')
+			imgui.PopItemWidth()
 
 			imgui.EndChild()
 			imgui.EndTabItem()
@@ -1678,7 +2166,7 @@ function M.draw_settings_panel()
 			local _testers = {
 				{'Zeratia', ''},
 				{'Mod',     ''},
-				{'Carver',  'www.catseyexi.com'},
+				{'Carver',  ''},
 				{'Emy',     ''},
 				{'Sky',     ''},
 			}

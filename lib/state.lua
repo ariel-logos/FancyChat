@@ -49,6 +49,10 @@ M.tab = {
 -- Settings UI scratch state.
 M.set = {
 	colorTextW          = 1,
+	-- Input-bar test mode: session-only preview toggle (deliberately
+	-- NOT persisted) that shows the input chat bar without the chat
+	-- input being open, so the player can drag and style it.
+	InputBarTest        = T{false},
 	alertList           = {},
 	alertBuffer         = T{},
 	Popup               = {false},
@@ -139,7 +143,6 @@ M.dw = {
 	TestMessage2     = '',
 	ShowMessageMode  = T{false},
 	ChannelColorMode = T{false},
-	testPTR          = nil,
 	frameID          = 1,
 	addr             = 0,
 	menuname		 = '',
@@ -217,16 +220,20 @@ M.b = {
 
 -- GDI font / rect render-object handles per chat window.
 M.fo = {
-	Fwd     = T{},
-	Bkw     = T{},
-	Chat    = T{T{}, T{}, T{}},
-	Aux     = T{T{}, T{}, T{}},
-	BigMode = nil,
+	Fwd      = T{},
+	Bkw      = T{},
+	Chat     = T{T{}, T{}, T{}},
+	Aux      = T{T{}, T{}, T{}},
+	BigMode  = nil,
+	-- Custom input chat bar text (gdi mirror of the native input).
+	InputBar = nil,
 }
 M.ro = {
-	RectBG  = T{},
-	Scroll  = T{},
-	BigMode = nil,
+	RectBG     = T{},
+	Scroll     = T{},
+	BigMode    = nil,
+	-- Custom input chat bar background plate.
+	InputBarBG = nil,
 }
 
 -- Persisted user settings + companion color tables.

@@ -1,11 +1,8 @@
 addon.name      = 'fancychat';
 addon.author    = 'Arielfy';
---addon.version   = '0.9';
+addon.version   = '1.0.260921R';
 addon.desc      = 'Fancy Chat!';
 addon.link      = '';
-
-local ver = '1.0.260721R'
-addon.version = ver
 
 --[[
 	FancyChat entry point.

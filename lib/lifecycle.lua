@@ -219,41 +219,61 @@ function M.register()
 	-- See the matching d3d_present rescan registration below.
 	-- ---------------------------------------------------------------------
 	local function scan_memory_pointers()
-		dw.testPTR        = ashita.memory.find('FFXiMain.dll', 0, '8B480C85C974??8B510885D274??3B05', 16, 0)
-		dw.testPTR        = ashita.memory.read_uint32(dw.testPTR)
+		-- DEREF-AT-READ CONVERSION: this function now caches ONLY code
+		-- addresses returned by ashita.memory.find().  The old version
+		-- also collapsed the first dereference here (reading the imm32/
+		-- disp32 operand out of the code bytes, or even the value inside
+		-- the static slot the operand points at).  Those scan-time
+		-- snapshots froze whatever the game had mid-login; on clients
+		-- whose runtime patching / UI initialisation settles AFTER the
+		-- login-time addon reload, features consuming the snapshots
+		-- ("Prevent obstructing FFXI UI", legacy-chat detection, R0
+		-- warning) stayed silently dead for the whole session.  The
+		-- consumers in render.lua now re-read the operand chains every
+		-- frame (matching the idiom XIUI / HXUI / xitools use for the
+		-- same byte signatures), which self-heals the moment the game
+		-- settles - so WHEN this scan runs no longer matters, only
+		-- that the code bytes themselves were found.
 
-		uiw.UpperMenuPTR  = ashita.memory.find('FFXiMain.dll', 0, '8B480C85C974??8B510885D274??3B05', 16, 0)
-		uiw.UpperMenuPTR  = ashita.memory.read_uint32(uiw.UpperMenuPTR)
+		-- Menu-state object: operand at +16 of the match is the disp32
+		-- of 'cmp eax,[g_pMenu]'.  render.lua re-reads it per frame.
+		uiw.MenuPtr = ashita.memory.find('FFXiMain.dll', 0, '8B480C85C974??8B510885D274??3B05', 16, 0)
 
-		local patternAddr        = ashita.memory.find('FFxiMain.dll', 0, '8935????????81C6????????56E8', 0, 0)
-		local pGlobalNowZoneAddr = ashita.memory.read_uint32(patternAddr + 0x02)
-		local Offset             = ashita.memory.read_uint32(patternAddr + 0x08)
-		local pGlobalNowZone     = ashita.memory.read_uint32(pGlobalNowZoneAddr)
-		uiw.NetStatObj[1] = pGlobalNowZone + Offset
+		-- Zone/netstat struct: store the two code-derived parts; the
+		-- heap pointer inside the static slot is resolved per use in
+		-- render.lua (it is null until zone-in completes).  Guarded:
+		-- this function also runs from event callbacks (one-shot
+		-- rescan + every zone-in), where a failed pattern match must
+		-- not turn into a near-null read.
+		local patternAddr = ashita.memory.find('FFXiMain.dll', 0, '8935????????81C6????????56E8', 0, 0)
+		if patternAddr ~= nil and patternAddr ~= 0 then
+			uiw.NetStatBase   = ashita.memory.read_uint32(patternAddr + 0x02)
+			uiw.NetStatOffset = ashita.memory.read_uint32(patternAddr + 0x08)
+		end
 
+		-- UI size globals: cache the instruction addresses; render.lua
+		-- re-reads operand + value per frame.
 		uiw.UISizeYPtr = ashita.memory.find('FFXiMain.dll', 0, 'A1????????3BF07E??8BF0', 0, 0)
-		uiw.UISizeYPtr = ashita.memory.read_uint32(uiw.UISizeYPtr + 0x01)
-		uiw.UISizeY    = ashita.memory.read_uint32(uiw.UISizeYPtr)
-
 		uiw.UISizeXPtr = ashita.memory.find('FFXiMain.dll', 0, 'BF????????F3??0FBF4C24', 0, 0)
-		uiw.UISizeXPtr = ashita.memory.read_uint32(uiw.UISizeXPtr + 0x01)
-		uiw.UISizeX    = ashita.memory.read_uint32(uiw.UISizeXPtr - 0x10)
 
-		uiw.WinOpenPtr     = ashita.memory.find('FFXiMain.dll', 0, 'E8????????84C075??A1????????85C074??668378', 0, 0)
-		uiw.WinOpenPtr2    = ashita.memory.find('FFXiMain.dll', 0, 'BF????????F3??0FBF4C24', 0, 0)
-		uiw.RefWinOpenPtr2 = ashita.memory.read_uint32(uiw.WinOpenPtr2 + 0x01)
-		uiw.RefWinOpenPtr  = ashita.memory.read_uint32(uiw.WinOpenPtr  + 0x23)
+		-- NPC-dialog byte flag ('A0 disp32' = mov al,[flag]); operand
+		-- re-read per use in render.lua.
+		uiw.DialogPtr = ashita.memory.find('FFXiMain.dll', 0, 'A0????????53565784C08BF1', 0, 0)
 
-		uiw.DialogPtr   = ashita.memory.find('FFXiMain.dll', 0, 'A0????????53565784C08BF1', 0, 0)
-		uiw.DialogPtr   = ashita.memory.read_uint32(uiw.DialogPtr + 0x01)
+		uiw.EventPtr  = ashita.memory.find('FFXiMain.dll', 0, 'A0????????84C0741AA1????????85C0741166A1????????663B05????????0F94C0C3', 0, 0)
 
-		uiw.MenuDescPTR = ashita.memory.find('FFxiMain.dll', 0, 'B9????????50E8????????8BF085F674??8B46', 1, 0)
+		-- "Is the interface hidden" bool getter, for the
+		-- Hide-chat-when-UI-is-hidden option.  Cache the code address
+		-- only; render.lua re-walks the operand chain per frame, so a
+		-- scan that ran before the client finished patching itself
+		-- self-heals on the next rescan.
+		uiw.UiHiddenPtr = ashita.memory.find('FFXiMain.dll', 0, '8B4424046A016A0050B9????????E8????????F6D81BC040C3', 0, 0)
 
-		uiw.UIVisiblePtr = ashita.memory.find('FFXiMain.dll', 0, '8B4424046A016A0050B9????????E8????????F6D81BC040C3', 0, 0)
-		uiw.MenuPtr      = ashita.memory.find('FFXiMain.dll', 0, '8B480C85C974??8B510885D274??3B05', 16, 0)
-		uiw.MenuPtr      = ashita.memory.read_uint32(uiw.MenuPtr)
-
-		uiw.EventPtr     = ashita.memory.find('FFXiMain.dll', 0, 'A0????????84C0741AA1????????85C0741166A1????????663B05????????0F94C0C3', 0, 0)
+		-- Legacy chat-window draw function (moved here from load_cb so
+		-- the zone-in / one-shot rescans refresh it too); the two
+		-- window-object slot addresses at +0x01 / +0x0B are re-read
+		-- per frame in render.lua.
+		uiw.DrawMessageWindowPtr = ashita.memory.find('FFXiMain.dll', 0, 'A1????????C64059018B0D????????C6415901C20800', 0, 0)
 	end
 
 	-- One-shot re-scan latch.  Flipped to true after the d3d_present
@@ -384,6 +404,7 @@ function M.register()
 		fcw[1].TextureIDGuideMe  = tonumber(ffi.cast('uint32_t', fcw[1].Textures.guideme))
 		fcw[1].TextureIDLogs     = tonumber(ffi.cast('uint32_t', fcw[1].Textures.logs))
 		fcw[1].TextureIDLoading  = tonumber(ffi.cast('uint32_t', fcw[1].Textures.loading))
+		fcw[1].TextureIDRefresh  = tonumber(ffi.cast('uint32_t', fcw[1].Textures.refresh))
 		fcw[1].TextureIDFolder   = tonumber(ffi.cast('uint32_t', fcw[1].Textures.folder))
 		fcw[1].TextureIDCompact  = tonumber(ffi.cast('uint32_t', fcw[1].Textures.compact))
 		fcw[1].TextureIDManual   = tonumber(ffi.cast('uint32_t', fcw[1].Textures.manual))
@@ -392,13 +413,14 @@ function M.register()
 		fcw[1].TextureIDDumpchat = tonumber(ffi.cast('uint32_t', fcw[1].Textures.dumpchat))
 		fcw[1].TextureIDLogo     = tonumber(ffi.cast('uint32_t', fcw[1].Textures.logo))
 
-		-- Locate the legacy chat-window pointers.
-		local drawMessageWindowPtr = ashita.memory.find('FFXiMain.dll', 0, 'A1????????C64059018B0D????????C6415901C20800', 0, 0)
-		if drawMessageWindowPtr == 0 then
+		-- Legacy chat-window pointer is scanned in scan_memory_pointers
+		-- now (so rescans refresh it); render.lua re-reads the window
+		-- slot operands per frame.  Just validate the scan found it.
+		if uiw.DrawMessageWindowPtr == nil or uiw.DrawMessageWindowPtr == 0 then
 			error(chat.header(addon.name):append(chat.error('Error: Failed to locate a required pointer.')))
 		end
-		uiw.WinPtr1 = ashita.memory.read_uint32(drawMessageWindowPtr + 0x01)
-		uiw.WinPtr2 = ashita.memory.read_uint32(drawMessageWindowPtr + 0x0B)
+		uiw.WinPtr1 = ashita.memory.read_uint32(uiw.DrawMessageWindowPtr + 0x01)
+		uiw.WinPtr2 = ashita.memory.read_uint32(uiw.DrawMessageWindowPtr + 0x0B)
 
 		-- GDI font/rect object construction ----------------------------------
 		local dsize = imgui.GetIO().DisplaySize
@@ -412,6 +434,14 @@ function M.register()
 		ro.Scroll[1]:set_z_order(1)
 		ro.Scroll[1]:set_visible(false)
 		ro.RectBG[1] = gdi:create_rect(allSettings.rectSettings, false)
+		-- Chat plates crop rather than squash: the window's proportions
+		-- change with the font size, the line count and the width
+		-- slider, so a stretched background would distort differently
+		-- for every player.  'cover' keeps the artwork's own proportions
+		-- and trims the overflow evenly, centred.  The input bar stays
+		-- on 'stretch' - it is a thin strip whose art is authored for
+		-- that shape.
+		ro.RectBG[1]:set_image_fit('cover')
 		fo.Fwd[1]    = gdi:create_object(allSettings.fontSettings, false)
 		fo.Fwd[1]:set_text(utf8.char(0x25bc))
 		fo.Bkw[1]    = gdi:create_object(allSettings.fontSettings, false)
@@ -420,6 +450,40 @@ function M.register()
 		fo.Bkw[1]:get_background():set_fill_color(0x22000000)
 		fo.Bkw[1]:set_bg_overlap(0)
 		fo.Bkw[1]:set_text(utf8.char(0x2004)..utf8.char(0x25b2)..' Scrolling chat history...')
+
+		-- Custom input chat bar (gdi mirror of the native input line).
+		-- Hidden until the render loop shows it while the chat input
+		-- is open.  z-orders: plate above the main chat content (1),
+		-- text above its own plate (2), so the bar reads cleanly even
+		-- when dragged over the chat windows.
+		ro.InputBarBG = gdi:create_rect(allSettings.rectSettings, false)
+		-- Optional image-backed plate.  The chosen file (if any) and
+		-- its alpha-only tint are applied per frame in render.lua so
+		-- picker changes are live; this just sets the fit mode and the
+		-- fallback fill colour used when no image is selected.
+		-- Experiment: take the top `height` PIXELS of the texture at
+		-- native vertical resolution and stretch only the width, so a
+		-- tall source is sampled from its top-left corner rather than
+		-- squashed into the strip.  Revert to 'stretch' to compare.
+		ro.InputBarBG:set_image_fit('topband')
+		ro.InputBarBG:set_fill_color(allSettings.InputBarBGColor)
+		ro.InputBarBG:set_width(math.floor(allSettings.InputBarChars * allSettings.InputBarFontHeight * 0.59))
+		ro.InputBarBG:set_height(allSettings.InputBarFontHeight + 4 + (allSettings.InputBarPadding * 2))
+		ro.InputBarBG:set_z_order(1)
+		ro.InputBarBG:set_visible(false)
+		fo.InputBar = gdi:create_object(allSettings.fontSettings, false)
+		fo.InputBar:set_font_height(allSettings.InputBarFontHeight)
+		fo.InputBar:set_z_order(2)
+		fo.InputBar:set_visible(false)
+		-- The caret is its OWN object, drawn over the text rather than
+		-- spliced into it: a caret inside the string shifts every
+		-- character to its right by a column as the player arrows
+		-- through the line, which reads as the text jittering.
+		fo.InputBarCaret = gdi:create_object(allSettings.fontSettings, false)
+		fo.InputBarCaret:set_font_height(allSettings.InputBarFontHeight)
+		fo.InputBarCaret:set_text('|')
+		fo.InputBarCaret:set_z_order(3)
+		fo.InputBarCaret:set_visible(false)
 
 		local customSettings = allSettings.fontSettings
 		customSettings.bg_overlap = 0
@@ -449,6 +513,7 @@ function M.register()
 			ro.Scroll[2]:set_z_order(1)
 			ro.Scroll[2]:set_visible(false)
 			ro.RectBG[2] = gdi:create_rect(allSettings.rectSettings, false)
+			ro.RectBG[2]:set_image_fit('cover')
 			fo.Fwd[2]    = gdi:create_object(allSettings.fontSettings, false)
 			fo.Fwd[2]:set_text(utf8.char(0x25bc))
 			fo.Bkw[2]    = gdi:create_object(allSettings.fontSettings, false)
@@ -510,12 +575,12 @@ function M.register()
 			end
 		end
 
-		-- Menu-avoidance reposition pixel offsets, scaled for current resolution.
-		fcw[1].MoveChatPos1 = (dsize.x * 400) / uiw.UISizeX
-		fcw[1].MoveChatPos2 = (dsize.x * 220) / uiw.UISizeX
-		fcw[1].MoveChatPos3 = (dsize.x * 260) / uiw.UISizeX
-		fcw[1].MoveChatPos4 = (dsize.x * 305) / uiw.UISizeX
-		fcw[1].MoveChatPos5 = (dsize.x * 136) / uiw.UISizeX
+		-- NOTE: fcw[1].MoveChatPos1..5 (menu-avoidance offsets) are now
+		-- recomputed every frame in render.lua from the LIVE UI size.
+		-- The old load_cb-only derivation here was the root cause of
+		-- "Prevent obstructing FFXI UI" staying dead after login for
+		-- players whose clients hadn't populated the UI-size globals
+		-- yet: the stale offsets were never recomputed by any rescan.
 
 		fcw[1].PositionLinesRequest = {true, true}
 		PositionLines(1)
@@ -566,7 +631,13 @@ function M.register()
 			if fo.Fwd[1] ~= nil then fo.Fwd[1]:set_visible(false) end
 			if fo.Fwd[2] ~= nil then fo.Fwd[2]:set_visible(false) end
 			par.IsInConv = false
-			par.InEvent  = ashita.memory.read_uint8(ashita.memory.read_uint32(uiw.EventPtr + 1)) == 1
+			-- Guarded: ashita.memory.find returns 0 on a failed match,
+			-- which would turn this into a read at address 1.
+			par.InEvent = false
+			if uiw.EventPtr ~= nil and uiw.EventPtr ~= 0 then
+				local evSlot = ashita.memory.read_uint32(uiw.EventPtr + 1)
+				par.InEvent = (evSlot ~= 0) and (ashita.memory.read_uint8(evSlot) == 1)
+			end
 			uiw.DialogCDStart = os.clock()
 		elseif e.id == 0x000B then
 			fcw[1].Zoning = true

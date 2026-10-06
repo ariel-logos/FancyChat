@@ -14,8 +14,10 @@ local M = {}
 function M.default_uiw()
 	return T{
 		NetStatObj         = T{0, 1},
-		UpperMenuPTR       = nil,
-		MenuDescPTR        = nil,
+		-- Deref-at-read parts for the zone/netstat struct: static-slot
+		-- address + struct offset, resolved per frame in render.lua.
+		NetStatBase        = nil,
+		NetStatOffset      = 0,
 		MenuDesc           = nil,
 		LegacyChatOpen     = false,
 		LastMenu           = {'', 0},
@@ -29,20 +31,31 @@ function M.default_uiw()
 		DialogPromptStart  = 0,
 		DialogCDStart      = 0,
 		DialogShown        = false,
-		RefWinOpenPtr      = nil,
-		RefWinOpenPtr2     = nil,
 		DialogPtr          = nil,
-		WinOpenPtr         = nil,
-		WinOpenPtr2        = nil,
 		UISizeYPtr         = nil,
 		UISizeXPtr         = nil,
 		EventPtr           = nil,
-		UISizeX            = nil,
-		UISizeY            = nil,
+		-- "Interface hidden" bool getter.  Code address only: the
+		-- mov ecx,imm32 operand at +0x0A is the static UI object and
+		-- byte +0xB4 on it is the flag.  render.lua walks the chain
+		-- per frame.  The client raises this both for a letterboxed
+		-- cutscene and for the player's own hide-UI hotkey.
+		UiHiddenPtr        = nil,
+		UiHideAt           = nil,   -- os.clock() deadline; nil = not pending
+		UiOwnedHide        = false, -- this option (not the player) is hiding
+		DrawMessageWindowPtr = nil,
+		-- Seeded with the FFXI defaults so the per-frame MoveChatPos
+		-- math in render.lua can never divide by nil/zero before the
+		-- first successful live read of the real values.
+		UISizeX            = 640,
+		UISizeY            = 480,
 		WinPtr1            = nil,
 		WinPtr2            = nil,
 		InputWinOpen       = nil,
-		MemValue           = nil,
+		-- Seeded 0 (not nil): the render-side read is now guarded and
+		-- can skip assignment on pre-settle frames, and the ~= 0 /
+		-- >= comparisons downstream must never see nil.
+		MemValue           = 0,
 		LastMemValue       = -1,
 	}
 end
@@ -116,7 +129,15 @@ function M.default_fcw()
 			GuideMeOpened         = T{false},
 			NotepadOpened         = T{false},
 			Textures              = utils.LoadTextures(),
+			-- HideChat is the COMBINED, per-frame answer to "should
+			-- FancyChat be on screen right now".  Recomputed from
+			-- scratch every frame in render.lua; never write it
+			-- directly.
 			HideChat              = false,
+			-- The player's own hide-chat shortcut toggles THIS.  Kept
+			-- separate so the UI coming back can't un-hide a chat they
+			-- hid deliberately.
+			UserHideChat          = false,
 			PrevHideChat          = false,
 			PrevAnchor_X          = -1,
 			PrevAnchor_Y          = -1,
@@ -320,6 +341,67 @@ function M.default_settings()
 		EnableFastScroll     = T{true},
 		EnabledChatMove      = T{false},
 		LockWindowPos        = T{false},
+		-- Saved chat-window positions (screen pixels), one pair per
+		-- window.  {-1, -1} = "never saved" sentinel: the window keeps
+		-- whatever position ImGui gives it (a legacy imgui.ini entry
+		-- or the default spawn) and adopts that as the saved value on
+		-- the first logged-in frame.  render.lua writes the pair on
+		-- every drag-release and applies it via SetNextWindowPos on
+		-- login / character switch.  Owning the position here (in the
+		-- per-character settings file) instead of relying on imgui.ini
+		-- makes it survive crashes and unclean exits - imgui.ini is
+		-- only flushed on clean shutdown on some Ashita cores, which
+		-- is why alt characters kept resetting to the top-left.
+		Window1Pos           = T{-1, -1},
+		Window2Pos           = T{-1, -1},
+		-- Follow the client's own "interface hidden" flag, which it
+		-- raises for cutscenes and for the hide-UI hotkey alike.
+		-- Opt-in: moving where a user's chat goes on an update is a
+		-- surprise.  Applies live, no restart.
+		HideWhenUIHidden     = T{false},
+		-- Background image filenames, chosen in Settings -> Chat
+		-- Window.  Both name a file in images/backgrounds/ - one
+		-- folder serves both surfaces, since each maps the texture to
+		-- its own shape rather than needing art cut to fit.
+		-- '' = no image, i.e. the plain colour plate.  When an image
+		-- IS set the plate colour's RGB is ignored and only its alpha
+		-- tints the artwork, so the opacity slider and the auto-hide
+		-- fade keep working.
+		ChatBGImage          = '',
+		InputBarBGImage      = '',
+		-- Opacity for the chat background IMAGE (0..1), live-editable.
+		-- Deliberately separate from rectSettings.fill_color, whose
+		-- alpha drives the plain plate but is restart-gated (staged
+		-- through set.PlateBGColor + "Restart & apply"), which would
+		-- otherwise leave a freshly picked image stuck at the default
+		-- plate alpha until the addon was reloaded.  Multiplied by the
+		-- auto-hide fade so the artwork still fades with the chat.
+		ChatBGImageOpacity   = 1.0,
+		-- Custom input chat bar: a styled gdi mirror of the native
+		-- chat input line, shown while the input is open.  Draggable
+		-- (same invisible-window pattern as the chat windows), with
+		-- its own width, plate color+opacity (single ARGB value) and
+		-- font size, all live-applied from the Chat Window tab.
+		-- InputBarPos follows the Window1Pos conventions: screen
+		-- pixels, per-character, {-1,-1} = "never placed" sentinel
+		-- (first use spawns it bottom-center and persists that).
+		InputBar             = T{false},
+		InputBarPos          = T{-1, -1},
+		-- Bar width in CHARACTERS, converted to pixels with the same
+		-- formula the chat windows use (chars * font_height * 0.59),
+		-- so the bar scales with its own font size exactly like the
+		-- chat plates scale with theirs.
+		InputBarChars        = 60,
+		InputBarBGColor      = 0x99000000,
+		InputBarFontHeight   = 18,
+		-- Extra pixels added symmetrically above and below the text
+		-- to the bar's bg plate height (0 = the default snug fit).
+		InputBarPadding      = 0,
+		-- Dedicated drag-lock for the input bar, independent from the
+		-- chat windows' LockWindowPos (which most users keep enabled
+		-- for the menu-avoidance feature).  Authoritative everywhere,
+		-- including test mode.
+		InputBarLock         = T{false},
 		-- When true, FancyChat stays visible even while the legacy
 		-- FFXI chat window is open (clicked / typing).  Default off,
 		-- which preserves the original "legacy open => FC hidden"
@@ -476,6 +558,8 @@ function M.default_colors()
 		linkshell1   = {0xFF50FFD0},
 		linkshell2   = {0xFF00FF80},
 		emote        = {0xFFC797FF},
+		-- Default taken from the mode table's unity entry (mode 212).
+		unity        = {0xFFFFD270},
 		combat       = {0xFFDCF1FC},
 		damage       = {0xFFFFFFFF},
 		combatspell  = {0xFFDDC9FF},
@@ -517,6 +601,7 @@ M.color_descriptions = {
 	linkshell1   = {'Linkshell 1',         '/linkshell messages'},
 	linkshell2   = {'Linkshell 2',         '/linkshell2 messages'},
 	emote        = {'Emotes',              '/emote messages'},
+	unity        = {'Unity',               '/unity messages'},
 	combat       = {'Combat',              'Combat base color'},
 	damage       = {'Combat Damage',       'Default DMG color'},
 	combatspell  = {'Combat Spell',        'Spell base color'},

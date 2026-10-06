@@ -889,7 +889,50 @@ end
 -- D3DX entry-point (D3DXCreateTextureFromFileInMemoryEx) so PNG/GIF/
 -- JPEG all decode through the same path and the caller treats the
 -- resulting texture identically.
-utils.LoadTextureFromFile = function(path)
+-- Pixel dimensions straight out of a PNG or JPEG header, without
+-- decoding the image.  Needed because D3DX has to be TOLD the surface
+-- size up front if it is to scale on the way in, and by the time its
+-- D3DXIMAGE_INFO comes back the full-size surface already exists.
+-- Returns nil for anything it doesn't recognise, which callers treat
+-- as "decode at native size" - the old behaviour.
+utils.ImageSizeFromBytes = function(body)
+	if (body == nil) or (#body < 24) then return nil end
+	-- PNG: IHDR width/height are at a fixed offset, big-endian.
+	local s1, s2, s3, s4 = body:byte(1, 4)
+	if (s1 == 0x89) and (s2 == 0x50) and (s3 == 0x4E) and (s4 == 0x47) then
+		local w1, w2, w3, w4, h1, h2, h3, h4 = body:byte(17, 24)
+		return w1 * 0x1000000 + w2 * 0x10000 + w3 * 0x100 + w4,
+		       h1 * 0x1000000 + h2 * 0x10000 + h3 * 0x100 + h4
+	end
+	-- JPEG: walk the marker chain to the first SOF, whose payload
+	-- carries height then width.  Segments without a length (SOI, EOI,
+	-- RSTn) are stepped over two bytes at a time.
+	if body:byte(1) ~= 0xFF or body:byte(2) ~= 0xD8 then return nil end
+	local i, n = 3, #body
+	while i < n - 8 do
+		if body:byte(i) ~= 0xFF then
+			i = i + 1
+		else
+			local m = body:byte(i + 1)
+			if (m >= 0xC0 and m <= 0xC3) then
+				local h1, h2, w1, w2 = body:byte(i + 5, i + 8)
+				return w1 * 0x100 + w2, h1 * 0x100 + h2
+			elseif (m == 0xD8) or (m == 0xD9) or (m >= 0xD0 and m <= 0xD7) then
+				i = i + 2
+			else
+				i = i + 2 + (body:byte(i + 2) * 0x100 + body:byte(i + 3))
+			end
+		end
+	end
+	return nil
+end
+
+-- `maxdim` caps the LONGEST side of the created surface, preserving
+-- aspect.  Without it a 4445x6667 JPEG becomes a 268 MB A8R8G8B8
+-- surface once D3DX rounds to a power of two - fatal in a 32-bit
+-- process if more than one is resident.  Callers that need the full
+-- resolution (the plate itself) simply omit it.
+utils.LoadTextureFromFile = function(path, maxdim)
 	if not path or path == '' then return nil, 'no path' end
 	local f = io.open(path, 'rb')
 	if not f then return nil, 'file not found' end
@@ -900,9 +943,21 @@ utils.LoadTextureFromFile = function(path)
 	local size      = #body
 	local info      = ffi.new('D3DXIMAGE_INFO[1]')
 	local texPtrPtr = ffi.new('IDirect3DTexture8*[1]')
+	-- Ask for a smaller surface only when the header could be read AND
+	-- the image actually exceeds the cap; otherwise fall through to
+	-- D3DX_DEFAULT exactly as before.
+	local reqW, reqH = 0xFFFFFFFF, 0xFFFFFFFF
+	if maxdim and maxdim > 0 then
+		local iw, ih = utils.ImageSizeFromBytes(body)
+		if iw and ih and iw > 0 and ih > 0 and math.max(iw, ih) > maxdim then
+			local s = maxdim / math.max(iw, ih)
+			reqW = math.max(1, math.floor(iw * s))
+			reqH = math.max(1, math.floor(ih * s))
+		end
+	end
 	local hr = C.D3DXCreateTextureFromFileInMemoryEx(
 		d3d8dev, body, size,
-		0xFFFFFFFF, 0xFFFFFFFF,
+		reqW, reqH,
 		1, 0,
 		C.D3DFMT_A8R8G8B8, C.D3DPOOL_MANAGED,
 		0xFFFFFFFF, 0xFFFFFFFF,
@@ -923,6 +978,7 @@ utils.LoadTextures = function()
 	LoadTexture(textures, 'guideme')
 	LoadTexture(textures, 'logs')
 	LoadTexture(textures, 'loading')
+	LoadTexture(textures, 'refresh')
 	LoadTexture(textures, 'folder')
 	LoadTexture(textures, 'compact')
 	LoadTexture(textures, 'manual')
@@ -1198,6 +1254,70 @@ end
 -- the player chooses the name on Export and picks from a list on Import.
 
 -- Bare-name listing of every regular file in chatcolors/.
+-- Background images available to the chat / input-bar pickers.
+-- User-supplied art lives in images/backgrounds/.  One folder serves
+-- both surfaces: each maps the texture to its own shape (the chat
+-- window centre-crops, the input bar samples a top band), so art no
+-- longer has to be authored per destination.
+-- Image formats the background picker offers.  D3DX decodes all of
+-- these through the same entry points the preview and the plate
+-- already use (D3DXCreateTextureFromFileInMemoryEx in
+-- utils.LoadTextureFromFile, D3DXCreateTextureFromFileExA in
+-- gdifonts/rectobject.lua), so nothing downstream needs to know which
+-- format a file is - adding another is one word here.
+utils.BG_IMAGE_EXTS = { png = true, jpg = true, jpeg = true }
+
+-- Backgrounds live in images/backgrounds/.  Two earlier layouts are
+-- still probed after it - a bare backgrounds/ folder, and before that
+-- a per-surface split into backgrounds/chatwindow/ and
+-- backgrounds/inputbar/ - because the saved setting is a bare
+-- filename, so anyone who already picked a background would otherwise
+-- silently lose it on update.  Both callers cache the result per
+-- filename, so these probes run on change, never per frame.  The
+-- legacy entries are deletable once no config in the wild uses them.
+local BG_DIR   = 'images\\backgrounds\\'
+local BG_DIRS  = { BG_DIR, 'backgrounds\\', 'backgrounds\\chatwindow\\', 'backgrounds\\inputbar\\' }
+utils.ResolveBackground = function(addonpath, fname)
+	if (fname == nil) or (fname == '') then return nil end
+	for i = 1, #BG_DIRS do
+		local candidate = addonpath..'\\'..BG_DIRS[i]..fname
+		local f = io.open(candidate, 'rb')
+		if f then
+			f:close()
+			return candidate
+		end
+	end
+	return addonpath..'\\'..BG_DIR..fname
+end
+
+utils.ListBackgrounds = function(addonpath)
+	local out = {}
+	-- One unfiltered listing, sifted in Lua: a wildcard per extension
+	-- would spawn a shell per extension and this re-runs on every
+	-- Refresh.  Same shape as ListColorsetFiles below.
+	local p = io.popen('dir /b /a-d "'..addonpath..'\\'..BG_DIR..'" 2>nul')
+	if not p then return out end
+	for line in p:lines() do
+		line = line:gsub('%s+$', '')
+		local ext = line:match('%.([%a%d]+)$')
+		if line ~= '' and ext ~= nil and utils.BG_IMAGE_EXTS[ext:lower()] then
+			out[#out+1] = line
+		end
+	end
+	p:close()
+	table.sort(out)
+	return out
+end
+
+-- Strip the RGB from an ARGB value, keeping only its alpha (RGB set
+-- to white).  Used to tint image-backed plates: modulating artwork by
+-- the user's full plate colour would multiply it toward black, but
+-- keeping the alpha preserves both the opacity slider and the
+-- auto-hide fade.
+utils.AlphaTint = function(argb)
+	return bit.bor(bit.lshift(bit.band(bit.rshift(argb, 24), 0xFF), 24), 0x00FFFFFF)
+end
+
 utils.ListColorsetFiles = function(addonpath)
 	local out = {}
 	local p = io.popen('dir /b /a-d "'..addonpath..'\\chatcolors\\" 2>nul')

@@ -86,6 +86,7 @@ local math_fmod    = math.fmod
 local bit_band     = bit.band
 local os_date      = os.date
 local os_time      = os.time
+local os_clock     = os.clock
 
 local utils_StringFindTable        = utils.StringFindTable
 local utils_FindLastOfMB           = utils.FindLastOfMB
@@ -733,6 +734,7 @@ parseThis = function(e, e_message)
 	elseif string_sub(lm, 1,  4) == 'tell'         then col = colors.tell[1]
 	elseif string_sub(lm, 1,  5) == 'shout'        then col = colors.shout[1]
 	elseif string_sub(lm, 1,  5) == 'emote'        then col = colors.emote[1]
+	elseif string_sub(lm, 1,  5) == 'unity'        then col = colors.unity[1]
 	-- Longer prefix first: 'error1' must be tested before 'error' or
 	-- string_sub(lm, 1, 5) == 'error' would also match mode 123's
 	-- 'error1' name and route it to the wrong palette slot.
@@ -1534,6 +1536,7 @@ parseThis = function(e, e_message)
 			L_i = L_i + 1
 		end
 		n_lines = n_lines - skipped
+
 		b.ChatBufferN_All = b.ChatBufferN_All + n_lines
 		if par.tabmode ~= 3 and not par.isCustom then b.ChatBufferN_AllAlt = b.ChatBufferN_AllAlt + n_lines end
 		if allSettings.SelectedTab:find('^All') or allSettings.SelectedTab2:find('^All') then ResetAutoHideTimer() end

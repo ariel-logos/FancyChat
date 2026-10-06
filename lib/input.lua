@@ -10,6 +10,8 @@ local tab            = state.tab
 local gamepadButtons = state.gamepadButtons
 local allSettings    = state.allSettings
 local set            = state.set
+local uiw            = state.uiw
+local par            = state.par
 
 local M = {}
 
@@ -292,7 +294,11 @@ function M.register()
 			and keyptr[allSettings.shortcutHideS] ~= 0
 			and not fcw[1].Keydown
 			and AshitaCore:GetChatManager():IsInputOpen() == 0x00 then
-			fcw[1].HideChat = not fcw[1].HideChat
+			-- Toggles the EFFECTIVE state, not its own latch: pressed
+			-- while the UI-hidden option already has the chat away, the
+			-- player means "show", so this must not leave a manual hide
+			-- pinned behind once the interface comes back.
+			fcw[1].UserHideChat = not fcw[1].HideChat
 			ResetAutoHideTimer()
 			SetChatOpacity(1, 1)
 			if allSettings.SecondChat[1] then SetChatOpacity(1, 2) end

@@ -172,6 +172,12 @@ function exports:create_rect(settings, manual)
     return obj;
 end
 
+-- Drop cached rect-object image textures (see rectobject.lua).  Call
+-- after replacing an image file on disk so the new content is loaded.
+function exports:clear_image_cache()
+    rectobject.clear_image_cache();
+end
+
 function exports:destroy_interface()
     objects = T{};
     renderer.DestroyFontManager(interface);
@@ -218,6 +224,20 @@ end
 
 function exports:render()
     render_objects();
+end
+
+-- Render ONLY the given objects (array of font/rect objects), ignoring
+-- the global object list.  Lets a caller draw a specific overlay (e.g.
+-- fancychat's input chat bar) on frames where the full render() is
+-- deliberately skipped to hide everything else.
+function exports:render_subset(objs)
+    if (sprite ~= nil) then
+        sprite:Begin();
+        for _, obj in ipairs(objs) do
+            obj:render(sprite);
+        end
+        sprite:End();
+    end
 end
 
 function exports:set_auto_render(enabled)
